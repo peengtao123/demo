@@ -24,6 +24,8 @@ class ApiResponseTest {
     @Test
     void testParameterizedConstructor() {
         LocalDateTime now = LocalDateTime.now();
+        System.out.println(now);
+        System.out.println("-----------------");
         ApiResponse<String> response = new ApiResponse<>(true, "测试消息", "测试数据");
         
         assertTrue(response.isSuccess());
