@@ -104,6 +104,53 @@
             background: rgba(255,255,255,0.3);
         }
         
+        /* 动态菜单样式 */
+        .menu-loading {
+            padding: 20px 25px;
+            color: rgba(255,255,255,0.6);
+            font-size: 14px;
+        }
+        
+        .menu-group {
+            margin-bottom: 5px;
+        }
+        
+        .menu-group-title {
+            padding: 10px 25px;
+            font-size: 12px;
+            color: rgba(255,255,255,0.6);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .submenu {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease;
+            background: rgba(0,0,0,0.1);
+        }
+        
+        .submenu.open {
+            max-height: 500px;
+        }
+        
+        .submenu .menu-item {
+            padding-left: 50px;
+            font-size: 14px;
+        }
+        
+        .menu-item.has-children::after {
+            content: '▼';
+            position: absolute;
+            right: 20px;
+            font-size: 10px;
+            transition: transform 0.3s;
+        }
+        
+        .menu-item.has-children.expanded::after {
+            transform: rotate(180deg);
+        }
+
         /* 右侧主内容区 */
         .main-content {
             flex: 1;
@@ -123,8 +170,8 @@
         }
         
         .top-bar h1 {
-            color: #333;
             font-size: 24px;
+            color: #333;
         }
         
         .user-info {
@@ -132,35 +179,159 @@
             align-items: center;
             gap: 15px;
         }
-        
-        .user-info span {
-            color: #666;
-        }
-        
-        .content-area {
-            background: white;
-            padding: 30px;
-            border-radius: 10px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-        }
-        
-        /* 响应式设计 */
-        @media (max-width: 768px) {
-            .sidebar {
-                width: 100%;
-                height: auto;
-                position: relative;
-            }
-            
-            .main-content {
-                margin-left: 0;
-            }
-            
-            .admin-layout {
-                flex-direction: column;
-            }
-        }
     </style>
+    
+    <!-- JavaScript for Dynamic Menu -->
+    <script th:inline="javascript">
+        // 当前激活的菜单项
+        const currentActiveMenu = /*[[${activeMenu}]]*/ 'dashboard';
+        
+        // 页面加载时获取动态菜单
+        document.addEventListener('DOMContentLoaded', function() {
+            loadDynamicMenu();
+        });
+        
+        // 加载动态菜单
+        function loadDynamicMenu() {
+            fetch('/admin/menu')
+                .then(response => response.json())
+                .then(menuData => {
+                    renderMenu(menuData);
+                })
+                .catch(error => {
+                    console.error('加载菜单失败:', error);
+                    showFallbackMenu();
+                });
+        }
+        
+        // 渲染菜单
+        function renderMenu(menuItems) {
+            const menuContainer = document.getElementById('sidebarMenu');
+            
+            if (!menuItems || menuItems.length === 0) {
+                showFallbackMenu();
+                return;
+            }
+            
+            let html = '';
+            menuItems.forEach((item, index) => {
+                html += renderMenuItem(item, index);
+            });
+            
+            menuContainer.innerHTML = html;
+            
+            // 绑定子菜单展开/收起事件
+            bindSubMenuEvents();
+        }
+        
+        // 渲染单个菜单项
+        function renderMenuItem(item, index) {
+            const isActive = isMenuActive(item.url);
+            const hasChildren = item.children && item.children.length > 0;
+            
+            let html = '';
+            
+            if (hasChildren) {
+                // 有子菜单
+                html += `
+                    <div class="menu-group">
+                        <a href="javascript:void(0)" 
+                           class="menu-item has-children ${isActive ? 'active' : ''}" 
+                           data-menu-id="${item.id}"
+                           onclick="toggleSubMenu(${item.id})">
+                            <span class="icon">${item.icon}</span>
+                            <span class="label">${item.name}</span>
+                        </a>
+                        <div class="submenu" id="submenu-${item.id}">
+                `;
+                
+                item.children.forEach(child => {
+                    const childActive = isMenuActive(child.url);
+                    html += `
+                        <a href="${child.url}" 
+                           class="menu-item ${childActive ? 'active' : ''}">
+                            <span class="icon">${child.icon}</span>
+                            <span class="label">${child.name}</span>
+                        </a>
+                    `;
+                });
+                
+                html += `
+                        </div>
+                    </div>
+                `;
+            } else {
+                // 无子菜单
+                html += `
+                    <a href="${item.url}" 
+                       class="menu-item ${isActive ? 'active' : ''}">
+                        <span class="icon">${item.icon}</span>
+                        <span class="label">${item.name}</span>
+                    </a>
+                `;
+            }
+            
+            return html;
+        }
+        
+        // 判断菜单是否激活
+        function isMenuActive(url) {
+            if (!url || url === '#') return false;
+            const currentPath = window.location.pathname;
+            return currentPath.startsWith(url);
+        }
+        
+        // 切换子菜单
+        function toggleSubMenu(menuId) {
+            const submenu = document.getElementById(`submenu-${menuId}`);
+            const menuItem = document.querySelector(`[data-menu-id="${menuId}"]`);
+            
+            if (submenu && menuItem) {
+                submenu.classList.toggle('open');
+                menuItem.classList.toggle('expanded');
+            }
+        }
+        
+        // 绑定子菜单事件
+        function bindSubMenuEvents() {
+            // 如果当前页面是子菜单项，自动展开父菜单
+            const activeItems = document.querySelectorAll('.menu-item.active');
+            activeItems.forEach(item => {
+                const parentGroup = item.closest('.menu-group');
+                if (parentGroup) {
+                    const submenu = parentGroup.querySelector('.submenu');
+                    const parentItem = parentGroup.querySelector('.menu-item.has-children');
+                    if (submenu && parentItem) {
+                        submenu.classList.add('open');
+                        parentItem.classList.add('expanded');
+                    }
+                }
+            });
+        }
+        
+        // 显示备用菜单（当API失败时）
+        function showFallbackMenu() {
+            const menuContainer = document.getElementById('sidebarMenu');
+            menuContainer.innerHTML = `
+                <a href="/admin/dashboard" class="menu-item ${currentActiveMenu === 'dashboard' ? 'active' : ''}">
+                    <span class="icon">📊</span>
+                    <span class="label">仪表盘</span>
+                </a>
+                <a href="/admin/users" class="menu-item ${currentActiveMenu === 'users' ? 'active' : ''}">
+                    <span class="icon">👥</span>
+                    <span class="label">用户管理</span>
+                </a>
+                <a href="/admin/roles" class="menu-item ${currentActiveMenu === 'roles' ? 'active' : ''}">
+                    <span class="icon">🎭</span>
+                    <span class="label">角色管理</span>
+                </a>
+                <a href="/admin/permissions" class="menu-item ${currentActiveMenu === 'permissions' ? 'active' : ''}">
+                    <span class="icon">🔐</span>
+                    <span class="label">权限管理</span>
+                </a>
+            `;
+        }
+    </script>
 </head>
 <body>
     <div class="admin-layout">
@@ -171,28 +342,11 @@
                 <p>Admin Dashboard</p>
             </div>
             
-            <nav class="sidebar-menu">
-                <a href="/admin/dashboard" class="menu-item" th:classappend="${activeMenu == 'dashboard'} ? 'active' : ''">
-                    <span class="icon">📊</span>
-                    <span class="label">仪表盘</span>
-                </a>
-                
-                <a href="/admin/users" class="menu-item" th:classappend="${activeMenu == 'users'} ? 'active' : ''">
-                    <span class="icon">👥</span>
-                    <span class="label">用户管理</span>
-                </a>
-                
-                <a href="/admin/roles" class="menu-item" th:classappend="${activeMenu == 'roles'} ? 'active' : ''">
-                    <span class="icon">🎭</span>
-                    <span class="label">角色管理</span>
-                </a>
-                
-                <a href="/admin/permissions" class="menu-item" th:classappend="${activeMenu == 'permissions'} ? 'active' : ''">
-                    <span class="icon">🔐</span>
-                    <span class="label">权限管理</span>
-                </a>
+            <nav class="sidebar-menu" id="sidebarMenu">
+                <!-- 动态菜单将通过JavaScript加载 -->
+                <div class="menu-loading">加载中...</div>
             </nav>
-            
+
             <div class="sidebar-footer">
                 <a href="/logout" class="logout-btn">退出登录</a>
             </div>

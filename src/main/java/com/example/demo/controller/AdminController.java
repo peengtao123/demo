@@ -1,12 +1,16 @@
 package com.example.demo.controller;
 
+import com.example.demo.entity.AuditLog;
 import com.example.demo.entity.Permission;
 import com.example.demo.entity.Role;
 import com.example.demo.entity.User;
+import com.example.demo.repository.AuditLogRepository;
+import com.example.demo.service.AuditLogService;
 import com.example.demo.service.PermissionService;
 import com.example.demo.service.RoleService;
 import com.example.demo.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
@@ -14,7 +18,9 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
+import java.util.Comparator;
 
 /**
  * 管理页面控制器 - 用于后台管理系统
@@ -31,6 +37,12 @@ public class AdminController {
 
     @Autowired
     private PermissionService permissionService;
+
+    @Autowired
+    private AuditLogService auditLogService;
+
+    @Autowired
+    private AuditLogRepository auditLogRepository;
 
     /**
      * 管理首页/仪表盘
@@ -523,7 +535,159 @@ public class AdminController {
     }
 
     /**
-     * 将当前登录用户信息添加到Model
+     * 审计日志列表页面
+     */
+    @GetMapping("/audit-logs")
+    public String auditLogs(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size,
+            @RequestParam(required = false) String operator,
+            @RequestParam(required = false) String operationType,
+            @RequestParam(required = false) String targetType,
+            Model model) {
+        
+        Page<AuditLog> logs;
+        
+        if (operator != null && !operator.isEmpty()) {
+            logs = auditLogService.findByOperator(operator, page, size);
+        } else if (operationType != null && !operationType.isEmpty()) {
+            logs = auditLogService.findByOperationType(operationType, page, size);
+        } else if (targetType != null && !targetType.isEmpty()) {
+            logs = auditLogService.findByTargetType(targetType, page, size);
+        } else {
+            logs = auditLogService.getAuditLogs(page, size);
+        }
+        
+        model.addAttribute("logs", logs);
+        model.addAttribute("currentPage", page);
+        model.addAttribute("pageSize", size);
+        model.addAttribute("operator", operator);
+        model.addAttribute("operationType", operationType);
+        model.addAttribute("targetType", targetType);
+        model.addAttribute("activeMenu", "audit");
+        model.addAttribute("pageTitle", "审计日志");
+        model.addAttribute("currentUsername", getCurrentUser());
+        
+        return "admin/audit/logs";
+    }
+    
+    /**
+     * 删除审计日志
+     */
+    @PostMapping("/audit-logs/delete/{id}")
+    public String deleteAuditLog(@PathVariable Long id, RedirectAttributes redirectAttributes) {
+        try {
+            auditLogRepository.deleteById(id);
+            redirectAttributes.addFlashAttribute("success", "日志删除成功");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("error", "删除失败: " + e.getMessage());
+        }
+        return "redirect:/admin/audit-logs";
+    }
+    
+    /**
+     * 批量删除审计日志
+     */
+    @PostMapping("/audit-logs/batch-delete")
+    public String batchDeleteAuditLogs(@RequestParam List<Long> ids, RedirectAttributes redirectAttributes) {
+        try {
+            auditLogRepository.deleteAllById(ids);
+            redirectAttributes.addFlashAttribute("success", "成功删除 " + ids.size() + " 条日志");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("error", "批量删除失败: " + e.getMessage());
+        }
+        return "redirect:/admin/audit-logs";
+    }
+
+    /**
+     * 获取当前用户的动态菜单（JSON API）
+     */
+    @GetMapping("/menu")
+    @ResponseBody
+    public List<Map<String, Object>> getUserMenu() {
+        try {
+            Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+            if (auth == null || !auth.isAuthenticated()) {
+                return Collections.emptyList();
+            }
+            
+            String username = auth.getName();
+            User user = userService.getUserByUsername(username);
+            
+            // 获取用户的所有启用的权限（只包含MENU类型）
+            List<Permission> menuPermissions = user.getRoles().stream()
+                    .flatMap(role -> role.getPermissions().stream())
+                    .filter(Permission::getStatus)
+                    .filter(p -> "MENU".equals(p.getType()))
+                    .sorted(Comparator.comparingInt(Permission::getSortOrder))
+                    .collect(Collectors.toList());
+            
+            // 构建菜单树
+            return buildMenuTree(menuPermissions, null);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return Collections.emptyList();
+        }
+    }
+    
+    /**
+     * 递归构建菜单树
+     */
+    private List<Map<String, Object>> buildMenuTree(List<Permission> allMenus, Long parentId) {
+        List<Map<String, Object>> menuTree = new ArrayList<>();
+        
+        for (Permission permission : allMenus) {
+            if ((parentId == null && permission.getParentId() == null) ||
+                (parentId != null && parentId.equals(permission.getParentId()))) {
+                
+                Map<String, Object> menuItem = new HashMap<>();
+                menuItem.put("id", permission.getId());
+                menuItem.put("name", permission.getName());
+                menuItem.put("icon", permission.getIcon() != null ? permission.getIcon() : "📄");
+                menuItem.put("url", getMenuUrl(permission.getCode()));
+                menuItem.put("sortOrder", permission.getSortOrder());
+                
+                // 递归查找子菜单
+                List<Map<String, Object>> children = buildMenuTree(allMenus, permission.getId());
+                if (!children.isEmpty()) {
+                    menuItem.put("children", children);
+                }
+                
+                menuTree.add(menuItem);
+            }
+        }
+        
+        return menuTree;
+    }
+    
+    /**
+     * 根据权限编码获取菜单URL
+     */
+    private String getMenuUrl(String code) {
+        if (code == null) return "#";
+        
+        switch (code.toLowerCase()) {
+            case "dashboard:view":
+                return "/admin/dashboard";
+            case "user:view":
+            case "user:list":
+                return "/admin/users";
+            case "role:view":
+            case "role:list":
+                return "/admin/roles";
+            case "permission:view":
+            case "permission:list":
+                return "/admin/permissions";
+            case "audit:view":
+            case "audit:log":
+                return "/admin/audit-logs";
+            default:
+                return "#";
+        }
+    }
+
+    /**
+     * 添加当前用户信息到Model
      */
     private void addCurrentUserToModel(Model model) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -535,5 +699,16 @@ public class AdminController {
             var authorities = authentication.getAuthorities();
             model.addAttribute("currentUserRoles", authorities);
         }
+    }
+    
+    /**
+     * 获取当前用户名
+     */
+    private String getCurrentUser() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication != null && authentication.isAuthenticated()) {
+            return authentication.getName();
+        }
+        return "anonymous";
     }
 }

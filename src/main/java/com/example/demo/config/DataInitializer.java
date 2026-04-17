@@ -26,36 +26,151 @@ public class DataInitializer {
             // 如果数据库为空，则添加一些测试数据
             if (userRepository.count() == 0) {
                 
-                // ============ 初始化权限 ============
-                Permission userView = new Permission("查看用户", "user:view", "查看用户列表和详情");
+                // ============ 初始化权限（包含菜单和功能权限）============
+                
+                // --- 一级菜单：仪表盘 ---
+                Permission dashboardMenu = new Permission("仪表盘", "dashboard:menu", "系统主控制面板");
+                dashboardMenu.setIcon("bi-speedometer2");
+                dashboardMenu.setType("MENU");
+                dashboardMenu.setSortOrder(1);
+                dashboardMenu.setParentId(null);
+                permissionRepository.save(dashboardMenu);
+                
+                // --- 一级菜单：用户管理 ---
+                Permission userMenu = new Permission("用户管理", "user:menu", "用户相关功能管理");
+                userMenu.setIcon("bi-people");
+                userMenu.setType("MENU");
+                userMenu.setSortOrder(2);
+                userMenu.setParentId(null);
+                permissionRepository.save(userMenu);
+                
+                // 二级菜单/功能：用户列表
+                Permission userList = new Permission("用户列表", "user:view", "查看用户列表");
+                userList.setIcon("bi-list-ul");
+                userList.setType("MENU");
+                userList.setSortOrder(1);
+                userList.setParentId(userMenu.getId());
+                permissionRepository.save(userList);
+                
+                // 功能按钮：创建用户
                 Permission userCreate = new Permission("创建用户", "user:create", "创建新用户");
-                Permission userEdit = new Permission("编辑用户", "user:edit", "编辑用户信息");
-                Permission userDelete = new Permission("删除用户", "user:delete", "删除用户");
-                
-                Permission roleView = new Permission("查看角色", "role:view", "查看角色列表和详情");
-                Permission roleCreate = new Permission("创建角色", "role:create", "创建新角色");
-                Permission roleEdit = new Permission("编辑角色", "role:edit", "编辑角色信息");
-                Permission roleDelete = new Permission("删除角色", "role:delete", "删除角色");
-                
-                Permission permView = new Permission("查看权限", "permission:view", "查看权限列表和详情");
-                Permission permCreate = new Permission("创建权限", "permission:create", "创建新权限");
-                Permission permEdit = new Permission("编辑权限", "permission:edit", "编辑权限信息");
-                Permission permDelete = new Permission("删除权限", "permission:delete", "删除权限");
-                
-                permissionRepository.save(userView);
+                userCreate.setType("BUTTON");
+                userCreate.setSortOrder(2);
+                userCreate.setParentId(userMenu.getId());
                 permissionRepository.save(userCreate);
+                
+                // 功能按钮：编辑用户
+                Permission userEdit = new Permission("编辑用户", "user:edit", "编辑用户信息");
+                userEdit.setType("BUTTON");
+                userEdit.setSortOrder(3);
+                userEdit.setParentId(userMenu.getId());
                 permissionRepository.save(userEdit);
+                
+                // 功能按钮：删除用户
+                Permission userDelete = new Permission("删除用户", "user:delete", "删除用户");
+                userDelete.setType("BUTTON");
+                userDelete.setSortOrder(4);
+                userDelete.setParentId(userMenu.getId());
                 permissionRepository.save(userDelete);
-                permissionRepository.save(roleView);
+                
+                // --- 一级菜单：角色管理 ---
+                Permission roleMenu = new Permission("角色管理", "role:menu", "角色和权限管理");
+                roleMenu.setIcon("bi-shield-lock");
+                roleMenu.setType("MENU");
+                roleMenu.setSortOrder(3);
+                roleMenu.setParentId(null);
+                permissionRepository.save(roleMenu);
+                
+                // 二级菜单/功能：角色列表
+                Permission roleList = new Permission("角色列表", "role:view", "查看角色列表");
+                roleList.setIcon("bi-list-ul");
+                roleList.setType("MENU");
+                roleList.setSortOrder(1);
+                roleList.setParentId(roleMenu.getId());
+                permissionRepository.save(roleList);
+                
+                // 功能按钮：创建角色
+                Permission roleCreate = new Permission("创建角色", "role:create", "创建新角色");
+                roleCreate.setType("BUTTON");
+                roleCreate.setSortOrder(2);
+                roleCreate.setParentId(roleMenu.getId());
                 permissionRepository.save(roleCreate);
+                
+                // 功能按钮：编辑角色
+                Permission roleEdit = new Permission("编辑角色", "role:edit", "编辑角色信息");
+                roleEdit.setType("BUTTON");
+                roleEdit.setSortOrder(3);
+                roleEdit.setParentId(roleMenu.getId());
                 permissionRepository.save(roleEdit);
+                
+                // 功能按钮：删除角色
+                Permission roleDelete = new Permission("删除角色", "role:delete", "删除角色");
+                roleDelete.setType("BUTTON");
+                roleDelete.setSortOrder(4);
+                roleDelete.setParentId(roleMenu.getId());
                 permissionRepository.save(roleDelete);
-                permissionRepository.save(permView);
+                
+                // --- 一级菜单：权限管理 ---
+                Permission permMenu = new Permission("权限管理", "permission:menu", "权限配置管理");
+                permMenu.setIcon("bi-key");
+                permMenu.setType("MENU");
+                permMenu.setSortOrder(4);
+                permMenu.setParentId(null);
+                permissionRepository.save(permMenu);
+                
+                // 二级菜单/功能：权限列表
+                Permission permList = new Permission("权限列表", "permission:view", "查看权限列表");
+                permList.setIcon("bi-list-ul");
+                permList.setType("MENU");
+                permList.setSortOrder(1);
+                permList.setParentId(permMenu.getId());
+                permissionRepository.save(permList);
+                
+                // 功能按钮：创建权限
+                Permission permCreate = new Permission("创建权限", "permission:create", "创建新权限");
+                permCreate.setType("BUTTON");
+                permCreate.setSortOrder(2);
+                permCreate.setParentId(permMenu.getId());
                 permissionRepository.save(permCreate);
+                
+                // 功能按钮：编辑权限
+                Permission permEdit = new Permission("编辑权限", "permission:edit", "编辑权限信息");
+                permEdit.setType("BUTTON");
+                permEdit.setSortOrder(3);
+                permEdit.setParentId(permMenu.getId());
                 permissionRepository.save(permEdit);
+                
+                // 功能按钮：删除权限
+                Permission permDelete = new Permission("删除权限", "permission:delete", "删除权限");
+                permDelete.setType("BUTTON");
+                permDelete.setSortOrder(4);
+                permDelete.setParentId(permMenu.getId());
                 permissionRepository.save(permDelete);
                 
-                System.out.println("初始化权限数据完成");
+                // --- 一级菜单：审计日志 ---
+                Permission auditMenu = new Permission("审计日志", "audit:menu", "系统操作日志");
+                auditMenu.setIcon("bi-journal-text");
+                auditMenu.setType("MENU");
+                auditMenu.setSortOrder(5);
+                auditMenu.setParentId(null);
+                permissionRepository.save(auditMenu);
+                
+                // 二级菜单/功能：日志列表
+                Permission auditList = new Permission("日志列表", "audit:view", "查看审计日志");
+                auditList.setIcon("bi-list-ul");
+                auditList.setType("MENU");
+                auditList.setSortOrder(1);
+                auditList.setParentId(auditMenu.getId());
+                permissionRepository.save(auditList);
+                
+                // 功能按钮：删除日志
+                Permission auditDelete = new Permission("删除日志", "audit:delete", "删除审计日志");
+                auditDelete.setType("BUTTON");
+                auditDelete.setSortOrder(2);
+                auditDelete.setParentId(auditMenu.getId());
+                permissionRepository.save(auditDelete);
+                
+                System.out.println("初始化权限数据完成（包含菜单层级结构）");
                 
                 // ============ 初始化角色 ============
                 Role adminRole = new Role("ADMIN", "系统管理员 - 拥有所有权限");

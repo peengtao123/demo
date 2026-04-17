@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:replace="~{admin/layout :: layout(~{::title}, ~{::content})}">
+<head>
+    <title>审计日志</title>
+</head>
+<body>
+    <div th:fragment="content">
+        <style>
+            .toolbar {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                margin-bottom: 20px;
+                flex-wrap: wrap;
+                gap: 10px;
+            }
+            
+            .filter-box {
+                display: flex;
+                gap: 10px;
+                flex: 1;
+                flex-wrap: wrap;
+            }
+            
+            .filter-box select,
+            .filter-box input {
+                padding: 10px 15px;
+                border: 2px solid #e0e0e0;
+                border-radius: 8px;
+                font-size: 14px;
+                transition: all 0.3s;
+            }
+            
+            .filter-box select:focus,
+            .filter-box input:focus {
+                outline: none;
+                border-color: #667eea;
+                box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+            }
+            
+            table {
+                width: 100%;
+                border-collapse: collapse;
+                margin-top: 20px;
+                background: white;
+                border-radius: 8px;
+                overflow: hidden;
+                box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            }
+            
+            thead {
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                color: white;
+            }
+            
+            th, td {
+                padding: 15px;
+                text-align: left;
+                border-bottom: 1px solid #eee;
+            }
+            
+            tbody tr:hover {
+                background: #f5f7fa;
+            }
+            
+            .badge {
+                display: inline-block;
+                padding: 5px 12px;
+                border-radius: 15px;
+                font-size: 12px;
+                font-weight: bold;
+            }
+            
+            .badge-type-create {
+                background: #4caf50;
+                color: white;
+            }
+            
+            .badge-type-update {
+                background: #2196f3;
+                color: white;
+            }
+            
+            .badge-type-delete {
+                background: #f44336;
+                color: white;
+            }
+            
+            .badge-type-status {
+                background: #ff9800;
+                color: white;
+            }
+            
+            .badge-type-password {
+                background: #9c27b0;
+                color: white;
+            }
+            
+            .badge-type-permission {
+                background: #00bcd4;
+                color: white;
+            }
+            
+            .btn {
+                padding: 8px 16px;
+                border: none;
+                border-radius: 5px;
+                cursor: pointer;
+                text-decoration: none;
+                display: inline-block;
+                font-size: 14px;
+                transition: all 0.3s;
+                margin-right: 5px;
+            }
+            
+            .btn-primary {
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                color: white;
+            }
+            
+            .btn-primary:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+            }
+            
+            .btn-danger {
+                background: #f44336;
+                color: white;
+            }
+            
+            .btn-danger:hover {
+                background: #da190b;
+            }
+            
+            .pagination {
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                margin-top: 20px;
+                gap: 10px;
+            }
+            
+            .pagination a, .pagination span {
+                padding: 8px 16px;
+                border: 2px solid #e0e0e0;
+                border-radius: 5px;
+                text-decoration: none;
+                color: #333;
+                transition: all 0.3s;
+            }
+            
+            .pagination a:hover {
+                background: #667eea;
+                color: white;
+                border-color: #667eea;
+            }
+            
+            .pagination .active {
+                background: #667eea;
+                color: white;
+                border-color: #667eea;
+            }
+            
+            .checkbox-cell {
+                width: 40px;
+            }
+            
+            .action-buttons {
+                display: flex;
+                gap: 5px;
+            }
+            
+            .alert {
+                padding: 12px 20px;
+                margin-bottom: 20px;
+                border-radius: 8px;
+                border-left: 4px solid;
+            }
+            
+            .alert-success {
+                background: #d4edda;
+                border-color: #28a745;
+                color: #155724;
+            }
+            
+            .alert-error {
+                background: #f8d7da;
+                border-color: #dc3545;
+                color: #721c24;
+            }
+            
+            .code-block {
+                background: #f5f5f5;
+                padding: 10px;
+                border-radius: 5px;
+                font-family: 'Courier New', monospace;
+                font-size: 12px;
+                max-height: 100px;
+                overflow-y: auto;
+                border: 1px solid #ddd;
+            }
+            
+            .ip-address {
+                color: #666;
+                font-size: 12px;
+            }
+            
+            .timestamp {
+                color: #999;
+                font-size: 12px;
+            }
+        </style>
+        
+        <!-- 消息提示 -->
+        <div th:if="${success}" class="alert alert-success" th:text="${success}"></div>
+        <div th:if="${error}" class="alert alert-error" th:text="${error}"></div>
+        
+        <!-- 工具栏和筛选器 -->
+        <div class="toolbar">
+            <form th:action="@{/admin/audit-logs}" method="get" class="filter-box">
+                <select name="operator">
+                    <option value="">所有操作人</option>
+                    <option value="admin" th:selected="${operator == 'admin'}">管理员</option>
+                </select>
+                
+                <select name="operationType">
+                    <option value="">所有操作类型</option>
+                    <option value="CREATE" th:selected="${operationType == 'CREATE'}">创建</option>
+                    <option value="UPDATE" th:selected="${operationType == 'UPDATE'}">更新</option>
+                    <option value="DELETE" th:selected="${operationType == 'DELETE'}">删除</option>
+                    <option value="STATUS_CHANGE" th:selected="${operationType == 'STATUS_CHANGE'}">状态变更</option>
+                    <option value="PASSWORD_RESET" th:selected="${operationType == 'PASSWORD_RESET'}">密码重置</option>
+                    <option value="PERMISSION_ASSIGN" th:selected="${operationType == 'PERMISSION_ASSIGN'}">权限分配</option>
+                    <option value="BATCH_DELETE" th:selected="${operationType == 'BATCH_DELETE'}">批量删除</option>
+                </select>
+                
+                <select name="targetType">
+                    <option value="">所有目标类型</option>
+                    <option value="USER" th:selected="${targetType == 'USER'}">用户</option>
+                    <option value="ROLE" th:selected="${targetType == 'ROLE'}">角色</option>
+                    <option value="PERMISSION" th:selected="${targetType == 'PERMISSION'}">权限</option>
+                </select>
+                
+                <button type="submit" class="btn btn-primary">🔍 筛选</button>
+                <a th:href="@{/admin/audit-logs}" class="btn btn-primary">重置</a>
+            </form>
+            
+            <div>
+                <button onclick="batchDelete()" class="btn btn-danger">🗑️ 批量删除</button>
+            </div>
+        </div>
+        
+        <!-- 审计日志列表表格 -->
+        <form id="auditLogForm" th:action="@{/admin/audit-logs/batch-delete}" method="post">
+            <table>
+                <thead>
+                    <tr>
+                        <th class="checkbox-cell">
+                            <input type="checkbox" id="selectAll" onchange="toggleSelectAll()" />
+                        </th>
+                        <th>ID</th>
+                        <th>操作人</th>
+                        <th>操作类型</th>
+                        <th>目标类型</th>
+                        <th>目标ID</th>
+                        <th>描述</th>
+                        <th>IP地址</th>
+                        <th>操作时间</th>
+                        <th>操作</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="log : ${logs.content}">
+                        <td class="checkbox-cell">
+                            <input type="checkbox" name="ids" th:value="${log.id}" class="log-checkbox" />
+                        </td>
+                        <td th:text="${log.id}">1</td>
+                        <td><strong th:text="${log.operator}">admin</strong></td>
+                        <td>
+                            <span class="badge" 
+                                  th:classappend="${log.operationType == 'CREATE' ? 'badge-type-create' : 
+                                                  (log.operationType == 'UPDATE' ? 'badge-type-update' : 
+                                                  (log.operationType == 'DELETE' ? 'badge-type-delete' : 
+                                                  (log.operationType == 'STATUS_CHANGE' ? 'badge-type-status' : 
+                                                  (log.operationType == 'PASSWORD_RESET' ? 'badge-type-password' : 
+                                                  (log.operationType == 'PERMISSION_ASSIGN' ? 'badge-type-permission' : 'badge-type-create')))))}"
+                                  th:text="${log.operationType}">CREATE</span>
+                        </td>
+                        <td th:text="${log.targetType}">USER</td>
+                        <td th:text="${log.targetId}">1</td>
+                        <td th:text="${log.description}">创建用户</td>
+                        <td>
+                            <span class="ip-address" th:text="${log.ipAddress ?: '-'}">127.0.0.1</span>
+                        </td>
+                        <td>
+                            <span class="timestamp" th:text="${#temporals.format(log.createTime, 'yyyy-MM-dd HH:mm:ss')}">2024-01-01 12:00:00</span>
+                        </td>
+                        <td>
+                            <div class="action-buttons">
+                                <button type="button" th:onclick="'showDetails(' + ${log.id} + ')'" 
+                                        class="btn btn-primary">详情</button>
+                                <button type="button" th:onclick="'deleteLog(' + ${log.id} + ')'" 
+                                        class="btn btn-danger">删除</button>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr th:if="${logs.content.empty}">
+                        <td colspan="10" style="text-align: center; padding: 40px; color: #999;">
+                            暂无审计日志数据
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </form>
+        
+        <!-- 分页 -->
+        <div class="pagination" th:if="${logs.totalPages > 0}">
+            <a th:if="${logs.hasPrevious()}" 
+               th:href="@{/admin/audit-logs(page=${logs.number - 1}, size=${logs.size}, operator=${operator}, operationType=${operationType}, targetType=${targetType})}">上一页</a>
+            
+            <span th:each="i : ${#numbers.sequence(0, logs.totalPages - 1)}">
+                <a th:if="${i != logs.number}" 
+                   th:href="@{/admin/audit-logs(page=${i}, size=${logs.size}, operator=${operator}, operationType=${operationType}, targetType=${targetType})}"
+                   th:text="${i + 1}">1</a>
+                <span th:if="${i == logs.number}" class="active" th:text="${i + 1}">1</span>
+            </span>
+            
+            <a th:if="${logs.hasNext()}" 
+               th:href="@{/admin/audit-logs(page=${logs.number + 1}, size=${logs.size}, operator=${operator}, operationType=${operationType}, targetType=${targetType})}">下一页</a>
+        </div>
+        
+        <!-- 详情模态框 -->
+        <div id="detailModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 9999;">
+            <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; padding: 30px; border-radius: 10px; max-width: 800px; width: 90%; max-height: 80vh; overflow-y: auto;">
+                <h2 style="margin-bottom: 20px; color: #667eea;">审计日志详情</h2>
+                <div id="detailContent"></div>
+                <div style="margin-top: 20px; text-align: right;">
+                    <button onclick="closeDetailModal()" class="btn btn-primary">关闭</button>
+                </div>
+            </div>
+        </div>
+        
+        <script>
+            function toggleSelectAll() {
+                const selectAll = document.getElementById('selectAll');
+                const checkboxes = document.querySelectorAll('.log-checkbox');
+                checkboxes.forEach(cb => cb.checked = selectAll.checked);
+            }
+            
+            function batchDelete() {
+                const checkboxes = document.querySelectorAll('.log-checkbox:checked');
+                if (checkboxes.length === 0) {
+                    alert('请至少选择一条日志');
+                    return;
+                }
+                
+                if (confirm('确定要删除选中的 ' + checkboxes.length + ' 条日志吗？')) {
+                    document.getElementById('auditLogForm').submit();
+                }
+            }
+            
+            function deleteLog(logId) {
+                if (confirm('确定要删除这条日志吗？此操作不可恢复！')) {
+                    const form = document.createElement('form');
+                    form.method = 'POST';
+                    form.action = '/admin/audit-logs/delete/' + logId;
+                    document.body.appendChild(form);
+                    form.submit();
+                }
+            }
+            
+            function showDetails(logId) {
+                // 这里应该从服务器获取详细信息
+                // 简化版：显示基本信息
+                const row = document.querySelector(`button[onclick="showDetails(${logId})"]`).closest('tr');
+                const cells = row.querySelectorAll('td');
+                
+                const content = `
+                    <div style="margin-bottom: 15px;">
+                        <strong>ID:</strong> ${cells[1].textContent}
+                    </div>
+                    <div style="margin-bottom: 15px;">
+                        <strong>操作人:</strong> ${cells[2].textContent}
+                    </div>
+                    <div style="margin-bottom: 15px;">
+                        <strong>操作类型:</strong> ${cells[3].textContent.trim()}
+                    </div>
+                    <div style="margin-bottom: 15px;">
+                        <strong>目标类型:</strong> ${cells[4].textContent}
+                    </div>
+                    <div style="margin-bottom: 15px;">
+                        <strong>目标ID:</strong> ${cells[5].textContent}
+                    </div>
+                    <div style="margin-bottom: 15px;">
+                        <strong>描述:</strong> ${cells[6].textContent}
+                    </div>
+                    <div style="margin-bottom: 15px;">
+                        <strong>IP地址:</strong> ${cells[7].textContent.trim()}
+                    </div>
+                    <div style="margin-bottom: 15px;">
+                        <strong>操作时间:</strong> ${cells[8].textContent.trim()}
+                    </div>
+                `;
+                
+                document.getElementById('detailContent').innerHTML = content;
+                document.getElementById('detailModal').style.display = 'block';
+            }
+            
+            function closeDetailModal() {
+                document.getElementById('detailModal').style.display = 'none';
+            }
+            
+            // 点击模态框外部关闭
+            document.getElementById('detailModal').addEventListener('click', function(e) {
+                if (e.target === this) {
+                    closeDetailModal();
+                }
+            });
+        </script>
+    </div>
+</body>
+</html>
