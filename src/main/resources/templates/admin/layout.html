@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:fragment="layout(title, content)">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:replace="${title}">管理系统</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Microsoft YaHei', Arial, sans-serif;
+            background: #f5f7fa;
+            min-height: 100vh;
+        }
+        
+        .admin-layout {
+            display: flex;
+            min-height: 100vh;
+        }
+        
+        /* 左侧侧边栏 */
+        .sidebar {
+            width: 260px;
+            background: linear-gradient(180deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            position: fixed;
+            height: 100vh;
+            overflow-y: auto;
+            box-shadow: 2px 0 10px rgba(0,0,0,0.1);
+            z-index: 1000;
+        }
+        
+        .sidebar-header {
+            padding: 30px 20px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+        
+        .sidebar-header h2 {
+            font-size: 24px;
+            margin-bottom: 10px;
+        }
+        
+        .sidebar-header p {
+            font-size: 14px;
+            opacity: 0.8;
+        }
+        
+        .sidebar-menu {
+            padding: 20px 0;
+        }
+        
+        .menu-item {
+            display: block;
+            padding: 15px 25px;
+            color: white;
+            text-decoration: none;
+            transition: all 0.3s;
+            border-left: 4px solid transparent;
+        }
+        
+        .menu-item:hover {
+            background: rgba(255,255,255,0.1);
+            border-left-color: white;
+        }
+        
+        .menu-item.active {
+            background: rgba(255,255,255,0.15);
+            border-left-color: white;
+        }
+        
+        .menu-item .icon {
+            margin-right: 12px;
+            font-size: 18px;
+        }
+        
+        .menu-item .label {
+            font-size: 15px;
+        }
+        
+        .sidebar-footer {
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            padding: 20px;
+            border-top: 1px solid rgba(255,255,255,0.1);
+        }
+        
+        .logout-btn {
+            display: block;
+            padding: 12px 20px;
+            background: rgba(255,255,255,0.2);
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            text-align: center;
+            transition: all 0.3s;
+        }
+        
+        .logout-btn:hover {
+            background: rgba(255,255,255,0.3);
+        }
+        
+        /* 右侧主内容区 */
+        .main-content {
+            flex: 1;
+            margin-left: 260px;
+            padding: 30px;
+        }
+        
+        .top-bar {
+            background: white;
+            padding: 20px 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            margin-bottom: 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .top-bar h1 {
+            color: #333;
+            font-size: 24px;
+        }
+        
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .user-info span {
+            color: #666;
+        }
+        
+        .content-area {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+        
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 100%;
+                height: auto;
+                position: relative;
+            }
+            
+            .main-content {
+                margin-left: 0;
+            }
+            
+            .admin-layout {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="admin-layout">
+        <!-- 左侧菜单 -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <h2>🎯 管理系统</h2>
+                <p>Admin Dashboard</p>
+            </div>
+            
+            <nav class="sidebar-menu">
+                <a href="/admin/dashboard" class="menu-item" th:classappend="${activeMenu == 'dashboard'} ? 'active' : ''">
+                    <span class="icon">📊</span>
+                    <span class="label">仪表盘</span>
+                </a>
+                
+                <a href="/admin/users" class="menu-item" th:classappend="${activeMenu == 'users'} ? 'active' : ''">
+                    <span class="icon">👥</span>
+                    <span class="label">用户管理</span>
+                </a>
+                
+                <a href="/admin/roles" class="menu-item" th:classappend="${activeMenu == 'roles'} ? 'active' : ''">
+                    <span class="icon">🎭</span>
+                    <span class="label">角色管理</span>
+                </a>
+                
+                <a href="/admin/permissions" class="menu-item" th:classappend="${activeMenu == 'permissions'} ? 'active' : ''">
+                    <span class="icon">🔐</span>
+                    <span class="label">权限管理</span>
+                </a>
+            </nav>
+            
+            <div class="sidebar-footer">
+                <a href="/logout" class="logout-btn">退出登录</a>
+            </div>
+        </aside>
+        
+        <!-- 右侧主内容 -->
+        <main class="main-content">
+            <div class="top-bar">
+                <h1 th:text="${pageTitle}">页面标题</h1>
+                <div class="user-info">
+                    <span>欢迎，<strong th:text="${currentUsername}">用户</strong></span>
+                </div>
+            </div>
+            
+            <div class="content-area">
+                <div th:replace="${content}">
+                    内容区域
+                </div>
+            </div>
+        </main>
+    </div>
+</body>
+</html>

@@ -1,219 +1,151 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org" th:replace="~{admin/layout :: layout(~{::title}, ~{::content})}">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>权限管理</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        
-        body {
-            font-family: 'Microsoft YaHei', Arial, sans-serif;
-            background: #f5f5f5;
-            min-height: 100vh;
-        }
-        
-        .container {
-            max-width: 1400px;
-            margin: 0 auto;
-            padding: 20px;
-        }
-        
-        .header {
-            background: white;
-            padding: 20px 30px;
-            border-radius: 10px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            margin-bottom: 20px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        
-        .header h1 {
-            color: #333;
-            font-size: 24px;
-        }
-        
-        .nav-links {
-            display: flex;
-            gap: 15px;
-        }
-        
-        .nav-links a {
-            color: #667eea;
-            text-decoration: none;
-            padding: 8px 16px;
-            border-radius: 5px;
-            transition: background 0.3s;
-        }
-        
-        .nav-links a:hover {
-            background: #f0f0f0;
-        }
-        
-        .content {
-            background: white;
-            padding: 30px;
-            border-radius: 10px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-        
-        .actions {
-            margin-bottom: 20px;
-        }
-        
-        .btn {
-            padding: 10px 20px;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            text-decoration: none;
-            display: inline-block;
-            font-size: 14px;
-            transition: all 0.3s;
-            margin-right: 10px;
-        }
-        
-        .btn-primary {
-            background: #667eea;
-            color: white;
-        }
-        
-        .btn-primary:hover {
-            background: #5568d3;
-        }
-        
-        .btn-view {
-            background: #2196f3;
-            color: white;
-        }
-        
-        .btn-view:hover {
-            background: #1976d2;
-        }
-        
-        .btn-edit {
-            background: #ff9800;
-            color: white;
-        }
-        
-        .btn-edit:hover {
-            background: #f57c00;
-        }
-        
-        .btn-delete {
-            background: #f44336;
-            color: white;
-        }
-        
-        .btn-delete:hover {
-            background: #d32f2f;
-        }
-        
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 20px;
-        }
-        
-        thead {
-            background: #667eea;
-            color: white;
-        }
-        
-        th, td {
-            padding: 15px;
-            text-align: left;
-            border-bottom: 1px solid #ddd;
-        }
-        
-        tbody tr:hover {
-            background: #f9f9f9;
-        }
-        
-        .alert {
-            padding: 15px;
-            margin-bottom: 20px;
-            border-radius: 5px;
-        }
-        
-        .alert-success {
-            background: #d4edda;
-            color: #155724;
-            border: 1px solid #c3e6cb;
-        }
-        
-        .alert-error {
-            background: #f8d7da;
-            color: #721c24;
-            border: 1px solid #f5c6cb;
-        }
-        
-        .code-badge {
-            background: #e3f2fd;
-            color: #1976d2;
-            padding: 4px 8px;
-            border-radius: 4px;
-            font-family: monospace;
-            font-size: 13px;
-        }
-    </style>
 </head>
 <body>
-    <div class="container">
-        <div class="header">
-            <h1>🔐 权限管理</h1>
-            <div class="nav-links">
-                <a href="/admin/dashboard">仪表盘</a>
-                <a href="/admin/users">用户管理</a>
-                <a href="/admin/roles">角色管理</a>
-                <a href="/logout">退出</a>
-            </div>
+    <div th:fragment="content">
+        <style>
+            .actions {
+                margin-bottom: 20px;
+            }
+            
+            .btn {
+                padding: 10px 20px;
+                border: none;
+                border-radius: 5px;
+                cursor: pointer;
+                text-decoration: none;
+                display: inline-block;
+                font-size: 14px;
+                transition: all 0.3s;
+                margin-right: 10px;
+            }
+            
+            .btn-primary {
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                color: white;
+            }
+            
+            .btn-primary:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 4px 8px rgba(102, 126, 234, 0.3);
+            }
+            
+            .btn-view {
+                background: #2196f3;
+                color: white;
+            }
+            
+            .btn-view:hover {
+                background: #1976d2;
+            }
+            
+            .btn-edit {
+                background: #ff9800;
+                color: white;
+            }
+            
+            .btn-edit:hover {
+                background: #f57c00;
+            }
+            
+            .btn-delete {
+                background: #f44336;
+                color: white;
+            }
+            
+            .btn-delete:hover {
+                background: #d32f2f;
+            }
+            
+            table {
+                width: 100%;
+                border-collapse: collapse;
+                margin-top: 20px;
+            }
+            
+            thead {
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                color: white;
+            }
+            
+            th, td {
+                padding: 15px;
+                text-align: left;
+                border-bottom: 1px solid #ddd;
+            }
+            
+            tbody tr:hover {
+                background: #f9f9f9;
+            }
+            
+            .alert {
+                padding: 15px;
+                margin-bottom: 20px;
+                border-radius: 5px;
+            }
+            
+            .alert-success {
+                background: #d4edda;
+                color: #155724;
+                border: 1px solid #c3e6cb;
+            }
+            
+            .alert-error {
+                background: #f8d7da;
+                color: #721c24;
+                border: 1px solid #f5c6cb;
+            }
+            
+            .code-badge {
+                background: #e3f2fd;
+                color: #1976d2;
+                padding: 4px 8px;
+                border-radius: 4px;
+                font-family: monospace;
+                font-size: 13px;
+            }
+        </style>
+        
+        <div th:if="${success}" class="alert alert-success" th:text="${success}"></div>
+        <div th:if="${error}" class="alert alert-error" th:text="${error}"></div>
+        
+        <div class="actions">
+            <a href="/admin/permissions/new" class="btn btn-primary">+ 新建权限</a>
         </div>
         
-        <div class="content">
-            <div th:if="${success}" class="alert alert-success" th:text="${success}"></div>
-            <div th:if="${error}" class="alert alert-error" th:text="${error}"></div>
-            
-            <div class="actions">
-                <a href="/admin/permissions/new" class="btn btn-primary">+ 新建权限</a>
-            </div>
-            
-            <table>
-                <thead>
-                    <tr>
-                        <th>ID</th>
-                        <th>权限名称</th>
-                        <th>权限编码</th>
-                        <th>描述</th>
-                        <th>创建时间</th>
-                        <th>操作</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr th:each="permission : ${permissions}">
-                        <td th:text="${permission.id}">1</td>
-                        <td th:text="${permission.name}">查看用户</td>
-                        <td><span class="code-badge" th:text="${permission.code}">user:view</span></td>
-                        <td th:text="${permission.description}">查看用户列表和详情</td>
-                        <td th:text="${#temporals.format(permission.createTime, 'yyyy-MM-dd HH:mm:ss')}">2024-01-01</td>
-                        <td>
-                            <a th:href="@{/admin/permissions/{id}(id=${permission.id})}" class="btn btn-view">查看</a>
-                            <a th:href="@{/admin/permissions/edit/{id}(id=${permission.id})}" class="btn btn-edit">编辑</a>
-                            <form th:action="@{/admin/permissions/delete/{id}(id=${permission.id})}" method="post" style="display:inline;" 
-                                  onsubmit="return confirm('确定要删除这个权限吗？');">
-                                <button type="submit" class="btn btn-delete">删除</button>
-                            </form>
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
+        <table>
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>权限名称</th>
+                    <th>权限编码</th>
+                    <th>描述</th>
+                    <th>创建时间</th>
+                    <th>操作</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr th:each="permission : ${permissions}">
+                    <td th:text="${permission.id}">1</td>
+                    <td th:text="${permission.name}">查看用户</td>
+                    <td><span class="code-badge" th:text="${permission.code}">user:view</span></td>
+                    <td th:text="${permission.description}">查看用户列表和详情</td>
+                    <td th:text="${#temporals.format(permission.createTime, 'yyyy-MM-dd HH:mm:ss')}">2024-01-01</td>
+                    <td>
+                        <a th:href="@{/admin/permissions/{id}(id=${permission.id})}" class="btn btn-view">查看</a>
+                        <a th:href="@{/admin/permissions/edit/{id}(id=${permission.id})}" class="btn btn-edit">编辑</a>
+                        <form th:action="@{/admin/permissions/delete/{id}(id=${permission.id})}" method="post" style="display:inline;" 
+                              onsubmit="return confirm('确定要删除这个权限吗？');">
+                            <button type="submit" class="btn btn-delete">删除</button>
+                        </form>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
     </div>
 </body>
 </html>

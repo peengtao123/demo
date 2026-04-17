@@ -44,6 +44,8 @@ public class AdminController {
         model.addAttribute("userCount", userCount);
         model.addAttribute("roleCount", roleCount);
         model.addAttribute("permissionCount", permissionCount);
+        model.addAttribute("activeMenu", "dashboard");
+        model.addAttribute("pageTitle", "📊 管理仪表盘");
         addCurrentUserToModel(model);
         
         return "admin/dashboard";
@@ -56,6 +58,8 @@ public class AdminController {
     public String userList(Model model) {
         List<User> users = userService.getAllUsers();
         model.addAttribute("users", users);
+        model.addAttribute("activeMenu", "users");
+        model.addAttribute("pageTitle", "👥 用户管理");
         addCurrentUserToModel(model);
         return "admin/users/list";
     }
@@ -67,6 +71,8 @@ public class AdminController {
     public String roleList(Model model) {
         List<Role> roles = roleService.getAllRoles();
         model.addAttribute("roles", roles);
+        model.addAttribute("activeMenu", "roles");
+        model.addAttribute("pageTitle", "🎭 角色管理");
         addCurrentUserToModel(model);
         return "admin/roles/list";
     }
@@ -80,6 +86,8 @@ public class AdminController {
             Role role = roleService.getRoleById(id)
                     .orElseThrow(() -> new RuntimeException("角色不存在"));
             model.addAttribute("role", role);
+            model.addAttribute("activeMenu", "roles");
+            model.addAttribute("pageTitle", "🎭 角色详情");
             addCurrentUserToModel(model);
             return "admin/roles/detail";
         } catch (RuntimeException e) {
@@ -94,6 +102,8 @@ public class AdminController {
     @GetMapping("/roles/new")
     public String newRole(Model model) {
         model.addAttribute("role", new Role());
+        model.addAttribute("activeMenu", "roles");
+        model.addAttribute("pageTitle", "🎭 新建角色");
         addCurrentUserToModel(model);
         return "admin/roles/form";
     }
@@ -107,6 +117,8 @@ public class AdminController {
             Role role = roleService.getRoleById(id)
                     .orElseThrow(() -> new RuntimeException("角色不存在"));
             model.addAttribute("role", role);
+            model.addAttribute("activeMenu", "roles");
+            model.addAttribute("pageTitle", "🎭 编辑角色");
             addCurrentUserToModel(model);
             return "admin/roles/form";
         } catch (RuntimeException e) {
@@ -155,6 +167,8 @@ public class AdminController {
     public String permissionList(Model model) {
         List<Permission> permissions = permissionService.getAllPermissions();
         model.addAttribute("permissions", permissions);
+        model.addAttribute("activeMenu", "permissions");
+        model.addAttribute("pageTitle", "🔐 权限管理");
         addCurrentUserToModel(model);
         return "admin/permissions/list";
     }
@@ -168,6 +182,8 @@ public class AdminController {
             Permission permission = permissionService.getPermissionById(id)
                     .orElseThrow(() -> new RuntimeException("权限不存在"));
             model.addAttribute("permission", permission);
+            model.addAttribute("activeMenu", "permissions");
+            model.addAttribute("pageTitle", "🔐 权限详情");
             addCurrentUserToModel(model);
             return "admin/permissions/detail";
         } catch (RuntimeException e) {
@@ -182,6 +198,8 @@ public class AdminController {
     @GetMapping("/permissions/new")
     public String newPermission(Model model) {
         model.addAttribute("permission", new Permission());
+        model.addAttribute("activeMenu", "permissions");
+        model.addAttribute("pageTitle", "🔐 新建权限");
         addCurrentUserToModel(model);
         return "admin/permissions/form";
     }
@@ -195,6 +213,8 @@ public class AdminController {
             Permission permission = permissionService.getPermissionById(id)
                     .orElseThrow(() -> new RuntimeException("权限不存在"));
             model.addAttribute("permission", permission);
+            model.addAttribute("activeMenu", "permissions");
+            model.addAttribute("pageTitle", "🔐 编辑权限");
             addCurrentUserToModel(model);
             return "admin/permissions/form";
         } catch (RuntimeException e) {
