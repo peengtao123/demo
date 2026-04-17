@@ -13,6 +13,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.util.HashSet;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Configuration
 public class DataInitializer {
@@ -182,6 +183,31 @@ public class DataInitializer {
                 roleRepository.save(editorRole);
                 
                 System.out.println("初始化角色数据完成");
+                
+                // ============ 为角色分配权限 ============
+                // ADMIN角色：拥有所有权限
+                Set<Permission> adminPermissions = new HashSet<>(permissionRepository.findAll());
+                adminRole.setPermissions(adminPermissions);
+                roleRepository.save(adminRole);
+                
+                // EDITOR角色：拥有查看和编辑权限（不含删除）
+                Set<Permission> editorPermissions = permissionRepository.findAll().stream()
+                    .filter(p -> !p.getCode().contains(":delete"))  // 排除删除权限
+                    .collect(Collectors.toSet());
+                editorRole.setPermissions(editorPermissions);
+                roleRepository.save(editorRole);
+                
+                // USER角色：只有查看权限
+                Set<Permission> userPermissions = permissionRepository.findAll().stream()
+                    .filter(p -> p.getCode().contains(":view") || p.getCode().contains(":menu"))  // 只包含查看和菜单权限
+                    .collect(Collectors.toSet());
+                userRole.setPermissions(userPermissions);
+                roleRepository.save(userRole);
+                
+                System.out.println("角色权限分配完成");
+                System.out.println("ADMIN角色权限数: " + adminRole.getPermissions().size());
+                System.out.println("EDITOR角色权限数: " + editorRole.getPermissions().size());
+                System.out.println("USER角色权限数: " + userRole.getPermissions().size());
                 
                 // ============ 初始化用户 ============
                 // 管理员账号

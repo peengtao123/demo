@@ -85,6 +85,31 @@
             <div class="detail-value" th:text="${#temporals.format(role.updateTime, 'yyyy-MM-dd HH:mm:ss')}">2024-01-01</div>
         </div>
         
+        <!-- 权限列表 -->
+        <div class="detail-row" style="flex-direction: column;" th:if="${role.permissions != null and !role.permissions.empty}">
+            <div class="detail-label" style="width: 100%; margin-bottom: 15px;">🔑 已分配权限 (<span th:text="${role.permissions.size()}">0</span>):</div>
+            <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 10px; width: 100%;">
+                <div th:each="perm : ${role.permissions}" 
+                     style="padding: 12px; background: #f8f9ff; border-radius: 6px; border-left: 3px solid #667eea;">
+                    <div style="font-weight: 500; color: #333; margin-bottom: 5px;">
+                        <i th:class="${perm.icon}" style="margin-right: 5px; color: #667eea;"></i>
+                        <span th:text="${perm.name}">权限名称</span>
+                    </div>
+                    <div style="font-size: 12px; color: #666;">
+                        <code style="background: white; padding: 2px 6px; border-radius: 3px; font-family: monospace;" 
+                              th:text="${perm.code}">permission:code</code>
+                    </div>
+                    <div th:if="${perm.description}" style="font-size: 11px; color: #999; margin-top: 3px;" 
+                         th:text="${perm.description}">权限描述</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="detail-row" th:if="${role.permissions == null or role.permissions.empty}">
+            <div class="detail-label">🔑 已分配权限:</div>
+            <div class="detail-value" style="color: #999;">暂无权限</div>
+        </div>
+        
         <div class="actions">
             <a th:href="@{/admin/roles/edit/{id}(id=${role.id})}" class="btn btn-edit">编辑</a>
             <a href="/admin/roles" class="btn btn-back">返回列表</a>

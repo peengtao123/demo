@@ -90,11 +90,91 @@
                           placeholder="请输入角色描述信息"></textarea>
             </div>
             
+            <!-- 权限分配 -->
+            <div class="form-group">
+                <label>🔑 权限分配</label>
+                <div style="margin-top: 10px; padding: 15px; background: #f8f9ff; border-radius: 8px; border: 2px solid #e0e0e0;">
+                    <!-- 全选按钮 -->
+                    <div style="margin-bottom: 15px; padding-bottom: 10px; border-bottom: 2px solid #667eea;">
+                        <label style="display: flex; align-items: center; cursor: pointer; font-weight: bold; color: #667eea;">
+                            <input type="checkbox" id="selectAllPermissions" 
+                                   style="margin-right: 10px; width: 18px; height: 18px; cursor: pointer;" />
+                            <span>全选 / 取消全选</span>
+                        </label>
+                    </div>
+                    
+                    <!-- 权限列表 -->
+                    <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 10px; max-height: 400px; overflow-y: auto;">
+                        <div th:each="perm : ${allPermissions}" class="permission-item">
+                            <label style="display: flex; align-items: flex-start; padding: 10px; border: 1px solid #e0e0e0; border-radius: 6px; cursor: pointer; transition: all 0.3s; background: white;"
+                                   onmouseover="this.style.borderColor='#667eea'; this.style.background='#f5f7ff'"
+                                   onmouseout="this.style.borderColor='#e0e0e0'; this.style.background='white'">
+                                <input type="checkbox" name="permissionIds" th:value="${perm.id}" 
+                                       th:checked="${role.permissions != null and role.permissions.contains(perm)}"
+                                       class="permission-checkbox"
+                                       style="margin-right: 10px; margin-top: 3px; width: 16px; height: 16px; cursor: pointer; flex-shrink: 0;" />
+                                <div style="flex: 1;">
+                                    <div style="font-weight: 500; color: #333; margin-bottom: 3px;">
+                                        <i th:class="${perm.icon}" style="margin-right: 5px; color: #667eea;"></i>
+                                        <span th:text="${perm.name}">权限名称</span>
+                                    </div>
+                                    <div style="font-size: 12px; color: #666;">
+                                        <code style="background: #f0f0f0; padding: 2px 6px; border-radius: 3px; font-family: monospace;" 
+                                              th:text="${perm.code}">permission:code</code>
+                                    </div>
+                                    <div th:if="${perm.description}" style="font-size: 11px; color: #999; margin-top: 3px;" 
+                                         th:text="${perm.description}">权限描述</div>
+                                </div>
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <div style="margin-top: 10px; padding-top: 10px; border-top: 1px solid #e0e0e0; font-size: 12px; color: #666;">
+                        💡 提示：勾选的权限将分配给该角色，用户拥有该角色后将获得相应权限
+                    </div>
+                </div>
+            </div>
+            
             <div class="form-actions">
-                <button type="submit" class="btn btn-primary">保存</button>
-                <a href="/admin/roles" class="btn btn-secondary">取消</a>
+                <button type="submit" class="btn btn-primary">💾 保存角色</button>
+                <a href="/admin/roles" class="btn btn-secondary">← 返回列表</a>
             </div>
         </form>
+        
+        <script>
+            // 全选/取消全选功能
+            document.addEventListener('DOMContentLoaded', function() {
+                const selectAllCheckbox = document.getElementById('selectAllPermissions');
+                const permissionCheckboxes = document.querySelectorAll('.permission-checkbox');
+                
+                if (selectAllCheckbox) {
+                    // 全选按钮点击事件
+                    selectAllCheckbox.addEventListener('change', function() {
+                        const isChecked = this.checked;
+                        permissionCheckboxes.forEach(function(checkbox) {
+                            checkbox.checked = isChecked;
+                        });
+                    });
+                    
+                    // 监听单个复选框的变化，更新全选按钮状态
+                    permissionCheckboxes.forEach(function(checkbox) {
+                        checkbox.addEventListener('change', function() {
+                            const allChecked = Array.from(permissionCheckboxes).every(cb => cb.checked);
+                            const someChecked = Array.from(permissionCheckboxes).some(cb => cb.checked);
+                            
+                            selectAllCheckbox.checked = allChecked;
+                            selectAllCheckbox.indeterminate = !allChecked && someChecked;
+                        });
+                    });
+                    
+                    // 初始化全选按钮状态
+                    const allChecked = Array.from(permissionCheckboxes).every(cb => cb.checked);
+                    const someChecked = Array.from(permissionCheckboxes).some(cb => cb.checked);
+                    selectAllCheckbox.checked = allChecked;
+                    selectAllCheckbox.indeterminate = !allChecked && someChecked;
+                }
+            });
+        </script>
     </div>
 </body>
 </html>

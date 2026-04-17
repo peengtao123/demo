@@ -5,6 +5,7 @@ import com.example.demo.entity.Permission;
 import com.example.demo.entity.Role;
 import com.example.demo.entity.User;
 import com.example.demo.repository.AuditLogRepository;
+import com.example.demo.repository.UserRepository;
 import com.example.demo.service.AuditLogService;
 import com.example.demo.service.PermissionService;
 import com.example.demo.service.RoleService;
@@ -43,6 +44,9 @@ public class AdminController {
 
     @Autowired
     private AuditLogRepository auditLogRepository;
+
+    @Autowired
+    private UserRepository userRepository;
 
     /**
      * 管理首页/仪表盘
@@ -156,7 +160,9 @@ public class AdminController {
      * 保存用户
      */
     @PostMapping("/users/save")
-    public String saveUser(@ModelAttribute User user, RedirectAttributes redirectAttributes) {
+    public String saveUser(@ModelAttribute User user, 
+                          @RequestParam(required = false) List<Long> roleIds,
+                          RedirectAttributes redirectAttributes) {
         try {
             if (user.getId() == null) {
                 // 新建用户
@@ -167,17 +173,55 @@ public class AdminController {
                 userDTO.setPhone(user.getPhone());
                 userDTO.setAge(user.getAge());
                 userDTO.setPassword(user.getPassword());
-                userService.createUser(userDTO);
+                User savedUser = userService.createUser(userDTO);
+                
+                // 分配角色
+                if (roleIds != null && !roleIds.isEmpty()) {
+                    assignRolesToUser(savedUser.getId(), roleIds);
+                }
+                
                 redirectAttributes.addFlashAttribute("success", "用户创建成功");
             } else {
                 // 更新用户基本信息
                 userService.updateUserInfo(user.getId(), user);
+                
+                // 更新角色分配
+                if (roleIds != null) {
+                    assignRolesToUser(user.getId(), roleIds);
+                }
+                
                 redirectAttributes.addFlashAttribute("success", "用户更新成功");
             }
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("error", "操作失败: " + e.getMessage());
         }
         return "redirect:/admin/users";
+    }
+
+    /**
+     * 为用户分配角色（辅助方法）
+     */
+    private void assignRolesToUser(Long userId, List<Long> roleIds) {
+        User user = userService.getUserById(userId);
+        Set<Role> roles = new HashSet<>();
+        
+        for (Long roleId : roleIds) {
+            Role role = roleService.getRoleById(roleId)
+                    .orElseThrow(() -> new RuntimeException("角色不存在: " + roleId));
+            roles.add(role);
+        }
+        
+        user.setRoles(roles);
+        userRepository.save(user);
+        
+        // 记录审计日志
+        auditLogService.log(
+            getCurrentUser(),
+            "ROLE_ASSIGN",
+            "USER",
+            userId.toString(),
+            "为用户分配角色，角色数量: " + roleIds.size()
+        );
     }
 
     /**
@@ -667,20 +711,35 @@ public class AdminController {
         if (code == null) return "#";
         
         switch (code.toLowerCase()) {
+            // 仪表盘
+            case "dashboard:menu":
             case "dashboard:view":
                 return "/admin/dashboard";
+            
+            // 用户管理
+            case "user:menu":
             case "user:view":
             case "user:list":
                 return "/admin/users";
+            
+            // 角色管理
+            case "role:menu":
             case "role:view":
             case "role:list":
                 return "/admin/roles";
+            
+            // 权限管理
+            case "permission:menu":
             case "permission:view":
             case "permission:list":
                 return "/admin/permissions";
+            
+            // 审计日志
+            case "audit:menu":
             case "audit:view":
             case "audit:log":
                 return "/admin/audit-logs";
+            
             default:
                 return "#";
         }

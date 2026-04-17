@@ -315,6 +315,35 @@ public class UserService {
     }
 
     /**
+     * 为用户分配角色
+     */
+    public User assignRoles(Long userId, List<Long> roleIds) {
+        User user = getUserById(userId);
+        Set<Role> oldRoles = new HashSet<>(user.getRoles());
+        
+        Set<Role> roles = new HashSet<>();
+        for (Long roleId : roleIds) {
+            // 这里需要通过RoleRepository获取角色，但UserService没有注入
+            // 所以我们需要通过其他方式，或者在Controller层处理
+            throw new RuntimeException("请使用RoleService分配角色");
+        }
+        
+        user.setRoles(roles);
+        User updatedUser = userRepository.save(user);
+        
+        // 记录审计日志
+        auditLogService.log(
+            getCurrentUser(),
+            "ROLE_ASSIGN",
+            "USER",
+            userId.toString(),
+            "为用户分配角色: " + user.getUsername()
+        );
+        
+        return updatedUser;
+    }
+
+    /**
      * 根据用户名查询用户
      */
     @Transactional(readOnly = true)

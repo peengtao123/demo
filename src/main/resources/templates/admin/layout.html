@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title th:replace="${title}">管理系统</title>
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <style>
         * {
             margin: 0;
@@ -137,6 +139,13 @@
         .submenu .menu-item {
             padding-left: 50px;
             font-size: 14px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .submenu .menu-item .icon {
+            margin-right: 10px;
+            font-size: 16px;
         }
         
         .menu-item.has-children::after {
@@ -206,19 +215,23 @@
         
         // 渲染菜单
         function renderMenu(menuItems) {
+            console.log('接收到的菜单数据:', menuItems);
             const menuContainer = document.getElementById('sidebarMenu');
             
             if (!menuItems || menuItems.length === 0) {
+                console.warn('菜单数据为空，显示备用菜单');
                 showFallbackMenu();
                 return;
             }
             
             let html = '';
             menuItems.forEach((item, index) => {
+                console.log(`渲染菜单项 ${index}:`, item);
                 html += renderMenuItem(item, index);
             });
             
             menuContainer.innerHTML = html;
+            console.log('菜单HTML渲染完成');
             
             // 绑定子菜单展开/收起事件
             bindSubMenuEvents();
@@ -239,7 +252,7 @@
                            class="menu-item has-children ${isActive ? 'active' : ''}" 
                            data-menu-id="${item.id}"
                            onclick="toggleSubMenu(${item.id})">
-                            <span class="icon">${item.icon}</span>
+                            <i class="icon ${item.icon}"></i>
                             <span class="label">${item.name}</span>
                         </a>
                         <div class="submenu" id="submenu-${item.id}">
@@ -250,7 +263,7 @@
                     html += `
                         <a href="${child.url}" 
                            class="menu-item ${childActive ? 'active' : ''}">
-                            <span class="icon">${child.icon}</span>
+                            <i class="icon ${child.icon}"></i>
                             <span class="label">${child.name}</span>
                         </a>
                     `;
@@ -265,7 +278,7 @@
                 html += `
                     <a href="${item.url}" 
                        class="menu-item ${isActive ? 'active' : ''}">
-                        <span class="icon">${item.icon}</span>
+                        <i class="icon ${item.icon}"></i>
                         <span class="label">${item.name}</span>
                     </a>
                 `;
