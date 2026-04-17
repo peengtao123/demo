@@ -20,6 +20,32 @@
             max-width: 1200px;
             margin: 0 auto;
         }
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .user-info {
+            color: #667eea;
+            font-weight: bold;
+        }
+        .logout-btn {
+            padding: 8px 20px;
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            border: none;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: transform 0.3s;
+        }
+        .logout-btn:hover {
+            transform: scale(1.05);
+        }
         h1 {
             color: #333;
             margin-bottom: 30px;
@@ -64,11 +90,11 @@
             border-radius: 20px;
             font-size: 0.9em;
         }
-        .user-info {
+        .user-info-detail {
             color: #666;
             line-height: 1.8;
         }
-        .user-info div {
+        .user-info-detail div {
             margin: 5px 0;
         }
         .label {
@@ -101,7 +127,18 @@
 </head>
 <body>
     <div class="container">
-        <a href="/pages/" class="back-link">← 返回首页</a>
+        <!-- 头部信息 -->
+        <div class="header">
+            <div>
+                <a href="/pages/" class="back-link">← 返回首页</a>
+            </div>
+            <div style="display: flex; align-items: center; gap: 15px;">
+                <span class="user-info" th:if="${currentUsername}">👤 <span th:text="${currentUsername}">用户名</span></span>
+                <form th:action="@{/logout}" method="post" style="margin: 0;">
+                    <button type="submit" class="logout-btn">退出登录</button>
+                </form>
+            </div>
+        </div>
         
         <h1>👥 用户列表</h1>
 
@@ -115,10 +152,11 @@
                 <span class="user-name" th:text="${user.name}">用户名</span>
                 <span class="user-id" th:text="'ID: ' + ${user.id}">ID: 1</span>
             </div>
-            <div class="user-info">
+            <div class="user-info-detail">
                 <div><span class="label">用户名:</span> <span th:text="${user.username}">username</span></div>
                 <div><span class="label">邮箱:</span> <span th:text="${user.email}">email@example.com</span></div>
                 <div><span class="label">年龄:</span> <span th:text="${user.age}">25</span></div>
+                <div><span class="label">角色:</span> <span th:text="${user.role}">USER</span></div>
                 <div><span class="label">创建时间:</span> <span th:text="${#temporals.format(user.createTime, 'yyyy-MM-dd HH:mm:ss')}">2024-01-01</span></div>
             </div>
             <a th:href="@{/pages/users/{id}(id=${user.id})}" class="view-btn">查看详情</a>

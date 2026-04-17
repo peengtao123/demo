@@ -39,6 +39,13 @@ public class User {
 
     private Integer age;
 
+    @NotBlank(message = "密码不能为空")
+    @Column(nullable = false)
+    private String password;
+
+    @Column(length = 50)
+    private String role = "USER"; // 默认角色为USER
+
     @CreatedDate
     @Column(updatable = false)
     private LocalDateTime createTime;
@@ -104,6 +111,22 @@ public class User {
         this.age = age;
     }
 
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
+    public String getRole() {
+        return role;
+    }
+
+    public void setRole(String role) {
+        this.role = role;
+    }
+
     public LocalDateTime getCreateTime() {
         return createTime;
     }
@@ -129,6 +152,7 @@ public class User {
                 ", name='" + name + '\'' +
                 ", phone='" + phone + '\'' +
                 ", age=" + age +
+                ", role='" + role + '\'' +
                 ", createTime=" + createTime +
                 ", updateTime=" + updateTime +
                 '}';

@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>用户登录</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Microsoft YaHei', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        .login-container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            padding: 40px;
+            max-width: 450px;
+            width: 100%;
+        }
+        .login-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .login-icon {
+            font-size: 4em;
+            margin-bottom: 15px;
+        }
+        h1 {
+            color: #333;
+            font-size: 1.8em;
+            margin-bottom: 10px;
+        }
+        .subtitle {
+            color: #666;
+            font-size: 0.95em;
+        }
+        .alert {
+            padding: 12px 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-size: 0.9em;
+        }
+        .alert-error {
+            background: #fee;
+            color: #c33;
+            border: 1px solid #fcc;
+        }
+        .alert-success {
+            background: #efe;
+            color: #3c3;
+            border: 1px solid #cfc;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: bold;
+            font-size: 0.95em;
+        }
+        input[type="text"],
+        input[type="password"] {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 1em;
+            transition: border-color 0.3s;
+        }
+        input[type="text"]:focus,
+        input[type="password"]:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        .btn-login {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.1em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: transform 0.3s, box-shadow 0.3s;
+            margin-top: 10px;
+        }
+        .btn-login:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+        .btn-login:active {
+            transform: translateY(0);
+        }
+        .demo-info {
+            margin-top: 25px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            border-left: 4px solid #667eea;
+        }
+        .demo-info-title {
+            font-weight: bold;
+            color: #667eea;
+            margin-bottom: 8px;
+            font-size: 0.9em;
+        }
+        .demo-info-item {
+            color: #666;
+            font-size: 0.85em;
+            margin: 5px 0;
+            font-family: 'Courier New', monospace;
+        }
+        .footer {
+            text-align: center;
+            margin-top: 20px;
+            color: #999;
+            font-size: 0.85em;
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <div class="login-header">
+            <div class="login-icon">🔐</div>
+            <h1>欢迎登录</h1>
+            <p class="subtitle">用户管理系统</p>
+        </div>
+
+        <!-- 错误提示 -->
+        <div th:if="${error}" class="alert alert-error">
+            ⚠️ <span th:text="${error}">错误信息</span>
+        </div>
+
+        <!-- 成功提示 -->
+        <div th:if="${message}" class="alert alert-success">
+            ✅ <span th:text="${message}">成功信息</span>
+        </div>
+
+        <!-- 登录表单 -->
+        <form th:action="@{/login}" method="post">
+            <div class="form-group">
+                <label for="username">👤 用户名</label>
+                <input type="text" 
+                       id="username" 
+                       name="username" 
+                       placeholder="请输入用户名"
+                       required 
+                       autofocus>
+            </div>
+
+            <div class="form-group">
+                <label for="password">🔑 密码</label>
+                <input type="password" 
+                       id="password" 
+                       name="password" 
+                       placeholder="请输入密码"
+                       required>
+            </div>
+
+            <button type="submit" class="btn-login">登 录</button>
+        </form>
+
+        <!-- 演示账号信息 -->
+        <div class="demo-info">
+            <div class="demo-info-title">💡 演示账号</div>
+            <div class="demo-info-item">用户名: admin</div>
+            <div class="demo-info-item">密码: admin123</div>
+        </div>
+
+        <div class="footer">
+            © 2026 用户管理系统
+        </div>
+    </div>
+</body>
+</html>

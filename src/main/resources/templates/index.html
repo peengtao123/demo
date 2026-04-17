@@ -27,6 +27,15 @@
             width: 90%;
             text-align: center;
         }
+        .user-info {
+            background: #f8f9fa;
+            padding: 10px 20px;
+            border-radius: 25px;
+            margin-bottom: 20px;
+            display: inline-block;
+            color: #667eea;
+            font-weight: bold;
+        }
         h1 {
             color: #333;
             margin-bottom: 20px;
@@ -64,10 +73,21 @@
             transform: translateY(-2px);
             box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
         }
+        .btn-logout {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        }
+        .btn-logout:hover {
+            box-shadow: 0 5px 15px rgba(245, 87, 108, 0.4);
+        }
     </style>
 </head>
 <body>
     <div class="container">
+        <!-- 当前用户信息 -->
+        <div class="user-info" th:if="${currentUsername}">
+            👤 <span th:text="${currentUsername}">用户名</span>
+        </div>
+
         <h1>🎉 欢迎使用用户管理系统</h1>
         
         <div class="stats">
@@ -78,6 +98,9 @@
         <div class="links">
             <a href="/pages/users" class="btn">查看用户列表</a>
             <a href="/api/users" class="btn">API接口文档</a>
+            <form th:action="@{/logout}" method="post" style="display: inline;">
+                <button type="submit" class="btn btn-logout">退出登录</button>
+            </form>
         </div>
     </div>
 </body>

@@ -7,6 +7,7 @@ import com.example.demo.service.UserService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -22,7 +23,7 @@ public class UserController {
      * 创建用户
      */
     @PostMapping
-    public ResponseEntity<ApiResponse<User>> createUser(@Valid @RequestBody UserDTO userDTO) {
+    public ResponseEntity<ApiResponse<User>> createUser(@Validated(UserDTO.CreateGroup.class) @RequestBody UserDTO userDTO) {
         try {
             User user = userService.createUser(userDTO);
             return ResponseEntity.ok(ApiResponse.success("用户创建成功", user));

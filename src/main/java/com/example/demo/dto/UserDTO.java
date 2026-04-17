@@ -25,6 +25,14 @@ public class UserDTO {
 
     private Integer age;
 
+    @NotBlank(message = "密码不能为空", groups = CreateGroup.class)
+    @Size(min = 6, max = 100, message = "密码长度必须在6-100个字符之间", groups = CreateGroup.class)
+    private String password;
+
+    // 验证组接口
+    public interface CreateGroup {}
+    public interface UpdateGroup {}
+
     public UserDTO() {
     }
 
@@ -81,5 +89,13 @@ public class UserDTO {
 
     public void setAge(Integer age) {
         this.age = age;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
     }
 }
