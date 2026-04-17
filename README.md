@@ -1,11 +1,23 @@
 # 用户管理系统
 
-基于 Spring Boot + H2 数据库的用户管理功能演示项目。
+基于 Spring Boot + H2 数据库的用户管理功能演示项目，包含完整的管理系统、角色管理和权限管理功能。
+
+## 🎉 最新功能
+
+### ✨ 管理系统（新增）
+- **管理仪表盘**: 统计信息展示和快捷导航
+- **用户管理**: 查看和管理系统用户
+- **角色管理**: 创建、编辑、删除角色
+- **权限管理**: 配置和管理系统权限
+- **基于角色的访问控制（RBAC）**: 细粒度的权限管理
+
+📖 详细说明请查看: [管理系统功能指南](./docs/ADMIN_SYSTEM_GUIDE.md)
 
 ## 📚 文档导航
 
 详细的技术文档已整理至 [docs](./docs/) 目录：
 
+- **🆕 管理系统**: [功能说明](./docs/ADMIN_SYSTEM_GUIDE.md) | [更新总结](./docs/UPDATE_SUMMARY.md)
 - **Spring Security**: [完整指南](./docs/SPRING_SECURITY_GUIDE.md) | [总结](./docs/SPRING_SECURITY_SUMMARY.md) | [快速参考](./docs/SECURITY_QUICK_REF.md)
 - **Thymeleaf**: [入门指南](./docs/THYMELEAF_README.md) | [总结](./docs/THYMELEAF_SUMMARY.md) | [快速开始](./docs/THYMELEAF_QUICKSTART.md)
 - **测试相关**: [单元测试](./docs/TEST_README.md) | [Web MVC测试](./docs/WEBMVC_TEST_README.md)
@@ -47,7 +59,18 @@ mvn spring-boot:run
 ./mvnw spring-boot:run
 ```
 
-### 2. 访问 H2 数据库控制台
+### 2. 访问管理系统
+
+浏览器打开：http://localhost:8080/login
+
+**默认账号：**
+- 👑 **管理员**: `admin` / `admin123` （可访问所有管理功能）
+- 👤 **普通用户**: `zhangsan` / `user123`
+- ✏️ **编辑者**: `wangwu` / `user123`
+
+> 💡 登录成功后会自动跳转到管理仪表盘
+
+### 3. 访问 H2 数据库控制台
 
 浏览器打开：http://localhost:8080/h2-console
 
@@ -56,7 +79,7 @@ mvn spring-boot:run
 - 用户名: `sa`
 - 密码: (留空)
 
-### 3. API 接口测试
+### 4. API 接口测试
 
 #### 查询所有用户
 ```bash

@@ -43,9 +43,11 @@ public class SecurityConfig {
             .authorizeHttpRequests(authorize -> authorize
                 // 公开访问的页面
                 .requestMatchers("/login", "/css/**", "/js/**", "/images/**").permitAll()
+                // 管理页面 - 需要ADMIN角色
+                .requestMatchers("/admin/**").hasRole("ADMIN")
                 // API端点需要认证
                 .requestMatchers("/api/**").authenticated()
-                // 页面访问需要认证
+                // 普通页面访问需要认证
                 .requestMatchers("/pages/**").authenticated()
                 // 其他请求需要认证
                 .anyRequest().authenticated()
@@ -53,7 +55,7 @@ public class SecurityConfig {
             .formLogin(form -> form
                 .loginPage("/login")
                 .loginProcessingUrl("/login")
-                .defaultSuccessUrl("/pages/", true)
+                .defaultSuccessUrl("/admin/dashboard", true) // 登录成功后跳转到管理仪表盘
                 .failureUrl("/login?error=true")
                 .permitAll()
             )
