@@ -37,6 +37,21 @@ public class Permission {
     @Column(length = 200)
     private String description;
 
+    @Column(length = 50)
+    private String icon;
+
+    @Column(nullable = false)
+    private Boolean status = true;
+
+    @Column(name = "parent_id")
+    private Long parentId;
+
+    @Column(name = "sort_order")
+    private Integer sortOrder = 0;
+
+    @Column(length = 50)
+    private String type = "MENU";
+
     @CreatedDate
     @Column(updatable = false)
     private LocalDateTime createTime;
@@ -89,6 +104,46 @@ public class Permission {
         this.description = description;
     }
 
+    public String getIcon() {
+        return icon;
+    }
+
+    public void setIcon(String icon) {
+        this.icon = icon;
+    }
+
+    public Boolean getStatus() {
+        return status;
+    }
+
+    public void setStatus(Boolean status) {
+        this.status = status;
+    }
+
+    public Long getParentId() {
+        return parentId;
+    }
+
+    public void setParentId(Long parentId) {
+        this.parentId = parentId;
+    }
+
+    public Integer getSortOrder() {
+        return sortOrder;
+    }
+
+    public void setSortOrder(Integer sortOrder) {
+        this.sortOrder = sortOrder;
+    }
+
+    public String getType() {
+        return type;
+    }
+
+    public void setType(String type) {
+        this.type = type;
+    }
+
     public LocalDateTime getCreateTime() {
         return createTime;
     }
@@ -120,6 +175,11 @@ public class Permission {
                 ", name='" + name + '\'' +
                 ", code='" + code + '\'' +
                 ", description='" + description + '\'' +
+                ", icon='" + icon + '\'' +
+                ", status=" + status +
+                ", parentId=" + parentId +
+                ", sortOrder=" + sortOrder +
+                ", type='" + type + '\'' +
                 ", createTime=" + createTime +
                 ", updateTime=" + updateTime +
                 '}';

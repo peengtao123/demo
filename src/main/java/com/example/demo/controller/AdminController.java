@@ -38,12 +38,24 @@ public class AdminController {
     @GetMapping("/dashboard")
     public String dashboard(Model model) {
         long userCount = userService.getAllUsers().size();
+        long enabledUserCount = userService.countEnabledUsers();
+        long disabledUserCount = userService.countDisabledUsers();
         long roleCount = roleService.getAllRoles().size();
+        long enabledRoleCount = roleService.countEnabledRoles();
+        long disabledRoleCount = roleService.countDisabledRoles();
         long permissionCount = permissionService.getAllPermissions().size();
+        long enabledPermissionCount = permissionService.countEnabledPermissions();
+        long disabledPermissionCount = permissionService.countDisabledPermissions();
         
         model.addAttribute("userCount", userCount);
+        model.addAttribute("enabledUserCount", enabledUserCount);
+        model.addAttribute("disabledUserCount", disabledUserCount);
         model.addAttribute("roleCount", roleCount);
+        model.addAttribute("enabledRoleCount", enabledRoleCount);
+        model.addAttribute("disabledRoleCount", disabledRoleCount);
         model.addAttribute("permissionCount", permissionCount);
+        model.addAttribute("enabledPermissionCount", enabledPermissionCount);
+        model.addAttribute("disabledPermissionCount", disabledPermissionCount);
         model.addAttribute("activeMenu", "dashboard");
         model.addAttribute("pageTitle", "📊 管理仪表盘");
         addCurrentUserToModel(model);
@@ -52,12 +64,26 @@ public class AdminController {
     }
 
     /**
-     * 用户管理列表页面
+     * 用户管理列表页面（支持分页和搜索）
      */
     @GetMapping("/users")
-    public String userList(Model model) {
-        List<User> users = userService.getAllUsers();
-        model.addAttribute("users", users);
+    public String userList(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(required = false) String keyword,
+            Model model) {
+        
+        if (keyword != null && !keyword.trim().isEmpty()) {
+            // 搜索模式
+            model.addAttribute("users", userService.searchUsers(keyword.trim(), page, size));
+            model.addAttribute("keyword", keyword);
+        } else {
+            // 普通分页模式
+            model.addAttribute("users", userService.getUsersWithPaging(page, size));
+        }
+        
+        model.addAttribute("currentPage", page);
+        model.addAttribute("pageSize", size);
         model.addAttribute("activeMenu", "users");
         model.addAttribute("pageTitle", "👥 用户管理");
         addCurrentUserToModel(model);
@@ -65,12 +91,161 @@ public class AdminController {
     }
 
     /**
-     * 角色管理列表页面
+     * 用户详情页面
+     */
+    @GetMapping("/users/{id}")
+    public String userDetail(@PathVariable Long id, Model model) {
+        try {
+            User user = userService.getUserById(id);
+            model.addAttribute("user", user);
+            model.addAttribute("activeMenu", "users");
+            model.addAttribute("pageTitle", "👤 用户详情");
+            addCurrentUserToModel(model);
+            return "admin/users/detail";
+        } catch (RuntimeException e) {
+            model.addAttribute("error", "用户不存在");
+            return "error";
+        }
+    }
+
+    /**
+     * 新建用户页面
+     */
+    @GetMapping("/users/new")
+    public String newUser(Model model) {
+        model.addAttribute("user", new User());
+        model.addAttribute("roles", roleService.getAllRoles());
+        model.addAttribute("activeMenu", "users");
+        model.addAttribute("pageTitle", "➕ 新建用户");
+        addCurrentUserToModel(model);
+        return "admin/users/form";
+    }
+
+    /**
+     * 编辑用户页面
+     */
+    @GetMapping("/users/edit/{id}")
+    public String editUser(@PathVariable Long id, Model model) {
+        try {
+            User user = userService.getUserById(id);
+            model.addAttribute("user", user);
+            model.addAttribute("roles", roleService.getAllRoles());
+            model.addAttribute("activeMenu", "users");
+            model.addAttribute("pageTitle", "✏️ 编辑用户");
+            addCurrentUserToModel(model);
+            return "admin/users/form";
+        } catch (RuntimeException e) {
+            model.addAttribute("error", "用户不存在");
+            return "error";
+        }
+    }
+
+    /**
+     * 保存用户
+     */
+    @PostMapping("/users/save")
+    public String saveUser(@ModelAttribute User user, RedirectAttributes redirectAttributes) {
+        try {
+            if (user.getId() == null) {
+                // 新建用户
+                com.example.demo.dto.UserDTO userDTO = new com.example.demo.dto.UserDTO();
+                userDTO.setUsername(user.getUsername());
+                userDTO.setEmail(user.getEmail());
+                userDTO.setName(user.getName());
+                userDTO.setPhone(user.getPhone());
+                userDTO.setAge(user.getAge());
+                userDTO.setPassword(user.getPassword());
+                userService.createUser(userDTO);
+                redirectAttributes.addFlashAttribute("success", "用户创建成功");
+            } else {
+                // 更新用户基本信息
+                userService.updateUserInfo(user.getId(), user);
+                redirectAttributes.addFlashAttribute("success", "用户更新成功");
+            }
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("error", "操作失败: " + e.getMessage());
+        }
+        return "redirect:/admin/users";
+    }
+
+    /**
+     * 删除用户
+     */
+    @PostMapping("/users/delete/{id}")
+    public String deleteUser(@PathVariable Long id, RedirectAttributes redirectAttributes) {
+        try {
+            userService.deleteUser(id);
+            redirectAttributes.addFlashAttribute("success", "用户删除成功");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("error", "删除失败: " + e.getMessage());
+        }
+        return "redirect:/admin/users";
+    }
+
+    /**
+     * 批量删除用户
+     */
+    @PostMapping("/users/batch-delete")
+    public String batchDeleteUsers(@RequestParam List<Long> ids, RedirectAttributes redirectAttributes) {
+        try {
+            userService.batchDeleteUsers(ids);
+            redirectAttributes.addFlashAttribute("success", "成功删除 " + ids.size() + " 个用户");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("error", "批量删除失败: " + e.getMessage());
+        }
+        return "redirect:/admin/users";
+    }
+
+    /**
+     * 启用/禁用用户
+     */
+    @PostMapping("/users/toggle-status/{id}")
+    public String toggleUserStatus(@PathVariable Long id, RedirectAttributes redirectAttributes) {
+        try {
+            User user = userService.toggleUserStatus(id);
+            String statusText = user.getStatus() ? "启用" : "禁用";
+            redirectAttributes.addFlashAttribute("success", "用户已" + statusText);
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("error", "操作失败: " + e.getMessage());
+        }
+        return "redirect:/admin/users";
+    }
+
+    /**
+     * 重置用户密码
+     */
+    @PostMapping("/users/reset-password/{id}")
+    public String resetPassword(@PathVariable Long id, 
+                                @RequestParam String newPassword,
+                                RedirectAttributes redirectAttributes) {
+        try {
+            userService.resetPassword(id, newPassword);
+            redirectAttributes.addFlashAttribute("success", "密码重置成功");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("error", "密码重置失败: " + e.getMessage());
+        }
+        return "redirect:/admin/users";
+    }
+
+    /**
+     * 角色管理列表页面（支持分页和搜索）
      */
     @GetMapping("/roles")
-    public String roleList(Model model) {
-        List<Role> roles = roleService.getAllRoles();
-        model.addAttribute("roles", roles);
+    public String roleList(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(required = false) String keyword,
+            Model model) {
+        
+        if (keyword != null && !keyword.trim().isEmpty()) {
+            model.addAttribute("roles", roleService.searchRoles(keyword.trim(), page, size));
+            model.addAttribute("keyword", keyword);
+        } else {
+            model.addAttribute("roles", roleService.getRolesWithPaging(page, size));
+        }
+        
+        model.addAttribute("currentPage", page);
+        model.addAttribute("pageSize", size);
         model.addAttribute("activeMenu", "roles");
         model.addAttribute("pageTitle", "🎭 角色管理");
         addCurrentUserToModel(model);
@@ -86,6 +261,7 @@ public class AdminController {
             Role role = roleService.getRoleById(id)
                     .orElseThrow(() -> new RuntimeException("角色不存在"));
             model.addAttribute("role", role);
+            model.addAttribute("allPermissions", permissionService.getAllPermissions());
             model.addAttribute("activeMenu", "roles");
             model.addAttribute("pageTitle", "🎭 角色详情");
             addCurrentUserToModel(model);
@@ -102,8 +278,9 @@ public class AdminController {
     @GetMapping("/roles/new")
     public String newRole(Model model) {
         model.addAttribute("role", new Role());
+        model.addAttribute("allPermissions", permissionService.getAllPermissions());
         model.addAttribute("activeMenu", "roles");
-        model.addAttribute("pageTitle", "🎭 新建角色");
+        model.addAttribute("pageTitle", "➕ 新建角色");
         addCurrentUserToModel(model);
         return "admin/roles/form";
     }
@@ -117,8 +294,9 @@ public class AdminController {
             Role role = roleService.getRoleById(id)
                     .orElseThrow(() -> new RuntimeException("角色不存在"));
             model.addAttribute("role", role);
+            model.addAttribute("allPermissions", permissionService.getAllPermissions());
             model.addAttribute("activeMenu", "roles");
-            model.addAttribute("pageTitle", "🎭 编辑角色");
+            model.addAttribute("pageTitle", "✏️ 编辑角色");
             addCurrentUserToModel(model);
             return "admin/roles/form";
         } catch (RuntimeException e) {
@@ -131,13 +309,29 @@ public class AdminController {
      * 保存角色
      */
     @PostMapping("/roles/save")
-    public String saveRole(@ModelAttribute Role role, RedirectAttributes redirectAttributes) {
+    public String saveRole(@ModelAttribute Role role, 
+                          @RequestParam(required = false) List<Long> permissionIds,
+                          RedirectAttributes redirectAttributes) {
         try {
             if (role.getId() == null) {
-                roleService.createRole(role);
+                // 创建新角色
+                Role savedRole = roleService.createRole(role);
+                
+                // 分配权限
+                if (permissionIds != null && !permissionIds.isEmpty()) {
+                    roleService.assignPermissions(savedRole.getId(), permissionIds);
+                }
+                
                 redirectAttributes.addFlashAttribute("success", "角色创建成功");
             } else {
+                // 更新角色
                 roleService.updateRole(role.getId(), role);
+                
+                // 更新权限
+                if (permissionIds != null) {
+                    roleService.assignPermissions(role.getId(), permissionIds);
+                }
+                
                 redirectAttributes.addFlashAttribute("success", "角色更新成功");
             }
         } catch (Exception e) {
@@ -161,12 +355,53 @@ public class AdminController {
     }
 
     /**
-     * 权限管理列表页面
+     * 批量删除角色
+     */
+    @PostMapping("/roles/batch-delete")
+    public String batchDeleteRoles(@RequestParam List<Long> ids, RedirectAttributes redirectAttributes) {
+        try {
+            roleService.batchDeleteRoles(ids);
+            redirectAttributes.addFlashAttribute("success", "成功删除 " + ids.size() + " 个角色");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("error", "批量删除失败: " + e.getMessage());
+        }
+        return "redirect:/admin/roles";
+    }
+
+    /**
+     * 启用/禁用角色
+     */
+    @PostMapping("/roles/toggle-status/{id}")
+    public String toggleRoleStatus(@PathVariable Long id, RedirectAttributes redirectAttributes) {
+        try {
+            Role role = roleService.toggleRoleStatus(id);
+            String statusText = role.getStatus() ? "启用" : "禁用";
+            redirectAttributes.addFlashAttribute("success", "角色已" + statusText);
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("error", "操作失败: " + e.getMessage());
+        }
+        return "redirect:/admin/roles";
+    }
+
+    /**
+     * 权限管理列表页面（支持分页和搜索）
      */
     @GetMapping("/permissions")
-    public String permissionList(Model model) {
-        List<Permission> permissions = permissionService.getAllPermissions();
-        model.addAttribute("permissions", permissions);
+    public String permissionList(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(required = false) String keyword,
+            Model model) {
+        
+        if (keyword != null && !keyword.trim().isEmpty()) {
+            model.addAttribute("permissions", permissionService.searchPermissions(keyword.trim(), page, size));
+            model.addAttribute("keyword", keyword);
+        } else {
+            model.addAttribute("permissions", permissionService.getPermissionsWithPaging(page, size));
+        }
+        
+        model.addAttribute("currentPage", page);
+        model.addAttribute("pageSize", size);
         model.addAttribute("activeMenu", "permissions");
         model.addAttribute("pageTitle", "🔐 权限管理");
         addCurrentUserToModel(model);
@@ -198,8 +433,9 @@ public class AdminController {
     @GetMapping("/permissions/new")
     public String newPermission(Model model) {
         model.addAttribute("permission", new Permission());
+        model.addAttribute("allPermissions", permissionService.getAllPermissions());
         model.addAttribute("activeMenu", "permissions");
-        model.addAttribute("pageTitle", "🔐 新建权限");
+        model.addAttribute("pageTitle", "➕ 新建权限");
         addCurrentUserToModel(model);
         return "admin/permissions/form";
     }
@@ -213,8 +449,9 @@ public class AdminController {
             Permission permission = permissionService.getPermissionById(id)
                     .orElseThrow(() -> new RuntimeException("权限不存在"));
             model.addAttribute("permission", permission);
+            model.addAttribute("allPermissions", permissionService.getAllPermissions());
             model.addAttribute("activeMenu", "permissions");
-            model.addAttribute("pageTitle", "🔐 编辑权限");
+            model.addAttribute("pageTitle", "✏️ 编辑权限");
             addCurrentUserToModel(model);
             return "admin/permissions/form";
         } catch (RuntimeException e) {
@@ -252,6 +489,35 @@ public class AdminController {
             redirectAttributes.addFlashAttribute("success", "权限删除成功");
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("error", "删除失败: " + e.getMessage());
+        }
+        return "redirect:/admin/permissions";
+    }
+
+    /**
+     * 批量删除权限
+     */
+    @PostMapping("/permissions/batch-delete")
+    public String batchDeletePermissions(@RequestParam List<Long> ids, RedirectAttributes redirectAttributes) {
+        try {
+            permissionService.batchDeletePermissions(ids);
+            redirectAttributes.addFlashAttribute("success", "成功删除 " + ids.size() + " 个权限");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("error", "批量删除失败: " + e.getMessage());
+        }
+        return "redirect:/admin/permissions";
+    }
+
+    /**
+     * 启用/禁用权限
+     */
+    @PostMapping("/permissions/toggle-status/{id}")
+    public String togglePermissionStatus(@PathVariable Long id, RedirectAttributes redirectAttributes) {
+        try {
+            Permission permission = permissionService.togglePermissionStatus(id);
+            String statusText = permission.getStatus() ? "启用" : "禁用";
+            redirectAttributes.addFlashAttribute("success", "权限已" + statusText);
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("error", "操作失败: " + e.getMessage());
         }
         return "redirect:/admin/permissions";
     }

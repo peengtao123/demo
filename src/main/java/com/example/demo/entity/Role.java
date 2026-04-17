@@ -32,6 +32,15 @@ public class Role {
     @Column(length = 200)
     private String description;
 
+    @Column(length = 50)
+    private String icon;
+
+    @Column(nullable = false)
+    private Boolean status = true;
+
+    @Column(name = "sort_order")
+    private Integer sortOrder = 0;
+
     @CreatedDate
     @Column(updatable = false)
     private LocalDateTime createTime;
@@ -83,6 +92,30 @@ public class Role {
         this.description = description;
     }
 
+    public String getIcon() {
+        return icon;
+    }
+
+    public void setIcon(String icon) {
+        this.icon = icon;
+    }
+
+    public Boolean getStatus() {
+        return status;
+    }
+
+    public void setStatus(Boolean status) {
+        this.status = status;
+    }
+
+    public Integer getSortOrder() {
+        return sortOrder;
+    }
+
+    public void setSortOrder(Integer sortOrder) {
+        this.sortOrder = sortOrder;
+    }
+
     public LocalDateTime getCreateTime() {
         return createTime;
     }
@@ -121,6 +154,9 @@ public class Role {
                 "id=" + id +
                 ", name='" + name + '\'' +
                 ", description='" + description + '\'' +
+                ", icon='" + icon + '\'' +
+                ", status=" + status +
+                ", sortOrder=" + sortOrder +
                 ", createTime=" + createTime +
                 ", updateTime=" + updateTime +
                 '}';

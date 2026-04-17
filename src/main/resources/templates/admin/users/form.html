@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:replace="~{admin/layout :: layout(~{::title}, ~{::content})}">
+<head>
+    <title th:text="${user.id != null ? '编辑用户' : '新建用户'}">用户表单</title>
+</head>
+<body>
+    <div th:fragment="content">
+        <style>
+            .form-container {
+                max-width: 800px;
+                margin: 0 auto;
+                background: white;
+                border-radius: 12px;
+                box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+                overflow: hidden;
+            }
+            
+            .form-header {
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                color: white;
+                padding: 30px;
+                text-align: center;
+            }
+            
+            .form-header h2 {
+                margin: 0;
+                font-size: 24px;
+            }
+            
+            .form-body {
+                padding: 30px;
+            }
+            
+            .form-group {
+                margin-bottom: 20px;
+            }
+            
+            .form-group label {
+                display: block;
+                margin-bottom: 8px;
+                font-weight: 500;
+                color: #333;
+            }
+            
+            .form-group label .required {
+                color: #f44336;
+                margin-left: 3px;
+            }
+            
+            .form-control {
+                width: 100%;
+                padding: 12px 15px;
+                border: 2px solid #e0e0e0;
+                border-radius: 8px;
+                font-size: 14px;
+                transition: all 0.3s;
+                box-sizing: border-box;
+            }
+            
+            .form-control:focus {
+                outline: none;
+                border-color: #667eea;
+                box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+            }
+            
+            textarea.form-control {
+                resize: vertical;
+                min-height: 100px;
+            }
+            
+            .form-row {
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+                gap: 20px;
+            }
+            
+            .alert {
+                padding: 12px 20px;
+                margin-bottom: 20px;
+                border-radius: 8px;
+                border-left: 4px solid;
+            }
+            
+            .alert-error {
+                background: #f8d7da;
+                border-color: #dc3545;
+                color: #721c24;
+            }
+            
+            .form-actions {
+                display: flex;
+                gap: 10px;
+                justify-content: center;
+                margin-top: 30px;
+                padding-top: 20px;
+                border-top: 1px solid #eee;
+            }
+            
+            .btn {
+                padding: 12px 30px;
+                border: none;
+                border-radius: 8px;
+                cursor: pointer;
+                text-decoration: none;
+                display: inline-block;
+                font-size: 14px;
+                transition: all 0.3s;
+                font-weight: 500;
+            }
+            
+            .btn-primary {
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                color: white;
+            }
+            
+            .btn-primary:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+            }
+            
+            .btn-secondary {
+                background: #6c757d;
+                color: white;
+            }
+            
+            .btn-secondary:hover {
+                background: #5a6268;
+            }
+            
+            .help-text {
+                font-size: 12px;
+                color: #666;
+                margin-top: 5px;
+            }
+        </style>
+        
+        <div class="form-container">
+            <!-- 表单头部 -->
+            <div class="form-header">
+                <h2 th:text="${user.id != null ? '✏️ 编辑用户' : '➕ 新建用户'}">用户表单</h2>
+            </div>
+            
+            <!-- 错误提示 -->
+            <div th:if="${error}" class="alert alert-error" th:text="${error}"></div>
+            
+            <!-- 表单内容 -->
+            <div class="form-body">
+                <form th:action="@{/admin/users/save}" method="post" th:object="${user}">
+                    <input type="hidden" th:field="*{id}" />
+                    
+                    <!-- 基本信息 -->
+                    <div class="form-group">
+                        <h3 style="color: #667eea; margin-bottom: 20px;">📋 基本信息</h3>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="username">用户名 <span class="required">*</span></label>
+                                <input type="text" id="username" th:field="*{username}" class="form-control" 
+                                       placeholder="请输入用户名" required 
+                                       th:disabled="${user.id != null}" />
+                                <div class="help-text">3-50个字符，新建后不可修改</div>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="name">姓名 <span class="required">*</span></label>
+                                <input type="text" id="name" th:field="*{name}" class="form-control" 
+                                       placeholder="请输入姓名" required />
+                            </div>
+                        </div>
+                        
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="email">邮箱 <span class="required">*</span></label>
+                                <input type="email" id="email" th:field="*{email}" class="form-control" 
+                                       placeholder="请输入邮箱" required />
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="phone">电话</label>
+                                <input type="tel" id="phone" th:field="*{phone}" class="form-control" 
+                                       placeholder="请输入电话号码" />
+                            </div>
+                        </div>
+                        
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="age">年龄</label>
+                                <input type="number" id="age" th:field="*{age}" class="form-control" 
+                                       placeholder="请输入年龄" min="1" max="150" />
+                            </div>
+                            
+                            <div class="form-group" th:if="${user.id == null}">
+                                <label for="password">密码 <span class="required">*</span></label>
+                                <input type="password" id="password" name="password" class="form-control" 
+                                       placeholder="请输入密码" required 
+                                       th:unless="${user.id != null}" />
+                                <div class="help-text" th:if="${user.id == null}">至少6个字符</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 扩展信息 -->
+                    <div class="form-group">
+                        <h3 style="color: #667eea; margin-bottom: 20px; margin-top: 30px;">📝 扩展信息</h3>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="avatar">头像URL</label>
+                                <input type="url" id="avatar" th:field="*{avatar}" class="form-control" 
+                                       placeholder="请输入头像图片URL" />
+                                <div class="help-text">可选，留空将显示默认头像</div>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="remark">备注</label>
+                            <textarea id="remark" th:field="*{remark}" class="form-control" 
+                                      placeholder="请输入备注信息"></textarea>
+                        </div>
+                    </div>
+                    
+                    <!-- 操作按钮 -->
+                    <div class="form-actions">
+                        <a th:href="@{/admin/users}" class="btn btn-secondary">← 取消返回</a>
+                        <button type="submit" class="btn btn-primary">💾 保存用户</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

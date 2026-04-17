@@ -6,10 +6,45 @@
 <body>
     <div th:fragment="content">
         <style>
+            .toolbar {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                margin-bottom: 20px;
+                flex-wrap: wrap;
+                gap: 10px;
+            }
+            
+            .search-box {
+                display: flex;
+                gap: 10px;
+                flex: 1;
+                max-width: 500px;
+            }
+            
+            .search-box input {
+                flex: 1;
+                padding: 10px 15px;
+                border: 2px solid #e0e0e0;
+                border-radius: 8px;
+                font-size: 14px;
+                transition: all 0.3s;
+            }
+            
+            .search-box input:focus {
+                outline: none;
+                border-color: #667eea;
+                box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+            }
+            
             table {
                 width: 100%;
                 border-collapse: collapse;
                 margin-top: 20px;
+                background: white;
+                border-radius: 8px;
+                overflow: hidden;
+                box-shadow: 0 2px 8px rgba(0,0,0,0.1);
             }
             
             thead {
@@ -20,11 +55,11 @@
             th, td {
                 padding: 15px;
                 text-align: left;
-                border-bottom: 1px solid #ddd;
+                border-bottom: 1px solid #eee;
             }
             
             tbody tr:hover {
-                background: #f9f9f9;
+                background: #f8f9ff;
             }
             
             .badge {
@@ -35,17 +70,22 @@
                 font-weight: bold;
             }
             
-            .badge-admin {
-                background: #ff9800;
-                color: white;
-            }
-            
-            .badge-user {
+            .badge-status-enabled {
                 background: #4caf50;
                 color: white;
             }
             
-            .badge-editor {
+            .badge-status-disabled {
+                background: #f44336;
+                color: white;
+            }
+            
+            .badge-role-admin {
+                background: #ff9800;
+                color: white;
+            }
+            
+            .badge-role-user {
                 background: #2196f3;
                 color: white;
             }
@@ -59,50 +99,301 @@
                 display: inline-block;
                 font-size: 14px;
                 transition: all 0.3s;
+                margin-right: 5px;
             }
             
-            .btn-view {
+            .btn-primary {
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                color: white;
+            }
+            
+            .btn-primary:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+            }
+            
+            .btn-success {
+                background: #4caf50;
+                color: white;
+            }
+            
+            .btn-success:hover {
+                background: #45a049;
+            }
+            
+            .btn-danger {
+                background: #f44336;
+                color: white;
+            }
+            
+            .btn-danger:hover {
+                background: #da190b;
+            }
+            
+            .btn-warning {
+                background: #ff9800;
+                color: white;
+            }
+            
+            .btn-warning:hover {
+                background: #e68900;
+            }
+            
+            .btn-info {
                 background: #2196f3;
                 color: white;
             }
             
-            .btn-view:hover {
+            .btn-info:hover {
                 background: #1976d2;
+            }
+            
+            .pagination {
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                margin-top: 20px;
+                gap: 10px;
+            }
+            
+            .pagination a, .pagination span {
+                padding: 8px 16px;
+                border: 2px solid #e0e0e0;
+                border-radius: 5px;
+                text-decoration: none;
+                color: #333;
+                transition: all 0.3s;
+            }
+            
+            .pagination a:hover {
+                background: #667eea;
+                color: white;
+                border-color: #667eea;
+            }
+            
+            .pagination .active {
+                background: #667eea;
+                color: white;
+                border-color: #667eea;
+            }
+            
+            .checkbox-cell {
+                width: 40px;
+            }
+            
+            .avatar {
+                width: 40px;
+                height: 40px;
+                border-radius: 50%;
+                object-fit: cover;
+                border: 2px solid #667eea;
+            }
+            
+            .user-info {
+                display: flex;
+                align-items: center;
+                gap: 10px;
+            }
+            
+            .action-buttons {
+                display: flex;
+                gap: 5px;
+                flex-wrap: wrap;
+            }
+            
+            .alert {
+                padding: 12px 20px;
+                margin-bottom: 20px;
+                border-radius: 8px;
+                border-left: 4px solid;
+            }
+            
+            .alert-success {
+                background: #d4edda;
+                border-color: #28a745;
+                color: #155724;
+            }
+            
+            .alert-error {
+                background: #f8d7da;
+                border-color: #dc3545;
+                color: #721c24;
             }
         </style>
         
-        <table>
-            <thead>
-                <tr>
-                    <th>ID</th>
-                    <th>用户名</th>
-                    <th>姓名</th>
-                    <th>邮箱</th>
-                    <th>电话</th>
-                    <th>年龄</th>
-                    <th>角色</th>
-                    <th>操作</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr th:each="user : ${users}">
-                    <td th:text="${user.id}">1</td>
-                    <td th:text="${user.username}">admin</td>
-                    <td th:text="${user.name}">管理员</td>
-                    <td th:text="${user.email}">admin@example.com</td>
-                    <td th:text="${user.phone}">13800138000</td>
-                    <td th:text="${user.age}">30</td>
-                    <td>
-                        <span class="badge" 
-                              th:classappend="${user.role == 'ADMIN'} ? 'badge-admin' : (${user.role == 'EDITOR'} ? 'badge-editor' : 'badge-user')"
-                              th:text="${user.role}">USER</span>
-                    </td>
-                    <td>
-                        <a th:href="@{/pages/users/{id}(id=${user.id})}" class="btn btn-view">查看详情</a>
-                    </td>
-                </tr>
-            </tbody>
-        </table>
+        <!-- 消息提示 -->
+        <div th:if="${success}" class="alert alert-success" th:text="${success}"></div>
+        <div th:if="${error}" class="alert alert-error" th:text="${error}"></div>
+        
+        <!-- 工具栏 -->
+        <div class="toolbar">
+            <div class="search-box">
+                <form th:action="@{/admin/users}" method="get">
+                    <input type="text" name="keyword" placeholder="搜索用户名、姓名或邮箱..." 
+                           th:value="${keyword}" />
+                    <button type="submit" class="btn btn-primary">🔍 搜索</button>
+                    <a th:href="@{/admin/users}" class="btn btn-info">重置</a>
+                </form>
+            </div>
+            <div>
+                <a th:href="@{/admin/users/new}" class="btn btn-success">➕ 新建用户</a>
+                <button onclick="batchDelete()" class="btn btn-danger">🗑️ 批量删除</button>
+            </div>
+        </div>
+        
+        <!-- 用户列表表格 -->
+        <form id="userForm" th:action="@{/admin/users/batch-delete}" method="post">
+            <table>
+                <thead>
+                    <tr>
+                        <th class="checkbox-cell">
+                            <input type="checkbox" id="selectAll" onchange="toggleSelectAll()" />
+                        </th>
+                        <th>ID</th>
+                        <th>用户信息</th>
+                        <th>邮箱</th>
+                        <th>电话</th>
+                        <th>年龄</th>
+                        <th>状态</th>
+                        <th>注册时间</th>
+                        <th>操作</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="user : ${users.content}">
+                        <td class="checkbox-cell">
+                            <input type="checkbox" name="ids" th:value="${user.id}" class="user-checkbox" />
+                        </td>
+                        <td th:text="${user.id}">1</td>
+                        <td>
+                            <div class="user-info">
+                                <img th:if="${user.avatar}" th:src="${user.avatar}" class="avatar" alt="头像" />
+                                <div th:unless="${user.avatar}" class="avatar" 
+                                     style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); display: flex; align-items: center; justify-content: center; color: white; font-weight: bold;">
+                                    <span th:text="${#strings.substring(user.name, 0, 1)}">用</span>
+                                </div>
+                                <div>
+                                    <div><strong th:text="${user.name}">用户名</strong></div>
+                                    <div style="font-size: 12px; color: #666;" th:text="${user.username}">@username</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td th:text="${user.email}">email@example.com</td>
+                        <td th:text="${user.phone ?: '-'}">-</td>
+                        <td th:text="${user.age ?: '-'}">-</td>
+                        <td>
+                            <span class="badge" 
+                                  th:classappend="${user.status} ? 'badge-status-enabled' : 'badge-status-disabled'"
+                                  th:text="${user.status} ? '启用' : '禁用'">启用</span>
+                        </td>
+                        <td th:text="${#temporals.format(user.createTime, 'yyyy-MM-dd HH:mm')}">2024-01-01</td>
+                        <td>
+                            <div class="action-buttons">
+                                <a th:href="@{/admin/users/{id}(id=${user.id})}" class="btn btn-info">查看</a>
+                                <a th:href="@{/admin/users/edit/{id}(id=${user.id})}" class="btn btn-warning">编辑</a>
+                                <button type="button" th:onclick="'toggleStatus(' + ${user.id} + ')'" 
+                                        class="btn" 
+                                        th:classappend="${user.status} ? 'btn-warning' : 'btn-success'"
+                                        th:text="${user.status} ? '禁用' : '启用'">切换</button>
+                                <button type="button" th:onclick="'resetPassword(' + ${user.id} + ')'" 
+                                        class="btn btn-warning">重置密码</button>
+                                <button type="button" th:onclick="'deleteUser(' + ${user.id} + ')'" 
+                                        class="btn btn-danger">删除</button>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr th:if="${users.content.empty}">
+                        <td colspan="9" style="text-align: center; padding: 40px; color: #999;">
+                            暂无用户数据
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </form>
+        
+        <!-- 分页 -->
+        <div class="pagination" th:if="${users.totalPages > 0}">
+            <a th:if="${users.hasPrevious()}" 
+               th:href="@{/admin/users(page=${users.number - 1}, size=${users.size}, keyword=${keyword})}">上一页</a>
+            
+            <span th:each="i : ${#numbers.sequence(0, users.totalPages - 1)}">
+                <a th:if="${i != users.number}" 
+                   th:href="@{/admin/users(page=${i}, size=${users.size}, keyword=${keyword})}"
+                   th:text="${i + 1}">1</a>
+                <span th:if="${i == users.number}" class="active" th:text="${i + 1}">1</span>
+            </span>
+            
+            <a th:if="${users.hasNext()}" 
+               th:href="@{/admin/users(page=${users.number + 1}, size=${users.size}, keyword=${keyword})}">下一页</a>
+        </div>
+        
+        <script>
+            // 全选/取消全选
+            function toggleSelectAll() {
+                const selectAll = document.getElementById('selectAll');
+                const checkboxes = document.querySelectorAll('.user-checkbox');
+                checkboxes.forEach(cb => cb.checked = selectAll.checked);
+            }
+            
+            // 批量删除
+            function batchDelete() {
+                const checkboxes = document.querySelectorAll('.user-checkbox:checked');
+                if (checkboxes.length === 0) {
+                    alert('请至少选择一个用户');
+                    return;
+                }
+                
+                if (confirm('确定要删除选中的 ' + checkboxes.length + ' 个用户吗？')) {
+                    document.getElementById('userForm').submit();
+                }
+            }
+            
+            // 切换用户状态
+            function toggleStatus(userId) {
+                if (confirm('确定要切换该用户的状态吗？')) {
+                    const form = document.createElement('form');
+                    form.method = 'POST';
+                    form.action = '/admin/users/toggle-status/' + userId;
+                    document.body.appendChild(form);
+                    form.submit();
+                }
+            }
+            
+            // 重置密码
+            function resetPassword(userId) {
+                const newPassword = prompt('请输入新密码（至少6位）：');
+                if (!newPassword || newPassword.length < 6) {
+                    alert('密码长度不能少于6位');
+                    return;
+                }
+                
+                if (confirm('确定要重置该用户的密码吗？')) {
+                    const form = document.createElement('form');
+                    form.method = 'POST';
+                    form.action = '/admin/users/reset-password/' + userId;
+                    
+                    const input = document.createElement('input');
+                    input.type = 'hidden';
+                    input.name = 'newPassword';
+                    input.value = newPassword;
+                    
+                    form.appendChild(input);
+                    document.body.appendChild(form);
+                    form.submit();
+                }
+            }
+            
+            // 删除用户
+            function deleteUser(userId) {
+                if (confirm('确定要删除该用户吗？此操作不可恢复！')) {
+                    const form = document.createElement('form');
+                    form.method = 'POST';
+                    form.action = '/admin/users/delete/' + userId;
+                    document.body.appendChild(form);
+                    form.submit();
+                }
+            }
+        </script>
     </div>
 </body>
 </html>

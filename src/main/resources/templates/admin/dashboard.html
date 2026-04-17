@@ -84,20 +84,55 @@
         </style>
         
         <div class="stats-grid">
-            <div class="stat-card">
+            <!-- 用户统计 -->
+            <div class="stat-card" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
                 <div class="icon">👥</div>
                 <div class="number" th:text="${userCount}">0</div>
                 <div class="label">用户总数</div>
             </div>
-            <div class="stat-card">
+            <div class="stat-card" style="background: linear-gradient(135deg, #4caf50 0%, #45a049 100%);">
+                <div class="icon">✅</div>
+                <div class="number" th:text="${enabledUserCount}">0</div>
+                <div class="label">启用用户</div>
+            </div>
+            <div class="stat-card" style="background: linear-gradient(135deg, #f44336 0%, #da190b 100%);">
+                <div class="icon">❌</div>
+                <div class="number" th:text="${disabledUserCount}">0</div>
+                <div class="label">禁用用户</div>
+            </div>
+            
+            <!-- 角色统计 -->
+            <div class="stat-card" style="background: linear-gradient(135deg, #ff9800 0%, #e68900 100%);">
                 <div class="icon">🎭</div>
                 <div class="number" th:text="${roleCount}">0</div>
                 <div class="label">角色总数</div>
             </div>
-            <div class="stat-card">
+            <div class="stat-card" style="background: linear-gradient(135deg, #8bc34a 0%, #7cb342 100%);">
+                <div class="icon">✅</div>
+                <div class="number" th:text="${enabledRoleCount}">0</div>
+                <div class="label">启用角色</div>
+            </div>
+            <div class="stat-card" style="background: linear-gradient(135deg, #ff5722 0%, #e64a19 100%);">
+                <div class="icon">❌</div>
+                <div class="number" th:text="${disabledRoleCount}">0</div>
+                <div class="label">禁用角色</div>
+            </div>
+            
+            <!-- 权限统计 -->
+            <div class="stat-card" style="background: linear-gradient(135deg, #2196f3 0%, #1976d2 100%);">
                 <div class="icon">🔐</div>
                 <div class="number" th:text="${permissionCount}">0</div>
                 <div class="label">权限总数</div>
+            </div>
+            <div class="stat-card" style="background: linear-gradient(135deg, #00bcd4 0%, #0097a7 100%);">
+                <div class="icon">✅</div>
+                <div class="number" th:text="${enabledPermissionCount}">0</div>
+                <div class="label">启用权限</div>
+            </div>
+            <div class="stat-card" style="background: linear-gradient(135deg, #9c27b0 0%, #7b1fa2 100%);">
+                <div class="icon">❌</div>
+                <div class="number" th:text="${disabledPermissionCount}">0</div>
+                <div class="label">禁用权限</div>
             </div>
         </div>
         

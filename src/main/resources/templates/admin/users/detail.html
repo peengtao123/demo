@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:replace="~{admin/layout :: layout(~{::title}, ~{::content})}">
+<head>
+    <title>用户详情</title>
+</head>
+<body>
+    <div th:fragment="content">
+        <style>
+            .user-detail-card {
+                background: white;
+                border-radius: 12px;
+                box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+                overflow: hidden;
+                max-width: 900px;
+                margin: 0 auto;
+            }
+            
+            .card-header {
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                color: white;
+                padding: 30px;
+                text-align: center;
+            }
+            
+            .avatar-large {
+                width: 120px;
+                height: 120px;
+                border-radius: 50%;
+                border: 4px solid white;
+                object-fit: cover;
+                margin-bottom: 15px;
+                box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            }
+            
+            .avatar-placeholder {
+                width: 120px;
+                height: 120px;
+                border-radius: 50%;
+                border: 4px solid white;
+                margin: 0 auto 15px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 48px;
+                font-weight: bold;
+                color: white;
+                background: rgba(255,255,255,0.2);
+                box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            }
+            
+            .user-name {
+                font-size: 28px;
+                font-weight: bold;
+                margin-bottom: 5px;
+            }
+            
+            .username {
+                font-size: 16px;
+                opacity: 0.9;
+            }
+            
+            .card-body {
+                padding: 30px;
+            }
+            
+            .info-section {
+                margin-bottom: 30px;
+            }
+            
+            .section-title {
+                font-size: 18px;
+                font-weight: bold;
+                color: #333;
+                margin-bottom: 15px;
+                padding-bottom: 10px;
+                border-bottom: 2px solid #667eea;
+            }
+            
+            .info-grid {
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+                gap: 20px;
+            }
+            
+            .info-item {
+                padding: 15px;
+                background: #f8f9ff;
+                border-radius: 8px;
+                border-left: 4px solid #667eea;
+            }
+            
+            .info-label {
+                font-size: 12px;
+                color: #666;
+                margin-bottom: 5px;
+                text-transform: uppercase;
+            }
+            
+            .info-value {
+                font-size: 16px;
+                color: #333;
+                font-weight: 500;
+            }
+            
+            .badge {
+                display: inline-block;
+                padding: 6px 14px;
+                border-radius: 20px;
+                font-size: 14px;
+                font-weight: bold;
+            }
+            
+            .badge-enabled {
+                background: #4caf50;
+                color: white;
+            }
+            
+            .badge-disabled {
+                background: #f44336;
+                color: white;
+            }
+            
+            .action-buttons {
+                display: flex;
+                gap: 10px;
+                justify-content: center;
+                margin-top: 30px;
+                padding-top: 20px;
+                border-top: 1px solid #eee;
+            }
+            
+            .btn {
+                padding: 12px 24px;
+                border: none;
+                border-radius: 8px;
+                cursor: pointer;
+                text-decoration: none;
+                display: inline-block;
+                font-size: 14px;
+                transition: all 0.3s;
+                font-weight: 500;
+            }
+            
+            .btn-primary {
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                color: white;
+            }
+            
+            .btn-primary:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+            }
+            
+            .btn-warning {
+                background: #ff9800;
+                color: white;
+            }
+            
+            .btn-warning:hover {
+                background: #e68900;
+            }
+            
+            .btn-danger {
+                background: #f44336;
+                color: white;
+            }
+            
+            .btn-danger:hover {
+                background: #da190b;
+            }
+            
+            .btn-secondary {
+                background: #6c757d;
+                color: white;
+            }
+            
+            .btn-secondary:hover {
+                background: #5a6268;
+            }
+        </style>
+        
+        <div class="user-detail-card">
+            <!-- 卡片头部 -->
+            <div class="card-header">
+                <img th:if="${user.avatar}" th:src="${user.avatar}" class="avatar-large" alt="头像" />
+                <div th:unless="${user.avatar}" class="avatar-placeholder" 
+                     style="background: linear-gradient(135deg, rgba(255,255,255,0.3) 0%, rgba(255,255,255,0.1) 100%);">
+                    <span th:text="${#strings.substring(user.name, 0, 1)}">用</span>
+                </div>
+                <div class="user-name" th:text="${user.name}">用户名</div>
+                <div class="username" th:text="'@' + ${user.username}">@username</div>
+            </div>
+            
+            <!-- 卡片内容 -->
+            <div class="card-body">
+                <!-- 基本信息 -->
+                <div class="info-section">
+                    <div class="section-title">📋 基本信息</div>
+                    <div class="info-grid">
+                        <div class="info-item">
+                            <div class="info-label">用户ID</div>
+                            <div class="info-value" th:text="${user.id}">1</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">用户名</div>
+                            <div class="info-value" th:text="${user.username}">admin</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">姓名</div>
+                            <div class="info-value" th:text="${user.name}">管理员</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">邮箱</div>
+                            <div class="info-value" th:text="${user.email}">admin@example.com</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">电话</div>
+                            <div class="info-value" th:text="${user.phone ?: '未设置'}">-</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">年龄</div>
+                            <div class="info-value" th:text="${user.age ?: '未设置'}">-</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 账户状态 -->
+                <div class="info-section">
+                    <div class="section-title">🔐 账户状态</div>
+                    <div class="info-grid">
+                        <div class="info-item">
+                            <div class="info-label">账户状态</div>
+                            <div class="info-value">
+                                <span class="badge" 
+                                      th:classappend="${user.status} ? 'badge-enabled' : 'badge-disabled'"
+                                      th:text="${user.status} ? '✅ 启用' : '❌ 禁用'">启用</span>
+                            </div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">注册时间</div>
+                            <div class="info-value" th:text="${#temporals.format(user.createTime, 'yyyy-MM-dd HH:mm:ss')}">2024-01-01</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">最后更新时间</div>
+                            <div class="info-value" th:text="${#temporals.format(user.updateTime, 'yyyy-MM-dd HH:mm:ss')}">2024-01-01</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">最后登录时间</div>
+                            <div class="info-value" th:text="${user.lastLoginTime != null ? #temporals.format(user.lastLoginTime, 'yyyy-MM-dd HH:mm:ss') : '从未登录'}">-</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">最后登录IP</div>
+                            <div class="info-value" th:text="${user.lastLoginIp ?: '-'}">-</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 角色信息 -->
+                <div class="info-section" th:if="${user.roles != null and !user.roles.empty}">
+                    <div class="section-title">🎭 角色信息</div>
+                    <div class="info-grid">
+                        <div class="info-item" th:each="role : ${user.roles}">
+                            <div class="info-label">角色名称</div>
+                            <div class="info-value" th:text="${role.name}">ROLE_USER</div>
+                            <div class="info-label" style="margin-top: 10px;">角色描述</div>
+                            <div class="info-value" th:text="${role.description ?: '无描述'}">-</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 备注信息 -->
+                <div class="info-section" th:if="${user.remark}">
+                    <div class="section-title">📝 备注信息</div>
+                    <div class="info-item">
+                        <div class="info-value" th:text="${user.remark}">备注内容</div>
+                    </div>
+                </div>
+                
+                <!-- 操作按钮 -->
+                <div class="action-buttons">
+                    <a th:href="@{/admin/users}" class="btn btn-secondary">← 返回列表</a>
+                    <a th:href="@{/admin/users/edit/{id}(id=${user.id})}" class="btn btn-primary">✏️ 编辑用户</a>
+                    <button type="button" th:onclick="'toggleStatus(' + ${user.id} + ')'" 
+                            class="btn" 
+                            th:classappend="${user.status} ? 'btn-warning' : 'btn-primary'"
+                            th:text="${user.status} ? '⚠️ 禁用账户' : '✅ 启用账户'">切换状态</button>
+                    <button type="button" th:onclick="'resetPassword(' + ${user.id} + ')'" 
+                            class="btn btn-warning">🔑 重置密码</button>
+                    <button type="button" th:onclick="'deleteUser(' + ${user.id} + ')'" 
+                            class="btn btn-danger">🗑️ 删除用户</button>
+                </div>
+            </div>
+        </div>
+        
+        <script>
+            // 切换用户状态
+            function toggleStatus(userId) {
+                if (confirm('确定要切换该用户的状态吗？')) {
+                    const form = document.createElement('form');
+                    form.method = 'POST';
+                    form.action = '/admin/users/toggle-status/' + userId;
+                    document.body.appendChild(form);
+                    form.submit();
+                }
+            }
+            
+            // 重置密码
+            function resetPassword(userId) {
+                const newPassword = prompt('请输入新密码（至少6位）：');
+                if (!newPassword || newPassword.length < 6) {
+                    alert('密码长度不能少于6位');
+                    return;
+                }
+                
+                if (confirm('确定要重置该用户的密码吗？')) {
+                    const form = document.createElement('form');
+                    form.method = 'POST';
+                    form.action = '/admin/users/reset-password/' + userId;
+                    
+                    const input = document.createElement('input');
+                    input.type = 'hidden';
+                    input.name = 'newPassword';
+                    input.value = newPassword;
+                    
+                    form.appendChild(input);
+                    document.body.appendChild(form);
+                    form.submit();
+                }
+            }
+            
+            // 删除用户
+            function deleteUser(userId) {
+                if (confirm('确定要删除该用户吗？此操作不可恢复！')) {
+                    const form = document.createElement('form');
+                    form.method = 'POST';
+                    form.action = '/admin/users/delete/' + userId;
+                    document.body.appendChild(form);
+                    form.submit();
+                }
+            }
+        </script>
+    </div>
+</body>
+</html>

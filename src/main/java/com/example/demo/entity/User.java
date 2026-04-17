@@ -56,6 +56,25 @@ public class User {
     )
     private Set<Role> roles = new HashSet<>();
 
+    // 新增字段：用户状态
+    @Column(nullable = false)
+    private Boolean status = true; // true: 启用, false: 禁用
+
+    // 新增字段：头像URL
+    @Column(length = 500)
+    private String avatar;
+
+    // 新增字段：最后登录时间
+    private LocalDateTime lastLoginTime;
+
+    // 新增字段：最后登录IP
+    @Column(length = 50)
+    private String lastLoginIp;
+
+    // 新增字段：备注
+    @Column(length = 500)
+    private String remark;
+
     @CreatedDate
     @Column(updatable = false)
     private LocalDateTime createTime;
@@ -145,6 +164,46 @@ public class User {
         this.roles = roles;
     }
 
+    public Boolean getStatus() {
+        return status;
+    }
+
+    public void setStatus(Boolean status) {
+        this.status = status;
+    }
+
+    public String getAvatar() {
+        return avatar;
+    }
+
+    public void setAvatar(String avatar) {
+        this.avatar = avatar;
+    }
+
+    public LocalDateTime getLastLoginTime() {
+        return lastLoginTime;
+    }
+
+    public void setLastLoginTime(LocalDateTime lastLoginTime) {
+        this.lastLoginTime = lastLoginTime;
+    }
+
+    public String getLastLoginIp() {
+        return lastLoginIp;
+    }
+
+    public void setLastLoginIp(String lastLoginIp) {
+        this.lastLoginIp = lastLoginIp;
+    }
+
+    public String getRemark() {
+        return remark;
+    }
+
+    public void setRemark(String remark) {
+        this.remark = remark;
+    }
+
     public LocalDateTime getCreateTime() {
         return createTime;
     }
@@ -171,6 +230,7 @@ public class User {
                 ", phone='" + phone + '\'' +
                 ", age=" + age +
                 ", role='" + role + '\'' +
+                ", status=" + status +
                 ", createTime=" + createTime +
                 ", updateTime=" + updateTime +
                 '}';
