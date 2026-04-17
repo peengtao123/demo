@@ -2,6 +2,19 @@
 
 基于 Spring Boot + H2 数据库的用户管理功能演示项目。
 
+## 📚 文档导航
+
+详细的技术文档已整理至 [docs](./docs/) 目录：
+
+- **Spring Security**: [完整指南](./docs/SPRING_SECURITY_GUIDE.md) | [总结](./docs/SPRING_SECURITY_SUMMARY.md) | [快速参考](./docs/SECURITY_QUICK_REF.md)
+- **Thymeleaf**: [入门指南](./docs/THYMELEAF_README.md) | [总结](./docs/THYMELEAF_SUMMARY.md) | [快速开始](./docs/THYMELEAF_QUICKSTART.md)
+- **测试相关**: [单元测试](./docs/TEST_README.md) | [Web MVC测试](./docs/WEBMVC_TEST_README.md)
+- **其他**: [@RestController原理](./docs/RESTCONTROLLER_PRINCIPLE.md) | [帮助文档](./docs/HELP.md)
+
+更多详情请查看 [docs/README.md](./docs/README.md)
+
+---
+
 ## 技术栈
 
 - Spring Boot 4.0.5
