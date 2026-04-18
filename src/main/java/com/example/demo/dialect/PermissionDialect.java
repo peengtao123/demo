@@ -1,6 +1,5 @@
 package com.example.demo.dialect;
 
-import org.thymeleaf.context.IExpressionContext;
 import org.thymeleaf.dialect.AbstractProcessorDialect;
 import org.thymeleaf.processor.IProcessor;
 import org.thymeleaf.standard.StandardDialect;

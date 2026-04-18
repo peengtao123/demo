@@ -1,6 +1,5 @@
 package com.example.demo.service;
 
-import com.example.demo.entity.Permission;
 import com.example.demo.entity.Role;
 import com.example.demo.entity.User;
 import com.example.demo.repository.UserRepository;
@@ -12,10 +11,8 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 /**
  * 自定义用户详情服务 - 用于Spring Security认证
@@ -54,8 +51,8 @@ public class CustomUserDetailsService implements UserDetailsService {
                 authorities.add(new SimpleGrantedAuthority("ROLE_" + role.getName()));
             }
         } else {
-            // 如果没有配置角色，使用默认的role字段
-            authorities.add(new SimpleGrantedAuthority("ROLE_" + user.getRole()));
+            // 如果没有配置角色，使用默认角色 USER
+            authorities.add(new SimpleGrantedAuthority("ROLE_USER"));
         }
         
         // 这里可以添加具体权限，如果需要的话

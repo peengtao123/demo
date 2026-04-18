@@ -45,6 +45,9 @@ public class DemoTest {
         // 验证执行时间在合理范围内（例如小于1秒）
         assertTrue(stopWatch.getTotalTimeMillis() < 1000, 
                 "操作执行时间过长: " + stopWatch.getTotalTimeMillis() + "ms");
+        
+        // 使用result变量以防止编译器优化
+        assertTrue(result.length() > 0, "结果不应为空");
     }
 
     /**
@@ -66,7 +69,7 @@ public class DemoTest {
             for (int j = 0; j < 100; j++) {
                 sb.append("data");
             }
-            String result = sb.toString();
+            sb.toString();
             
             long endTime = System.nanoTime();
             long executionTime = (endTime - startTime) / 1_000_000; // 转换为毫秒

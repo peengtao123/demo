@@ -287,12 +287,23 @@ public class RoleService {
         Role updatedRole = roleRepository.save(role);
         
         // 记录审计日志
-        auditLogService.log(
+        String oldPermissionInfo = oldPermissions.stream()
+                .map(p -> p.getName() + "(" + p.getCode() + ")")
+                .sorted()
+                .collect(Collectors.joining(", "));
+        String newPermissionInfo = permissions.stream()
+                .map(p -> p.getName() + "(" + p.getCode() + ")")
+                .sorted()
+                .collect(Collectors.joining(", "));
+        
+        auditLogService.logWithChanges(
             getCurrentUser(),
             "PERMISSION_ASSIGN",
             "ROLE",
             roleId.toString(),
-            "为角色分配权限: " + role.getName() + " (权限数量: " + permissionIds.size() + ")"
+            "为角色分配权限: " + updatedRole.getName(),
+            "旧权限: [" + oldPermissionInfo + "]",
+            "新权限: [" + newPermissionInfo + "]"
         );
         
         return updatedRole;

@@ -2,10 +2,8 @@ package com.example.demo.dialect;
 
 import com.example.demo.entity.User;
 import com.example.demo.service.UserService;
-import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.web.context.request.ServletRequestAttributes;
 import org.thymeleaf.context.ITemplateContext;
 import org.thymeleaf.engine.AttributeName;
 import org.thymeleaf.model.IProcessableElementTag;

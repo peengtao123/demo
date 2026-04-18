@@ -1,7 +1,6 @@
 package com.example.demo.service;
 
 import com.example.demo.dto.UserDTO;
-import com.example.demo.entity.Role;
 import com.example.demo.entity.User;
 import com.example.demo.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,9 +16,7 @@ import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
 import java.time.LocalDateTime;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
@@ -289,12 +286,15 @@ public class UserService {
         User updatedUser = userRepository.save(existingUser);
         
         // 记录审计日志
-        auditLogService.log(
+        String newInfo = "name=" + updatedUser.getName() + ", phone=" + updatedUser.getPhone();
+        auditLogService.logWithChanges(
             getCurrentUser(),
             "UPDATE",
             "USER",
             id.toString(),
-            "更新用户基本信息: " + updatedUser.getUsername()
+            "更新用户基本信息: " + updatedUser.getUsername(),
+            oldInfo,
+            newInfo
         );
         
         return updatedUser;
@@ -426,12 +426,15 @@ public class UserService {
         User updatedUser = userRepository.save(user);
         
         // 记录审计日志
-        auditLogService.log(
+        String newInfo = "name=" + updatedUser.getName() + ", phone=" + updatedUser.getPhone();
+        auditLogService.logWithChanges(
             getCurrentUser(),
             "PROFILE_UPDATE",
             "USER",
             userId.toString(),
-            "更新个人信息"
+            "更新个人信息",
+            oldInfo,
+            newInfo
         );
         
         return updatedUser;
@@ -488,33 +491,12 @@ public class UserService {
      * @param userId 用户ID
      * @param roleIds 角色ID列表
      * @return 更新后的用户实体对象
-     * @throws RuntimeException 该方法已废弃，请使用 RoleService 分配角色
+     * @throws RuntimeException 该方法已废弃,请使用 RoleService 分配角色
      * @deprecated 请使用 RoleService 进行角色分配
      */
     public User assignRoles(Long userId, List<Long> roleIds) {
-        User user = getUserById(userId);
-        Set<Role> oldRoles = new HashSet<>(user.getRoles());
-        
-        Set<Role> roles = new HashSet<>();
-        for (Long roleId : roleIds) {
-            // 这里需要通过RoleRepository获取角色，但UserService没有注入
-            // 所以我们需要通过其他方式，或者在Controller层处理
-            throw new RuntimeException("请使用RoleService分配角色");
-        }
-        
-        user.setRoles(roles);
-        User updatedUser = userRepository.save(user);
-        
-        // 记录审计日志
-        auditLogService.log(
-            getCurrentUser(),
-            "ROLE_ASSIGN",
-            "USER",
-            userId.toString(),
-            "为用户分配角色: " + user.getUsername()
-        );
-        
-        return updatedUser;
+        // 此方法已废弃，角色分配应通过 RoleService 处理
+        throw new RuntimeException("请使用RoleService分配角色");
     }
 
     /**
