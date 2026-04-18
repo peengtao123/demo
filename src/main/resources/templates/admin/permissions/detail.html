@@ -92,6 +92,33 @@
         </div>
         
         <div class="detail-row">
+            <div class="detail-label">权限类型:</div>
+            <div class="detail-value">
+                <span th:if="${permission.type == 'MENU'}" style="background: #e8f5e9; color: #2e7d32; padding: 4px 8px; border-radius: 4px;">菜单权限</span>
+                <span th:if="${permission.type == 'BUTTON'}" style="background: #fff3e0; color: #ef6c00; padding: 4px 8px; border-radius: 4px;">按钮权限</span>
+                <span th:if="${permission.type == 'API'}" style="background: #fce4ec; color: #c2185b; padding: 4px 8px; border-radius: 4px;">接口权限</span>
+            </div>
+        </div>
+        
+        <div class="detail-row" th:if="${permission.icon != null and permission.icon != ''}">
+            <div class="detail-label">图标:</div>
+            <div class="detail-value" th:text="${permission.icon}">👥</div>
+        </div>
+        
+        <div class="detail-row">
+            <div class="detail-label">排序号:</div>
+            <div class="detail-value" th:text="${permission.sortOrder}">0</div>
+        </div>
+        
+        <div class="detail-row">
+            <div class="detail-label">状态:</div>
+            <div class="detail-value">
+                <span th:if="${permission.status}" style="color: #4caf50; font-weight: bold;">✓ 启用</span>
+                <span th:unless="${permission.status}" style="color: #f44336; font-weight: bold;">✗ 禁用</span>
+            </div>
+        </div>
+        
+        <div class="detail-row">
             <div class="detail-label">创建时间:</div>
             <div class="detail-value" th:text="${#temporals.format(permission.createTime, 'yyyy-MM-dd HH:mm:ss')}">2024-01-01</div>
         </div>

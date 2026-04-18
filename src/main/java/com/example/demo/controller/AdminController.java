@@ -740,6 +740,11 @@ public class AdminController {
             case "audit:log":
                 return "/admin/audit-logs";
             
+            // 系统管理 - 个人信息
+            case "profile:menu":
+            case "profile:view":
+                return "/admin/profile";
+            
             default:
                 return "#";
         }
@@ -769,5 +774,101 @@ public class AdminController {
             return authentication.getName();
         }
         return "anonymous";
+    }
+
+    /**
+     * 获取当前用户ID
+     */
+    private Long getCurrentUserId() {
+        String username = getCurrentUser();
+        try {
+            User user = userService.getUserByUsername(username);
+            return user.getId();
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    // ==================== 系统管理 - 个人信息 ====================
+
+    /**
+     * 个人信息页面
+     */
+    @GetMapping("/profile")
+    public String profile(Model model) {
+        try {
+            Long userId = getCurrentUserId();
+            User user = userService.getUserById(userId);
+            model.addAttribute("user", user);
+            model.addAttribute("activeMenu", "profile");
+            model.addAttribute("pageTitle", "👤 个人信息");
+            addCurrentUserToModel(model);
+            return "admin/profile/index";
+        } catch (Exception e) {
+            model.addAttribute("error", "获取用户信息失败: " + e.getMessage());
+            return "error";
+        }
+    }
+
+    /**
+     * 更新个人信息
+     */
+    @PostMapping("/profile/update")
+    public String updateProfile(
+            @RequestParam String name,
+            @RequestParam(required = false) String phone,
+            @RequestParam(required = false) Integer age,
+            @RequestParam(required = false) String avatar,
+            @RequestParam(required = false) String remark,
+            RedirectAttributes redirectAttributes) {
+        try {
+            Long userId = getCurrentUserId();
+            userService.updateCurrentUserProfile(userId, name, phone, age, avatar, remark);
+            redirectAttributes.addFlashAttribute("success", "个人信息更新成功");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("error", "更新失败: " + e.getMessage());
+        }
+        return "redirect:/admin/profile";
+    }
+
+    /**
+     * 修改密码页面
+     */
+    @GetMapping("/profile/password")
+    public String changePasswordPage(Model model) {
+        model.addAttribute("activeMenu", "profile");
+        model.addAttribute("pageTitle", "🔑 修改密码");
+        addCurrentUserToModel(model);
+        return "admin/profile/password";
+    }
+
+    /**
+     * 执行修改密码
+     */
+    @PostMapping("/profile/password/change")
+    public String changePassword(
+            @RequestParam String oldPassword,
+            @RequestParam String newPassword,
+            @RequestParam String confirmPassword,
+            RedirectAttributes redirectAttributes) {
+        try {
+            // 验证新密码一致性
+            if (!newPassword.equals(confirmPassword)) {
+                throw new RuntimeException("两次输入的新密码不一致");
+            }
+            
+            // 验证新密码长度
+            if (newPassword.length() < 6) {
+                throw new RuntimeException("新密码长度不能少于6位");
+            }
+            
+            Long userId = getCurrentUserId();
+            userService.changePassword(userId, oldPassword, newPassword);
+            redirectAttributes.addFlashAttribute("success", "密码修改成功，请重新登录");
+            return "redirect:/logout";
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("error", "修改失败: " + e.getMessage());
+            return "redirect:/admin/profile/password";
+        }
     }
 }

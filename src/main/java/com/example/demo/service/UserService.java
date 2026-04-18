@@ -1,6 +1,7 @@
 package com.example.demo.service;
 
 import com.example.demo.dto.UserDTO;
+import com.example.demo.entity.Role;
 import com.example.demo.entity.User;
 import com.example.demo.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,7 +17,9 @@ import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
 import java.time.LocalDateTime;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -300,6 +303,59 @@ public class UserService {
             "USER",
             id.toString(),
             "重置用户密码: " + user.getUsername(),
+            getClientIp()
+        );
+    }
+
+    /**
+     * 更新当前用户的个人信息
+     */
+    public User updateCurrentUserProfile(Long userId, String name, String phone, Integer age, String avatar, String remark) {
+        User user = getUserById(userId);
+        String oldInfo = "name=" + user.getName() + ", phone=" + user.getPhone();
+        
+        user.setName(name);
+        user.setPhone(phone);
+        user.setAge(age);
+        user.setAvatar(avatar);
+        user.setRemark(remark);
+        
+        User updatedUser = userRepository.save(user);
+        
+        // 记录审计日志
+        auditLogService.log(
+            getCurrentUser(),
+            "PROFILE_UPDATE",
+            "USER",
+            userId.toString(),
+            "更新个人信息"
+        );
+        
+        return updatedUser;
+    }
+
+    /**
+     * 修改当前用户密码
+     */
+    public void changePassword(Long userId, String oldPassword, String newPassword) {
+        User user = getUserById(userId);
+        
+        // 验证旧密码
+        if (!passwordEncoder.matches(oldPassword, user.getPassword())) {
+            throw new RuntimeException("原密码不正确");
+        }
+        
+        // 设置新密码
+        user.setPassword(passwordEncoder.encode(newPassword));
+        userRepository.save(user);
+        
+        // 记录审计日志
+        auditLogService.logWithIp(
+            getCurrentUser(),
+            "PASSWORD_CHANGE",
+            "USER",
+            userId.toString(),
+            "修改密码",
             getClientIp()
         );
     }

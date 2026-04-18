@@ -90,6 +90,20 @@ INSERT INTO permissions (name, code, description, icon, type, parent_id, sort_or
 VALUES ('删除日志', 'audit:delete', '删除审计日志', NULL, 'BUTTON', 
         (SELECT id FROM permissions WHERE code = 'audit:menu'), 2, true);
 
+-- ============ 系统管理菜单 ============
+
+-- 6. 系统管理菜单
+INSERT INTO permissions (name, code, description, icon, type, parent_id, sort_order, status) 
+VALUES ('系统管理', 'profile:menu', '个人信息和密码管理', 'bi-gear', 'MENU', NULL, 6, true);
+
+INSERT INTO permissions (name, code, description, icon, type, parent_id, sort_order, status) 
+VALUES ('个人信息', 'profile:view', '查看和编辑个人信息', 'bi-person', 'MENU', 
+        (SELECT id FROM permissions WHERE code = 'profile:menu'), 1, true);
+
+INSERT INTO permissions (name, code, description, icon, type, parent_id, sort_order, status) 
+VALUES ('修改密码', 'profile:password', '修改登录密码', 'bi-key', 'BUTTON', 
+        (SELECT id FROM permissions WHERE code = 'profile:menu'), 2, true);
+
 -- ============ 查询验证 ============
 -- 查看所有菜单层级结构
 SELECT 

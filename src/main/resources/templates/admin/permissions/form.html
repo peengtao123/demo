@@ -103,11 +103,56 @@
                           placeholder="请输入权限描述信息"></textarea>
             </div>
             
+            <div class="form-group">
+                <label for="type">权限类型 *</label>
+                <select id="type" th:field="*{type}" required style="width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 5px; font-size: 14px;">
+                    <option value="MENU">菜单权限</option>
+                    <option value="BUTTON">按钮权限</option>
+                    <option value="API">接口权限</option>
+                </select>
+                <div class="help-text">菜单权限用于控制菜单显示，按钮权限用于控制页面按钮，接口权限用于控制API访问</div>
+            </div>
+            
+            <div class="form-group">
+                <label for="icon">图标（仅菜单权限需要）</label>
+                <input type="text" id="icon" th:field="*{icon}" 
+                       placeholder="例如：👥、🎭、🔐" />
+                <div class="help-text">支持Emoji图标或CSS类名</div>
+            </div>
+            
+            <div class="form-group">
+                <label for="sortOrder">排序号</label>
+                <input type="number" id="sortOrder" th:field="*{sortOrder}" 
+                       placeholder="数字越小越靠前" min="0" />
+            </div>
+            
             <div class="form-actions">
                 <button type="submit" class="btn btn-primary">保存</button>
                 <a href="/admin/permissions" class="btn btn-secondary">取消</a>
             </div>
         </form>
+        
+        <script>
+            // 根据权限类型显示/隐藏图标的提示
+            document.getElementById('type').addEventListener('change', function() {
+                var iconGroup = document.getElementById('icon').closest('.form-group');
+                if (this.value === 'MENU') {
+                    iconGroup.style.display = 'block';
+                } else {
+                    iconGroup.style.display = 'none';
+                    document.getElementById('icon').value = '';
+                }
+            });
+            
+            // 初始化时检查类型
+            window.addEventListener('DOMContentLoaded', function() {
+                var typeSelect = document.getElementById('type');
+                var iconGroup = document.getElementById('icon').closest('.form-group');
+                if (typeSelect.value !== 'MENU') {
+                    iconGroup.style.display = 'none';
+                }
+            });
+        </script>
     </div>
 </body>
 </html>

@@ -299,7 +299,7 @@
                         <td>
                             <span class="badge" 
                                   th:classappend="${permission.type == 'MENU' ? 'badge-type-menu' : (permission.type == 'BUTTON' ? 'badge-type-button' : 'badge-type-api')}"
-                                  th:text="${permission.type}">MENU</span>
+                                  th:text="${permission.type == 'MENU' ? '菜单' : (permission.type == 'BUTTON' ? '按钮' : '接口')}">菜单</span>
                         </td>
                         <td>
                             <span class="badge" style="background: #ff9800; color: white;" 
