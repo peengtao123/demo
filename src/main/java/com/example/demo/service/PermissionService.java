@@ -10,7 +10,11 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
 /**
  * 权限服务类 - 提供权限相关的业务逻辑处理
@@ -114,14 +118,14 @@ public class PermissionService {
                 .orElseThrow(() -> new RuntimeException("权限不存在: " + id));
         
         // 如果修改了编码，检查新编码是否已被其他权限使用
-        if (!permission.getCode().equals(permissionDetails.getCode()) && 
-            permissionRepository.findByCode(permissionDetails.getCode()).isPresent()) {
+        if (!permission.getCode().equals(permissionDetails.getCode()) 
+            && permissionRepository.findByCode(permissionDetails.getCode()).isPresent()) {
             throw new RuntimeException("权限编码已存在: " + permissionDetails.getCode());
         }
         
         // 如果修改了名称，检查新名称是否已被其他权限使用
-        if (!permission.getName().equals(permissionDetails.getName()) && 
-            permissionRepository.findByName(permissionDetails.getName()).isPresent()) {
+        if (!permission.getName().equals(permissionDetails.getName()) 
+            && permissionRepository.findByName(permissionDetails.getName()).isPresent()) {
             throw new RuntimeException("权限名称已存在: " + permissionDetails.getName());
         }
         
@@ -264,8 +268,8 @@ public class PermissionService {
         List<Map<String, Object>> tree = new ArrayList<>();
         
         for (Permission permission : permissions) {
-            if ((parentId == null && permission.getParentId() == null) ||
-                (parentId != null && parentId.equals(permission.getParentId()))) {
+            if ((parentId == null && permission.getParentId() == null) 
+                || (parentId != null && parentId.equals(permission.getParentId()))) {
                 
                 Map<String, Object> node = new HashMap<>();
                 node.put("id", permission.getId());

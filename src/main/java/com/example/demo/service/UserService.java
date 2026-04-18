@@ -233,14 +233,14 @@ public class UserService {
         String oldInfo = existingUser.toString();
 
         // 如果修改了用户名，检查新用户名是否已被其他用户使用
-        if (!existingUser.getUsername().equals(userDTO.getUsername()) && 
-            userRepository.existsByUsername(userDTO.getUsername())) {
+        if (!existingUser.getUsername().equals(userDTO.getUsername()) 
+            && userRepository.existsByUsername(userDTO.getUsername())) {
             throw new RuntimeException("用户名已存在: " + userDTO.getUsername());
         }
 
         // 如果修改了邮箱，检查新邮箱是否已被其他用户使用
-        if (!existingUser.getEmail().equals(userDTO.getEmail()) && 
-            userRepository.existsByEmail(userDTO.getEmail())) {
+        if (!existingUser.getEmail().equals(userDTO.getEmail()) 
+            && userRepository.existsByEmail(userDTO.getEmail())) {
             throw new RuntimeException("邮箱已被注册: " + userDTO.getEmail());
         }
 

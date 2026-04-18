@@ -13,7 +13,10 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.*;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
@@ -141,8 +144,8 @@ public class RoleService {
         String oldInfo = "name=" + role.getName() + ", status=" + role.getStatus();
         
         // 如果修改了名称，检查新名称是否已被其他角色使用
-        if (!role.getName().equals(roleDetails.getName()) && 
-            roleRepository.findByName(roleDetails.getName()).isPresent()) {
+        if (!role.getName().equals(roleDetails.getName()) 
+            && roleRepository.findByName(roleDetails.getName()).isPresent()) {
             throw new RuntimeException("角色名称已存在: " + roleDetails.getName());
         }
         

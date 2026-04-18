@@ -190,6 +190,87 @@
                 <artifactId>maven-project-info-reports-plugin</artifactId>
                 <version>3.4.5</version>
             </plugin>
+            
+            <!-- Maven PMD Plugin for code quality analysis -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-pmd-plugin</artifactId>
+                <version>3.28.0</version>
+                <configuration>
+                    <!-- Java版本 -->
+                    <targetJdk>${java.version}</targetJdk>
+                    <!-- 编码格式 -->
+                    <encoding>UTF-8</encoding>
+                    <!-- 是否将失败转换为错误 -->
+                    <failurePriority>5</failurePriority>
+                    <!-- 最小令牌数，低于此数的文件将被忽略 -->
+                    <minimumTokens>100</minimumTokens>
+                    <!-- 是否包含测试代码 -->
+                    <includeTests>true</includeTests>
+                    <!-- 输出格式：xml, html, text -->
+                    <format>xml</format>
+                    <!-- 打印文件名 -->
+                    <printFailingErrors>true</printFailingErrors>
+                    <!-- 规则集配置文件 -->
+                    <rulesets>
+                        <ruleset>${project.basedir}/pmd-ruleset.xml</ruleset>
+                    </rulesets>
+                    <!-- 排除的文件 -->
+                    <excludeRoots>
+                        <excludeRoot>target/generated-sources</excludeRoot>
+                        <excludeRoot>target/generated-test-sources</excludeRoot>
+                    </excludeRoots>
+                </configuration>
+                <executions>
+                    <!-- 在verify阶段执行PMD检查 -->
+                    <execution>
+                        <id>pmd-check</id>
+                        <phase>verify</phase>
+                        <goals>
+                            <goal>check</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            
+            <!-- Maven Checkstyle Plugin for code style analysis -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-checkstyle-plugin</artifactId>
+                <version>3.6.0</version>
+                <configuration>
+                    <!-- 编码格式 -->
+                    <encoding>UTF-8</encoding>
+                    <!-- 配置文件位置 -->
+                    <configLocation>${project.basedir}/checkstyle.xml</configLocation>
+                    <!-- 控制台输出 -->
+                    <consoleOutput>true</consoleOutput>
+                    <!-- 失败时不中断构建（仅警告） -->
+                    <failsOnError>false</failsOnError>
+                    <!-- 链接 Violation 到源代码 -->
+                    <linkXRef>false</linkXRef>
+                    <!-- 排除的文件 -->
+                    <excludes>**/generated/**/*,**/target/**/*</excludes>
+                </configuration>
+                <executions>
+                    <!-- 在verify阶段执行Checkstyle检查 -->
+                    <execution>
+                        <id>checkstyle-check</id>
+                        <phase>verify</phase>
+                        <goals>
+                            <goal>check</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <dependencies>
+                    <!-- Checkstyle 核心依赖 -->
+                    <dependency>
+                        <groupId>com.puppycrawl.tools</groupId>
+                        <artifactId>checkstyle</artifactId>
+                        <version>10.21.1</version>
+                    </dependency>
+                </dependencies>
+            </plugin>
         </plugins>
     </build>
     
@@ -241,10 +322,19 @@
                 </reportSets>
             </plugin>
 
+            <!-- Maven PMD Plugin for site reports -->
             <plugin>
-                    <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-pmd-plugin</artifactId>
-                    <version>3.28.0</version>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-pmd-plugin</artifactId>
+                <version>3.28.0</version>
+                <reportSets>
+                    <reportSet>
+                        <reports>
+                            <report>pmd</report>
+                            <report>cpd</report>
+                        </reports>
+                    </reportSet>
+                </reportSets>
             </plugin>
              <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
