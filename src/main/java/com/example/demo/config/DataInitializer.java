@@ -248,7 +248,6 @@ public class DataInitializer {
                 admin.setPhone("13800138000");
                 admin.setAge(30);
                 admin.setPassword(passwordEncoder.encode("admin123"));
-                admin.setRole("ADMIN");
                 Set<Role> adminRoles = new HashSet<>();
                 adminRoles.add(adminRole);
                 admin.setRoles(adminRoles);
@@ -258,7 +257,6 @@ public class DataInitializer {
                 user1.setPhone("13800138001");
                 user1.setAge(25);
                 user1.setPassword(passwordEncoder.encode("user123"));
-                user1.setRole("USER");
                 Set<Role> user1Roles = new HashSet<>();
                 user1Roles.add(userRole);
                 user1.setRoles(user1Roles);
@@ -268,7 +266,6 @@ public class DataInitializer {
                 user2.setPhone("13800138002");
                 user2.setAge(30);
                 user2.setPassword(passwordEncoder.encode("user123"));
-                user2.setRole("USER");
                 Set<Role> user2Roles = new HashSet<>();
                 user2Roles.add(userRole);
                 user2.setRoles(user2Roles);
@@ -278,7 +275,6 @@ public class DataInitializer {
                 user3.setPhone("13800138003");
                 user3.setAge(28);
                 user3.setPassword(passwordEncoder.encode("user123"));
-                user3.setRole("EDITOR");
                 Set<Role> user3Roles = new HashSet<>();
                 user3Roles.add(editorRole);
                 user3.setRoles(user3Roles);
