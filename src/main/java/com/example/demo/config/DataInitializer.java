@@ -187,7 +187,22 @@ public class DataInitializer {
                 auditDelete.setType("BUTTON");
                 auditDelete.setSortOrder(2);
                 auditDelete.setParentId(auditMenu.getId());
-                permissionRepository.save(auditDelete);
+                permissionRepository.save(auditDelete);                
+                // --- 一级菜单：AI助手 ---
+                Permission aiMenu = new Permission("AI助手", "ai:menu", "智能对话助手");
+                aiMenu.setIcon("bi-robot");
+                aiMenu.setType("MENU");
+                aiMenu.setSortOrder(6);
+                aiMenu.setParentId(null);
+                permissionRepository.save(aiMenu);
+                
+                // 二级菜单/功能：AI聊天
+                Permission aiChat = new Permission("AI聊天", "ai:chat", "与AI进行对话");
+                aiChat.setIcon("bi-chat-dots");
+                aiChat.setType("MENU");
+                aiChat.setSortOrder(1);
+                aiChat.setParentId(aiMenu.getId());
+                permissionRepository.save(aiChat);
                 
                 System.out.println("初始化权限数据完成（包含菜单层级结构）");
                 
