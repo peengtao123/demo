@@ -16,12 +16,24 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import java.util.*;
-import java.util.stream.Collectors;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * 管理后台控制器
@@ -119,7 +131,7 @@ import java.util.Comparator;
  */
 @Controller
 @RequestMapping(&quot;/admin&quot;)
-<span class="fc" id="L122">public class AdminController {</span>
+<span class="fc" id="L134">public class AdminController {</span>
 
     @Autowired
     private UserService userService;
@@ -147,30 +159,30 @@ import java.util.Comparator;
      */
     @GetMapping(&quot;/dashboard&quot;)
     public String dashboard(Model model) {
-<span class="nc" id="L150">        long userCount = userService.getAllUsers().size();</span>
-<span class="nc" id="L151">        long enabledUserCount = userService.countEnabledUsers();</span>
-<span class="nc" id="L152">        long disabledUserCount = userService.countDisabledUsers();</span>
-<span class="nc" id="L153">        long roleCount = roleService.getAllRoles().size();</span>
-<span class="nc" id="L154">        long enabledRoleCount = roleService.countEnabledRoles();</span>
-<span class="nc" id="L155">        long disabledRoleCount = roleService.countDisabledRoles();</span>
-<span class="nc" id="L156">        long permissionCount = permissionService.getAllPermissions().size();</span>
-<span class="nc" id="L157">        long enabledPermissionCount = permissionService.countEnabledPermissions();</span>
-<span class="nc" id="L158">        long disabledPermissionCount = permissionService.countDisabledPermissions();</span>
+<span class="nc" id="L162">        long userCount = userService.getAllUsers().size();</span>
+<span class="nc" id="L163">        long enabledUserCount = userService.countEnabledUsers();</span>
+<span class="nc" id="L164">        long disabledUserCount = userService.countDisabledUsers();</span>
+<span class="nc" id="L165">        long roleCount = roleService.getAllRoles().size();</span>
+<span class="nc" id="L166">        long enabledRoleCount = roleService.countEnabledRoles();</span>
+<span class="nc" id="L167">        long disabledRoleCount = roleService.countDisabledRoles();</span>
+<span class="nc" id="L168">        long permissionCount = permissionService.getAllPermissions().size();</span>
+<span class="nc" id="L169">        long enabledPermissionCount = permissionService.countEnabledPermissions();</span>
+<span class="nc" id="L170">        long disabledPermissionCount = permissionService.countDisabledPermissions();</span>
         
-<span class="nc" id="L160">        model.addAttribute(&quot;userCount&quot;, userCount);</span>
-<span class="nc" id="L161">        model.addAttribute(&quot;enabledUserCount&quot;, enabledUserCount);</span>
-<span class="nc" id="L162">        model.addAttribute(&quot;disabledUserCount&quot;, disabledUserCount);</span>
-<span class="nc" id="L163">        model.addAttribute(&quot;roleCount&quot;, roleCount);</span>
-<span class="nc" id="L164">        model.addAttribute(&quot;enabledRoleCount&quot;, enabledRoleCount);</span>
-<span class="nc" id="L165">        model.addAttribute(&quot;disabledRoleCount&quot;, disabledRoleCount);</span>
-<span class="nc" id="L166">        model.addAttribute(&quot;permissionCount&quot;, permissionCount);</span>
-<span class="nc" id="L167">        model.addAttribute(&quot;enabledPermissionCount&quot;, enabledPermissionCount);</span>
-<span class="nc" id="L168">        model.addAttribute(&quot;disabledPermissionCount&quot;, disabledPermissionCount);</span>
-<span class="nc" id="L169">        model.addAttribute(&quot;activeMenu&quot;, &quot;dashboard&quot;);</span>
-<span class="nc" id="L170">        model.addAttribute(&quot;pageTitle&quot;, &quot;📊 管理仪表盘&quot;);</span>
-<span class="nc" id="L171">        addCurrentUserToModel(model);</span>
+<span class="nc" id="L172">        model.addAttribute(&quot;userCount&quot;, userCount);</span>
+<span class="nc" id="L173">        model.addAttribute(&quot;enabledUserCount&quot;, enabledUserCount);</span>
+<span class="nc" id="L174">        model.addAttribute(&quot;disabledUserCount&quot;, disabledUserCount);</span>
+<span class="nc" id="L175">        model.addAttribute(&quot;roleCount&quot;, roleCount);</span>
+<span class="nc" id="L176">        model.addAttribute(&quot;enabledRoleCount&quot;, enabledRoleCount);</span>
+<span class="nc" id="L177">        model.addAttribute(&quot;disabledRoleCount&quot;, disabledRoleCount);</span>
+<span class="nc" id="L178">        model.addAttribute(&quot;permissionCount&quot;, permissionCount);</span>
+<span class="nc" id="L179">        model.addAttribute(&quot;enabledPermissionCount&quot;, enabledPermissionCount);</span>
+<span class="nc" id="L180">        model.addAttribute(&quot;disabledPermissionCount&quot;, disabledPermissionCount);</span>
+<span class="nc" id="L181">        model.addAttribute(&quot;activeMenu&quot;, &quot;dashboard&quot;);</span>
+<span class="nc" id="L182">        model.addAttribute(&quot;pageTitle&quot;, &quot;📊 管理仪表盘&quot;);</span>
+<span class="nc" id="L183">        addCurrentUserToModel(model);</span>
         
-<span class="nc" id="L173">        return &quot;admin/dashboard&quot;;</span>
+<span class="nc" id="L185">        return &quot;admin/dashboard&quot;;</span>
     }
 
     /**
@@ -189,21 +201,21 @@ import java.util.Comparator;
             @RequestParam(required = false) String keyword,
             Model model) {
         
-<span class="nc bnc" id="L192" title="All 4 branches missed.">        if (keyword != null &amp;&amp; !keyword.trim().isEmpty()) {</span>
+<span class="nc bnc" id="L204" title="All 4 branches missed.">        if (keyword != null &amp;&amp; !keyword.trim().isEmpty()) {</span>
             // 搜索模式
-<span class="nc" id="L194">            model.addAttribute(&quot;users&quot;, userService.searchUsers(keyword.trim(), page, size));</span>
-<span class="nc" id="L195">            model.addAttribute(&quot;keyword&quot;, keyword);</span>
+<span class="nc" id="L206">            model.addAttribute(&quot;users&quot;, userService.searchUsers(keyword.trim(), page, size));</span>
+<span class="nc" id="L207">            model.addAttribute(&quot;keyword&quot;, keyword);</span>
         } else {
             // 普通分页模式
-<span class="nc" id="L198">            model.addAttribute(&quot;users&quot;, userService.getUsersWithPaging(page, size));</span>
+<span class="nc" id="L210">            model.addAttribute(&quot;users&quot;, userService.getUsersWithPaging(page, size));</span>
         }
         
-<span class="nc" id="L201">        model.addAttribute(&quot;currentPage&quot;, page);</span>
-<span class="nc" id="L202">        model.addAttribute(&quot;pageSize&quot;, size);</span>
-<span class="nc" id="L203">        model.addAttribute(&quot;activeMenu&quot;, &quot;users&quot;);</span>
-<span class="nc" id="L204">        model.addAttribute(&quot;pageTitle&quot;, &quot;👥 用户管理&quot;);</span>
-<span class="nc" id="L205">        addCurrentUserToModel(model);</span>
-<span class="nc" id="L206">        return &quot;admin/users/list&quot;;</span>
+<span class="nc" id="L213">        model.addAttribute(&quot;currentPage&quot;, page);</span>
+<span class="nc" id="L214">        model.addAttribute(&quot;pageSize&quot;, size);</span>
+<span class="nc" id="L215">        model.addAttribute(&quot;activeMenu&quot;, &quot;users&quot;);</span>
+<span class="nc" id="L216">        model.addAttribute(&quot;pageTitle&quot;, &quot;👥 用户管理&quot;);</span>
+<span class="nc" id="L217">        addCurrentUserToModel(model);</span>
+<span class="nc" id="L218">        return &quot;admin/users/list&quot;;</span>
     }
 
     /**
@@ -216,15 +228,15 @@ import java.util.Comparator;
     @GetMapping(&quot;/users/{id}&quot;)
     public String userDetail(@PathVariable Long id, Model model) {
         try {
-<span class="nc" id="L219">            User user = userService.getUserById(id);</span>
-<span class="nc" id="L220">            model.addAttribute(&quot;user&quot;, user);</span>
-<span class="nc" id="L221">            model.addAttribute(&quot;activeMenu&quot;, &quot;users&quot;);</span>
-<span class="nc" id="L222">            model.addAttribute(&quot;pageTitle&quot;, &quot;👤 用户详情&quot;);</span>
-<span class="nc" id="L223">            addCurrentUserToModel(model);</span>
-<span class="nc" id="L224">            return &quot;admin/users/detail&quot;;</span>
-<span class="nc" id="L225">        } catch (RuntimeException e) {</span>
-<span class="nc" id="L226">            model.addAttribute(&quot;error&quot;, &quot;用户不存在&quot;);</span>
-<span class="nc" id="L227">            return &quot;error&quot;;</span>
+<span class="nc" id="L231">            User user = userService.getUserById(id);</span>
+<span class="nc" id="L232">            model.addAttribute(&quot;user&quot;, user);</span>
+<span class="nc" id="L233">            model.addAttribute(&quot;activeMenu&quot;, &quot;users&quot;);</span>
+<span class="nc" id="L234">            model.addAttribute(&quot;pageTitle&quot;, &quot;👤 用户详情&quot;);</span>
+<span class="nc" id="L235">            addCurrentUserToModel(model);</span>
+<span class="nc" id="L236">            return &quot;admin/users/detail&quot;;</span>
+<span class="nc" id="L237">        } catch (RuntimeException e) {</span>
+<span class="nc" id="L238">            model.addAttribute(&quot;error&quot;, &quot;用户不存在&quot;);</span>
+<span class="nc" id="L239">            return &quot;error&quot;;</span>
         }
     }
 
@@ -236,12 +248,12 @@ import java.util.Comparator;
      */
     @GetMapping(&quot;/users/new&quot;)
     public String newUser(Model model) {
-<span class="nc" id="L239">        model.addAttribute(&quot;user&quot;, new User());</span>
-<span class="nc" id="L240">        model.addAttribute(&quot;roles&quot;, roleService.getAllRoles());</span>
-<span class="nc" id="L241">        model.addAttribute(&quot;activeMenu&quot;, &quot;users&quot;);</span>
-<span class="nc" id="L242">        model.addAttribute(&quot;pageTitle&quot;, &quot;➕ 新建用户&quot;);</span>
-<span class="nc" id="L243">        addCurrentUserToModel(model);</span>
-<span class="nc" id="L244">        return &quot;admin/users/form&quot;;</span>
+<span class="nc" id="L251">        model.addAttribute(&quot;user&quot;, new User());</span>
+<span class="nc" id="L252">        model.addAttribute(&quot;roles&quot;, roleService.getAllRoles());</span>
+<span class="nc" id="L253">        model.addAttribute(&quot;activeMenu&quot;, &quot;users&quot;);</span>
+<span class="nc" id="L254">        model.addAttribute(&quot;pageTitle&quot;, &quot;➕ 新建用户&quot;);</span>
+<span class="nc" id="L255">        addCurrentUserToModel(model);</span>
+<span class="nc" id="L256">        return &quot;admin/users/form&quot;;</span>
     }
 
     /**
@@ -254,16 +266,16 @@ import java.util.Comparator;
     @GetMapping(&quot;/users/edit/{id}&quot;)
     public String editUser(@PathVariable Long id, Model model) {
         try {
-<span class="nc" id="L257">            User user = userService.getUserById(id);</span>
-<span class="nc" id="L258">            model.addAttribute(&quot;user&quot;, user);</span>
-<span class="nc" id="L259">            model.addAttribute(&quot;roles&quot;, roleService.getAllRoles());</span>
-<span class="nc" id="L260">            model.addAttribute(&quot;activeMenu&quot;, &quot;users&quot;);</span>
-<span class="nc" id="L261">            model.addAttribute(&quot;pageTitle&quot;, &quot;✏️ 编辑用户&quot;);</span>
-<span class="nc" id="L262">            addCurrentUserToModel(model);</span>
-<span class="nc" id="L263">            return &quot;admin/users/form&quot;;</span>
-<span class="nc" id="L264">        } catch (RuntimeException e) {</span>
-<span class="nc" id="L265">            model.addAttribute(&quot;error&quot;, &quot;用户不存在&quot;);</span>
-<span class="nc" id="L266">            return &quot;error&quot;;</span>
+<span class="nc" id="L269">            User user = userService.getUserById(id);</span>
+<span class="nc" id="L270">            model.addAttribute(&quot;user&quot;, user);</span>
+<span class="nc" id="L271">            model.addAttribute(&quot;roles&quot;, roleService.getAllRoles());</span>
+<span class="nc" id="L272">            model.addAttribute(&quot;activeMenu&quot;, &quot;users&quot;);</span>
+<span class="nc" id="L273">            model.addAttribute(&quot;pageTitle&quot;, &quot;✏️ 编辑用户&quot;);</span>
+<span class="nc" id="L274">            addCurrentUserToModel(model);</span>
+<span class="nc" id="L275">            return &quot;admin/users/form&quot;;</span>
+<span class="nc" id="L276">        } catch (RuntimeException e) {</span>
+<span class="nc" id="L277">            model.addAttribute(&quot;error&quot;, &quot;用户不存在&quot;);</span>
+<span class="nc" id="L278">            return &quot;error&quot;;</span>
         }
     }
 
@@ -280,38 +292,38 @@ import java.util.Comparator;
                           @RequestParam(required = false) List&lt;Long&gt; roleIds,
                           RedirectAttributes redirectAttributes) {
         try {
-<span class="nc bnc" id="L283" title="All 2 branches missed.">            if (user.getId() == null) {</span>
+<span class="nc bnc" id="L295" title="All 2 branches missed.">            if (user.getId() == null) {</span>
                 // 新建用户
-<span class="nc" id="L285">                com.example.demo.dto.UserDTO userDTO = new com.example.demo.dto.UserDTO();</span>
-<span class="nc" id="L286">                userDTO.setUsername(user.getUsername());</span>
-<span class="nc" id="L287">                userDTO.setEmail(user.getEmail());</span>
-<span class="nc" id="L288">                userDTO.setName(user.getName());</span>
-<span class="nc" id="L289">                userDTO.setPhone(user.getPhone());</span>
-<span class="nc" id="L290">                userDTO.setAge(user.getAge());</span>
-<span class="nc" id="L291">                userDTO.setPassword(user.getPassword());</span>
-<span class="nc" id="L292">                User savedUser = userService.createUser(userDTO);</span>
+<span class="nc" id="L297">                com.example.demo.dto.UserDTO userDTO = new com.example.demo.dto.UserDTO();</span>
+<span class="nc" id="L298">                userDTO.setUsername(user.getUsername());</span>
+<span class="nc" id="L299">                userDTO.setEmail(user.getEmail());</span>
+<span class="nc" id="L300">                userDTO.setName(user.getName());</span>
+<span class="nc" id="L301">                userDTO.setPhone(user.getPhone());</span>
+<span class="nc" id="L302">                userDTO.setAge(user.getAge());</span>
+<span class="nc" id="L303">                userDTO.setPassword(user.getPassword());</span>
+<span class="nc" id="L304">                User savedUser = userService.createUser(userDTO);</span>
                 
                 // 分配角色
-<span class="nc bnc" id="L295" title="All 4 branches missed.">                if (roleIds != null &amp;&amp; !roleIds.isEmpty()) {</span>
-<span class="nc" id="L296">                    assignRolesToUser(savedUser.getId(), roleIds);</span>
+<span class="nc bnc" id="L307" title="All 4 branches missed.">                if (roleIds != null &amp;&amp; !roleIds.isEmpty()) {</span>
+<span class="nc" id="L308">                    assignRolesToUser(savedUser.getId(), roleIds);</span>
                 }
                 
-<span class="nc" id="L299">                redirectAttributes.addFlashAttribute(&quot;success&quot;, &quot;用户创建成功&quot;);</span>
-<span class="nc" id="L300">            } else {</span>
+<span class="nc" id="L311">                redirectAttributes.addFlashAttribute(&quot;success&quot;, &quot;用户创建成功&quot;);</span>
+<span class="nc" id="L312">            } else {</span>
                 // 更新用户基本信息
-<span class="nc" id="L302">                userService.updateUserInfo(user.getId(), user);</span>
+<span class="nc" id="L314">                userService.updateUserInfo(user.getId(), user);</span>
                 
                 // 更新角色分配
-<span class="nc bnc" id="L305" title="All 2 branches missed.">                if (roleIds != null) {</span>
-<span class="nc" id="L306">                    assignRolesToUser(user.getId(), roleIds);</span>
+<span class="nc bnc" id="L317" title="All 2 branches missed.">                if (roleIds != null) {</span>
+<span class="nc" id="L318">                    assignRolesToUser(user.getId(), roleIds);</span>
                 }
                 
-<span class="nc" id="L309">                redirectAttributes.addFlashAttribute(&quot;success&quot;, &quot;用户更新成功&quot;);</span>
+<span class="nc" id="L321">                redirectAttributes.addFlashAttribute(&quot;success&quot;, &quot;用户更新成功&quot;);</span>
             }
-<span class="nc" id="L311">        } catch (Exception e) {</span>
-<span class="nc" id="L312">            redirectAttributes.addFlashAttribute(&quot;error&quot;, &quot;操作失败: &quot; + e.getMessage());</span>
-<span class="nc" id="L313">        }</span>
-<span class="nc" id="L314">        return &quot;redirect:/admin/users&quot;;</span>
+<span class="nc" id="L323">        } catch (Exception e) {</span>
+<span class="nc" id="L324">            redirectAttributes.addFlashAttribute(&quot;error&quot;, &quot;操作失败: &quot; + e.getMessage());</span>
+<span class="nc" id="L325">        }</span>
+<span class="nc" id="L326">        return &quot;redirect:/admin/users&quot;;</span>
     }
 
     /**
@@ -321,27 +333,27 @@ import java.util.Comparator;
      * @param roleIds 角色ID列表
      */
     private void assignRolesToUser(Long userId, List&lt;Long&gt; roleIds) {
-<span class="nc" id="L324">        User user = userService.getUserById(userId);</span>
-<span class="nc" id="L325">        Set&lt;Role&gt; roles = new HashSet&lt;&gt;();</span>
+<span class="nc" id="L336">        User user = userService.getUserById(userId);</span>
+<span class="nc" id="L337">        Set&lt;Role&gt; roles = new HashSet&lt;&gt;();</span>
         
-<span class="nc bnc" id="L327" title="All 2 branches missed.">        for (Long roleId : roleIds) {</span>
-<span class="nc" id="L328">            Role role = roleService.getRoleById(roleId)</span>
-<span class="nc" id="L329">                    .orElseThrow(() -&gt; new RuntimeException(&quot;角色不存在: &quot; + roleId));</span>
-<span class="nc" id="L330">            roles.add(role);</span>
-<span class="nc" id="L331">        }</span>
+<span class="nc bnc" id="L339" title="All 2 branches missed.">        for (Long roleId : roleIds) {</span>
+<span class="nc" id="L340">            Role role = roleService.getRoleById(roleId)</span>
+<span class="nc" id="L341">                    .orElseThrow(() -&gt; new RuntimeException(&quot;角色不存在: &quot; + roleId));</span>
+<span class="nc" id="L342">            roles.add(role);</span>
+<span class="nc" id="L343">        }</span>
         
-<span class="nc" id="L333">        user.setRoles(roles);</span>
-<span class="nc" id="L334">        userRepository.save(user);</span>
+<span class="nc" id="L345">        user.setRoles(roles);</span>
+<span class="nc" id="L346">        userRepository.save(user);</span>
         
         // 记录审计日志
-<span class="nc" id="L337">        auditLogService.log(</span>
-<span class="nc" id="L338">            getCurrentUser(),</span>
+<span class="nc" id="L349">        auditLogService.log(</span>
+<span class="nc" id="L350">            getCurrentUser(),</span>
             &quot;ROLE_ASSIGN&quot;,
             &quot;USER&quot;,
-<span class="nc" id="L341">            userId.toString(),</span>
-<span class="nc" id="L342">            &quot;为用户分配角色，角色数量: &quot; + roleIds.size()</span>
+<span class="nc" id="L353">            userId.toString(),</span>
+<span class="nc" id="L354">            &quot;为用户分配角色，角色数量: &quot; + roleIds.size()</span>
         );
-<span class="nc" id="L344">    }</span>
+<span class="nc" id="L356">    }</span>
 
     /**
      * 删除用户
@@ -353,12 +365,12 @@ import java.util.Comparator;
     @PostMapping(&quot;/users/delete/{id}&quot;)
     public String deleteUser(@PathVariable Long id, RedirectAttributes redirectAttributes) {
         try {
-<span class="nc" id="L356">            userService.deleteUser(id);</span>
-<span class="nc" id="L357">            redirectAttributes.addFlashAttribute(&quot;success&quot;, &quot;用户删除成功&quot;);</span>
-<span class="nc" id="L358">        } catch (Exception e) {</span>
-<span class="nc" id="L359">            redirectAttributes.addFlashAttribute(&quot;error&quot;, &quot;删除失败: &quot; + e.getMessage());</span>
-<span class="nc" id="L360">        }</span>
-<span class="nc" id="L361">        return &quot;redirect:/admin/users&quot;;</span>
+<span class="nc" id="L368">            userService.deleteUser(id);</span>
+<span class="nc" id="L369">            redirectAttributes.addFlashAttribute(&quot;success&quot;, &quot;用户删除成功&quot;);</span>
+<span class="nc" id="L370">        } catch (Exception e) {</span>
+<span class="nc" id="L371">            redirectAttributes.addFlashAttribute(&quot;error&quot;, &quot;删除失败: &quot; + e.getMessage());</span>
+<span class="nc" id="L372">        }</span>
+<span class="nc" id="L373">        return &quot;redirect:/admin/users&quot;;</span>
     }
 
     /**
@@ -371,12 +383,12 @@ import java.util.Comparator;
     @PostMapping(&quot;/users/batch-delete&quot;)
     public String batchDeleteUsers(@RequestParam List&lt;Long&gt; ids, RedirectAttributes redirectAttributes) {
         try {
-<span class="nc" id="L374">            userService.batchDeleteUsers(ids);</span>
-<span class="nc" id="L375">            redirectAttributes.addFlashAttribute(&quot;success&quot;, &quot;成功删除 &quot; + ids.size() + &quot; 个用户&quot;);</span>
-<span class="nc" id="L376">        } catch (Exception e) {</span>
-<span class="nc" id="L377">            redirectAttributes.addFlashAttribute(&quot;error&quot;, &quot;批量删除失败: &quot; + e.getMessage());</span>
-<span class="nc" id="L378">        }</span>
-<span class="nc" id="L379">        return &quot;redirect:/admin/users&quot;;</span>
+<span class="nc" id="L386">            userService.batchDeleteUsers(ids);</span>
+<span class="nc" id="L387">            redirectAttributes.addFlashAttribute(&quot;success&quot;, &quot;成功删除 &quot; + ids.size() + &quot; 个用户&quot;);</span>
+<span class="nc" id="L388">        } catch (Exception e) {</span>
+<span class="nc" id="L389">            redirectAttributes.addFlashAttribute(&quot;error&quot;, &quot;批量删除失败: &quot; + e.getMessage());</span>
+<span class="nc" id="L390">        }</span>
+<span class="nc" id="L391">        return &quot;redirect:/admin/users&quot;;</span>
     }
 
     /**
@@ -389,13 +401,13 @@ import java.util.Comparator;
     @PostMapping(&quot;/users/toggle-status/{id}&quot;)
     public String toggleUserStatus(@PathVariable Long id, RedirectAttributes redirectAttributes) {
         try {
-<span class="nc" id="L392">            User user = userService.toggleUserStatus(id);</span>
-<span class="nc bnc" id="L393" title="All 2 branches missed.">            String statusText = user.getStatus() ? &quot;启用&quot; : &quot;禁用&quot;;</span>
-<span class="nc" id="L394">            redirectAttributes.addFlashAttribute(&quot;success&quot;, &quot;用户已&quot; + statusText);</span>
-<span class="nc" id="L395">        } catch (Exception e) {</span>
-<span class="nc" id="L396">            redirectAttributes.addFlashAttribute(&quot;error&quot;, &quot;操作失败: &quot; + e.getMessage());</span>
-<span class="nc" id="L397">        }</span>
-<span class="nc" id="L398">        return &quot;redirect:/admin/users&quot;;</span>
+<span class="nc" id="L404">            User user = userService.toggleUserStatus(id);</span>
+<span class="nc bnc" id="L405" title="All 2 branches missed.">            String statusText = user.getStatus() ? &quot;启用&quot; : &quot;禁用&quot;;</span>
+<span class="nc" id="L406">            redirectAttributes.addFlashAttribute(&quot;success&quot;, &quot;用户已&quot; + statusText);</span>
+<span class="nc" id="L407">        } catch (Exception e) {</span>
+<span class="nc" id="L408">            redirectAttributes.addFlashAttribute(&quot;error&quot;, &quot;操作失败: &quot; + e.getMessage());</span>
+<span class="nc" id="L409">        }</span>
+<span class="nc" id="L410">        return &quot;redirect:/admin/users&quot;;</span>
     }
 
     /**
@@ -411,12 +423,12 @@ import java.util.Comparator;
                                 @RequestParam String newPassword,
                                 RedirectAttributes redirectAttributes) {
         try {
-<span class="nc" id="L414">            userService.resetPassword(id, newPassword);</span>
-<span class="nc" id="L415">            redirectAttributes.addFlashAttribute(&quot;success&quot;, &quot;密码重置成功&quot;);</span>
-<span class="nc" id="L416">        } catch (Exception e) {</span>
-<span class="nc" id="L417">            redirectAttributes.addFlashAttribute(&quot;error&quot;, &quot;密码重置失败: &quot; + e.getMessage());</span>
-<span class="nc" id="L418">        }</span>
-<span class="nc" id="L419">        return &quot;redirect:/admin/users&quot;;</span>
+<span class="nc" id="L426">            userService.resetPassword(id, newPassword);</span>
+<span class="nc" id="L427">            redirectAttributes.addFlashAttribute(&quot;success&quot;, &quot;密码重置成功&quot;);</span>
+<span class="nc" id="L428">        } catch (Exception e) {</span>
+<span class="nc" id="L429">            redirectAttributes.addFlashAttribute(&quot;error&quot;, &quot;密码重置失败: &quot; + e.getMessage());</span>
+<span class="nc" id="L430">        }</span>
+<span class="nc" id="L431">        return &quot;redirect:/admin/users&quot;;</span>
     }
 
     /**
@@ -435,19 +447,19 @@ import java.util.Comparator;
             @RequestParam(required = false) String keyword,
             Model model) {
         
-<span class="nc bnc" id="L438" title="All 4 branches missed.">        if (keyword != null &amp;&amp; !keyword.trim().isEmpty()) {</span>
-<span class="nc" id="L439">            model.addAttribute(&quot;roles&quot;, roleService.searchRoles(keyword.trim(), page, size));</span>
-<span class="nc" id="L440">            model.addAttribute(&quot;keyword&quot;, keyword);</span>
+<span class="nc bnc" id="L450" title="All 4 branches missed.">        if (keyword != null &amp;&amp; !keyword.trim().isEmpty()) {</span>
+<span class="nc" id="L451">            model.addAttribute(&quot;roles&quot;, roleService.searchRoles(keyword.trim(), page, size));</span>
+<span class="nc" id="L452">            model.addAttribute(&quot;keyword&quot;, keyword);</span>
         } else {
-<span class="nc" id="L442">            model.addAttribute(&quot;roles&quot;, roleService.getRolesWithPaging(page, size));</span>
+<span class="nc" id="L454">            model.addAttribute(&quot;roles&quot;, roleService.getRolesWithPaging(page, size));</span>
         }
         
-<span class="nc" id="L445">        model.addAttribute(&quot;currentPage&quot;, page);</span>
-<span class="nc" id="L446">        model.addAttribute(&quot;pageSize&quot;, size);</span>
-<span class="nc" id="L447">        model.addAttribute(&quot;activeMenu&quot;, &quot;roles&quot;);</span>
-<span class="nc" id="L448">        model.addAttribute(&quot;pageTitle&quot;, &quot;🎭 角色管理&quot;);</span>
-<span class="nc" id="L449">        addCurrentUserToModel(model);</span>
-<span class="nc" id="L450">        return &quot;admin/roles/list&quot;;</span>
+<span class="nc" id="L457">        model.addAttribute(&quot;currentPage&quot;, page);</span>
+<span class="nc" id="L458">        model.addAttribute(&quot;pageSize&quot;, size);</span>
+<span class="nc" id="L459">        model.addAttribute(&quot;activeMenu&quot;, &quot;roles&quot;);</span>
+<span class="nc" id="L460">        model.addAttribute(&quot;pageTitle&quot;, &quot;🎭 角色管理&quot;);</span>
+<span class="nc" id="L461">        addCurrentUserToModel(model);</span>
+<span class="nc" id="L462">        return &quot;admin/roles/list&quot;;</span>
     }
 
     /**
@@ -460,17 +472,17 @@ import java.util.Comparator;
     @GetMapping(&quot;/roles/{id}&quot;)
     public String roleDetail(@PathVariable Long id, Model model) {
         try {
-<span class="nc" id="L463">            Role role = roleService.getRoleById(id)</span>
-<span class="nc" id="L464">                    .orElseThrow(() -&gt; new RuntimeException(&quot;角色不存在&quot;));</span>
-<span class="nc" id="L465">            model.addAttribute(&quot;role&quot;, role);</span>
-<span class="nc" id="L466">            model.addAttribute(&quot;allPermissions&quot;, permissionService.getAllPermissions());</span>
-<span class="nc" id="L467">            model.addAttribute(&quot;activeMenu&quot;, &quot;roles&quot;);</span>
-<span class="nc" id="L468">            model.addAttribute(&quot;pageTitle&quot;, &quot;🎭 角色详情&quot;);</span>
-<span class="nc" id="L469">            addCurrentUserToModel(model);</span>
-<span class="nc" id="L470">            return &quot;admin/roles/detail&quot;;</span>
-<span class="nc" id="L471">        } catch (RuntimeException e) {</span>
-<span class="nc" id="L472">            model.addAttribute(&quot;error&quot;, &quot;角色不存在&quot;);</span>
-<span class="nc" id="L473">            return &quot;error&quot;;</span>
+<span class="nc" id="L475">            Role role = roleService.getRoleById(id)</span>
+<span class="nc" id="L476">                    .orElseThrow(() -&gt; new RuntimeException(&quot;角色不存在&quot;));</span>
+<span class="nc" id="L477">            model.addAttribute(&quot;role&quot;, role);</span>
+<span class="nc" id="L478">            model.addAttribute(&quot;allPermissions&quot;, permissionService.getAllPermissions());</span>
+<span class="nc" id="L479">            model.addAttribute(&quot;activeMenu&quot;, &quot;roles&quot;);</span>
+<span class="nc" id="L480">            model.addAttribute(&quot;pageTitle&quot;, &quot;🎭 角色详情&quot;);</span>
+<span class="nc" id="L481">            addCurrentUserToModel(model);</span>
+<span class="nc" id="L482">            return &quot;admin/roles/detail&quot;;</span>
+<span class="nc" id="L483">        } catch (RuntimeException e) {</span>
+<span class="nc" id="L484">            model.addAttribute(&quot;error&quot;, &quot;角色不存在&quot;);</span>
+<span class="nc" id="L485">            return &quot;error&quot;;</span>
         }
     }
 
@@ -482,12 +494,12 @@ import java.util.Comparator;
      */
     @GetMapping(&quot;/roles/new&quot;)
     public String newRole(Model model) {
-<span class="nc" id="L485">        model.addAttribute(&quot;role&quot;, new Role());</span>
-<span class="nc" id="L486">        model.addAttribute(&quot;allPermissions&quot;, permissionService.getAllPermissions());</span>
-<span class="nc" id="L487">        model.addAttribute(&quot;activeMenu&quot;, &quot;roles&quot;);</span>
-<span class="nc" id="L488">        model.addAttribute(&quot;pageTitle&quot;, &quot;➕ 新建角色&quot;);</span>
-<span class="nc" id="L489">        addCurrentUserToModel(model);</span>
-<span class="nc" id="L490">        return &quot;admin/roles/form&quot;;</span>
+<span class="nc" id="L497">        model.addAttribute(&quot;role&quot;, new Role());</span>
+<span class="nc" id="L498">        model.addAttribute(&quot;allPermissions&quot;, permissionService.getAllPermissions());</span>
+<span class="nc" id="L499">        model.addAttribute(&quot;activeMenu&quot;, &quot;roles&quot;);</span>
+<span class="nc" id="L500">        model.addAttribute(&quot;pageTitle&quot;, &quot;➕ 新建角色&quot;);</span>
+<span class="nc" id="L501">        addCurrentUserToModel(model);</span>
+<span class="nc" id="L502">        return &quot;admin/roles/form&quot;;</span>
     }
 
     /**
@@ -500,17 +512,17 @@ import java.util.Comparator;
     @GetMapping(&quot;/roles/edit/{id}&quot;)
     public String editRole(@PathVariable Long id, Model model) {
         try {
-<span class="nc" id="L503">            Role role = roleService.getRoleById(id)</span>
-<span class="nc" id="L504">                    .orElseThrow(() -&gt; new RuntimeException(&quot;角色不存在&quot;));</span>
-<span class="nc" id="L505">            model.addAttribute(&quot;role&quot;, role);</span>
-<span class="nc" id="L506">            model.addAttribute(&quot;allPermissions&quot;, permissionService.getAllPermissions());</span>
-<span class="nc" id="L507">            model.addAttribute(&quot;activeMenu&quot;, &quot;roles&quot;);</span>
-<span class="nc" id="L508">            model.addAttribute(&quot;pageTitle&quot;, &quot;✏️ 编辑角色&quot;);</span>
-<span class="nc" id="L509">            addCurrentUserToModel(model);</span>
-<span class="nc" id="L510">            return &quot;admin/roles/form&quot;;</span>
-<span class="nc" id="L511">        } catch (RuntimeException e) {</span>
-<span class="nc" id="L512">            model.addAttribute(&quot;error&quot;, &quot;角色不存在&quot;);</span>
-<span class="nc" id="L513">            return &quot;error&quot;;</span>
+<span class="nc" id="L515">            Role role = roleService.getRoleById(id)</span>
+<span class="nc" id="L516">                    .orElseThrow(() -&gt; new RuntimeException(&quot;角色不存在&quot;));</span>
+<span class="nc" id="L517">            model.addAttribute(&quot;role&quot;, role);</span>
+<span class="nc" id="L518">            model.addAttribute(&quot;allPermissions&quot;, permissionService.getAllPermissions());</span>
+<span class="nc" id="L519">            model.addAttribute(&quot;activeMenu&quot;, &quot;roles&quot;);</span>
+<span class="nc" id="L520">            model.addAttribute(&quot;pageTitle&quot;, &quot;✏️ 编辑角色&quot;);</span>
+<span class="nc" id="L521">            addCurrentUserToModel(model);</span>
+<span class="nc" id="L522">            return &quot;admin/roles/form&quot;;</span>
+<span class="nc" id="L523">        } catch (RuntimeException e) {</span>
+<span class="nc" id="L524">            model.addAttribute(&quot;error&quot;, &quot;角色不存在&quot;);</span>
+<span class="nc" id="L525">            return &quot;error&quot;;</span>
         }
     }
 
@@ -527,31 +539,31 @@ import java.util.Comparator;
                           @RequestParam(required = false) List&lt;Long&gt; permissionIds,
                           RedirectAttributes redirectAttributes) {
         try {
-<span class="nc bnc" id="L530" title="All 2 branches missed.">            if (role.getId() == null) {</span>
+<span class="nc bnc" id="L542" title="All 2 branches missed.">            if (role.getId() == null) {</span>
                 // 创建新角色
-<span class="nc" id="L532">                Role savedRole = roleService.createRole(role);</span>
+<span class="nc" id="L544">                Role savedRole = roleService.createRole(role);</span>
                 
                 // 分配权限
-<span class="nc bnc" id="L535" title="All 4 branches missed.">                if (permissionIds != null &amp;&amp; !permissionIds.isEmpty()) {</span>
-<span class="nc" id="L536">                    roleService.assignPermissions(savedRole.getId(), permissionIds);</span>
+<span class="nc bnc" id="L547" title="All 4 branches missed.">                if (permissionIds != null &amp;&amp; !permissionIds.isEmpty()) {</span>
+<span class="nc" id="L548">                    roleService.assignPermissions(savedRole.getId(), permissionIds);</span>
                 }
                 
-<span class="nc" id="L539">                redirectAttributes.addFlashAttribute(&quot;success&quot;, &quot;角色创建成功&quot;);</span>
-<span class="nc" id="L540">            } else {</span>
+<span class="nc" id="L551">                redirectAttributes.addFlashAttribute(&quot;success&quot;, &quot;角色创建成功&quot;);</span>
+<span class="nc" id="L552">            } else {</span>
                 // 更新角色
-<span class="nc" id="L542">                roleService.updateRole(role.getId(), role);</span>
+<span class="nc" id="L554">                roleService.updateRole(role.getId(), role);</span>
                 
                 // 更新权限
-<span class="nc bnc" id="L545" title="All 2 branches missed.">                if (permissionIds != null) {</span>
-<span class="nc" id="L546">                    roleService.assignPermissions(role.getId(), permissionIds);</span>
+<span class="nc bnc" id="L557" title="All 2 branches missed.">                if (permissionIds != null) {</span>
+<span class="nc" id="L558">                    roleService.assignPermissions(role.getId(), permissionIds);</span>
                 }
                 
-<span class="nc" id="L549">                redirectAttributes.addFlashAttribute(&quot;success&quot;, &quot;角色更新成功&quot;);</span>
+<span class="nc" id="L561">                redirectAttributes.addFlashAttribute(&quot;success&quot;, &quot;角色更新成功&quot;);</span>
             }
-<span class="nc" id="L551">        } catch (Exception e) {</span>
-<span class="nc" id="L552">            redirectAttributes.addFlashAttribute(&quot;error&quot;, &quot;操作失败: &quot; + e.getMessage());</span>
-<span class="nc" id="L553">        }</span>
-<span class="nc" id="L554">        return &quot;redirect:/admin/roles&quot;;</span>
+<span class="nc" id="L563">        } catch (Exception e) {</span>
+<span class="nc" id="L564">            redirectAttributes.addFlashAttribute(&quot;error&quot;, &quot;操作失败: &quot; + e.getMessage());</span>
+<span class="nc" id="L565">        }</span>
+<span class="nc" id="L566">        return &quot;redirect:/admin/roles&quot;;</span>
     }
 
     /**
@@ -564,12 +576,12 @@ import java.util.Comparator;
     @PostMapping(&quot;/roles/delete/{id}&quot;)
     public String deleteRole(@PathVariable Long id, RedirectAttributes redirectAttributes) {
         try {
-<span class="nc" id="L567">            roleService.deleteRole(id);</span>
-<span class="nc" id="L568">            redirectAttributes.addFlashAttribute(&quot;success&quot;, &quot;角色删除成功&quot;);</span>
-<span class="nc" id="L569">        } catch (Exception e) {</span>
-<span class="nc" id="L570">            redirectAttributes.addFlashAttribute(&quot;error&quot;, &quot;删除失败: &quot; + e.getMessage());</span>
-<span class="nc" id="L571">        }</span>
-<span class="nc" id="L572">        return &quot;redirect:/admin/roles&quot;;</span>
+<span class="nc" id="L579">            roleService.deleteRole(id);</span>
+<span class="nc" id="L580">            redirectAttributes.addFlashAttribute(&quot;success&quot;, &quot;角色删除成功&quot;);</span>
+<span class="nc" id="L581">        } catch (Exception e) {</span>
+<span class="nc" id="L582">            redirectAttributes.addFlashAttribute(&quot;error&quot;, &quot;删除失败: &quot; + e.getMessage());</span>
+<span class="nc" id="L583">        }</span>
+<span class="nc" id="L584">        return &quot;redirect:/admin/roles&quot;;</span>
     }
 
     /**
@@ -582,12 +594,12 @@ import java.util.Comparator;
     @PostMapping(&quot;/roles/batch-delete&quot;)
     public String batchDeleteRoles(@RequestParam List&lt;Long&gt; ids, RedirectAttributes redirectAttributes) {
         try {
-<span class="nc" id="L585">            roleService.batchDeleteRoles(ids);</span>
-<span class="nc" id="L586">            redirectAttributes.addFlashAttribute(&quot;success&quot;, &quot;成功删除 &quot; + ids.size() + &quot; 个角色&quot;);</span>
-<span class="nc" id="L587">        } catch (Exception e) {</span>
-<span class="nc" id="L588">            redirectAttributes.addFlashAttribute(&quot;error&quot;, &quot;批量删除失败: &quot; + e.getMessage());</span>
-<span class="nc" id="L589">        }</span>
-<span class="nc" id="L590">        return &quot;redirect:/admin/roles&quot;;</span>
+<span class="nc" id="L597">            roleService.batchDeleteRoles(ids);</span>
+<span class="nc" id="L598">            redirectAttributes.addFlashAttribute(&quot;success&quot;, &quot;成功删除 &quot; + ids.size() + &quot; 个角色&quot;);</span>
+<span class="nc" id="L599">        } catch (Exception e) {</span>
+<span class="nc" id="L600">            redirectAttributes.addFlashAttribute(&quot;error&quot;, &quot;批量删除失败: &quot; + e.getMessage());</span>
+<span class="nc" id="L601">        }</span>
+<span class="nc" id="L602">        return &quot;redirect:/admin/roles&quot;;</span>
     }
 
     /**
@@ -600,13 +612,13 @@ import java.util.Comparator;
     @PostMapping(&quot;/roles/toggle-status/{id}&quot;)
     public String toggleRoleStatus(@PathVariable Long id, RedirectAttributes redirectAttributes) {
         try {
-<span class="nc" id="L603">            Role role = roleService.toggleRoleStatus(id);</span>
-<span class="nc bnc" id="L604" title="All 2 branches missed.">            String statusText = role.getStatus() ? &quot;启用&quot; : &quot;禁用&quot;;</span>
-<span class="nc" id="L605">            redirectAttributes.addFlashAttribute(&quot;success&quot;, &quot;角色已&quot; + statusText);</span>
-<span class="nc" id="L606">        } catch (Exception e) {</span>
-<span class="nc" id="L607">            redirectAttributes.addFlashAttribute(&quot;error&quot;, &quot;操作失败: &quot; + e.getMessage());</span>
-<span class="nc" id="L608">        }</span>
-<span class="nc" id="L609">        return &quot;redirect:/admin/roles&quot;;</span>
+<span class="nc" id="L615">            Role role = roleService.toggleRoleStatus(id);</span>
+<span class="nc bnc" id="L616" title="All 2 branches missed.">            String statusText = role.getStatus() ? &quot;启用&quot; : &quot;禁用&quot;;</span>
+<span class="nc" id="L617">            redirectAttributes.addFlashAttribute(&quot;success&quot;, &quot;角色已&quot; + statusText);</span>
+<span class="nc" id="L618">        } catch (Exception e) {</span>
+<span class="nc" id="L619">            redirectAttributes.addFlashAttribute(&quot;error&quot;, &quot;操作失败: &quot; + e.getMessage());</span>
+<span class="nc" id="L620">        }</span>
+<span class="nc" id="L621">        return &quot;redirect:/admin/roles&quot;;</span>
     }
 
     /**
@@ -625,19 +637,19 @@ import java.util.Comparator;
             @RequestParam(required = false) String keyword,
             Model model) {
         
-<span class="nc bnc" id="L628" title="All 4 branches missed.">        if (keyword != null &amp;&amp; !keyword.trim().isEmpty()) {</span>
-<span class="nc" id="L629">            model.addAttribute(&quot;permissions&quot;, permissionService.searchPermissions(keyword.trim(), page, size));</span>
-<span class="nc" id="L630">            model.addAttribute(&quot;keyword&quot;, keyword);</span>
+<span class="nc bnc" id="L640" title="All 4 branches missed.">        if (keyword != null &amp;&amp; !keyword.trim().isEmpty()) {</span>
+<span class="nc" id="L641">            model.addAttribute(&quot;permissions&quot;, permissionService.searchPermissions(keyword.trim(), page, size));</span>
+<span class="nc" id="L642">            model.addAttribute(&quot;keyword&quot;, keyword);</span>
         } else {
-<span class="nc" id="L632">            model.addAttribute(&quot;permissions&quot;, permissionService.getPermissionsWithPaging(page, size));</span>
+<span class="nc" id="L644">            model.addAttribute(&quot;permissions&quot;, permissionService.getPermissionsWithPaging(page, size));</span>
         }
         
-<span class="nc" id="L635">        model.addAttribute(&quot;currentPage&quot;, page);</span>
-<span class="nc" id="L636">        model.addAttribute(&quot;pageSize&quot;, size);</span>
-<span class="nc" id="L637">        model.addAttribute(&quot;activeMenu&quot;, &quot;permissions&quot;);</span>
-<span class="nc" id="L638">        model.addAttribute(&quot;pageTitle&quot;, &quot;🔐 权限管理&quot;);</span>
-<span class="nc" id="L639">        addCurrentUserToModel(model);</span>
-<span class="nc" id="L640">        return &quot;admin/permissions/list&quot;;</span>
+<span class="nc" id="L647">        model.addAttribute(&quot;currentPage&quot;, page);</span>
+<span class="nc" id="L648">        model.addAttribute(&quot;pageSize&quot;, size);</span>
+<span class="nc" id="L649">        model.addAttribute(&quot;activeMenu&quot;, &quot;permissions&quot;);</span>
+<span class="nc" id="L650">        model.addAttribute(&quot;pageTitle&quot;, &quot;🔐 权限管理&quot;);</span>
+<span class="nc" id="L651">        addCurrentUserToModel(model);</span>
+<span class="nc" id="L652">        return &quot;admin/permissions/list&quot;;</span>
     }
 
     /**
@@ -650,16 +662,16 @@ import java.util.Comparator;
     @GetMapping(&quot;/permissions/{id}&quot;)
     public String permissionDetail(@PathVariable Long id, Model model) {
         try {
-<span class="nc" id="L653">            Permission permission = permissionService.getPermissionById(id)</span>
-<span class="nc" id="L654">                    .orElseThrow(() -&gt; new RuntimeException(&quot;权限不存在&quot;));</span>
-<span class="nc" id="L655">            model.addAttribute(&quot;permission&quot;, permission);</span>
-<span class="nc" id="L656">            model.addAttribute(&quot;activeMenu&quot;, &quot;permissions&quot;);</span>
-<span class="nc" id="L657">            model.addAttribute(&quot;pageTitle&quot;, &quot;🔐 权限详情&quot;);</span>
-<span class="nc" id="L658">            addCurrentUserToModel(model);</span>
-<span class="nc" id="L659">            return &quot;admin/permissions/detail&quot;;</span>
-<span class="nc" id="L660">        } catch (RuntimeException e) {</span>
-<span class="nc" id="L661">            model.addAttribute(&quot;error&quot;, &quot;权限不存在&quot;);</span>
-<span class="nc" id="L662">            return &quot;error&quot;;</span>
+<span class="nc" id="L665">            Permission permission = permissionService.getPermissionById(id)</span>
+<span class="nc" id="L666">                    .orElseThrow(() -&gt; new RuntimeException(&quot;权限不存在&quot;));</span>
+<span class="nc" id="L667">            model.addAttribute(&quot;permission&quot;, permission);</span>
+<span class="nc" id="L668">            model.addAttribute(&quot;activeMenu&quot;, &quot;permissions&quot;);</span>
+<span class="nc" id="L669">            model.addAttribute(&quot;pageTitle&quot;, &quot;🔐 权限详情&quot;);</span>
+<span class="nc" id="L670">            addCurrentUserToModel(model);</span>
+<span class="nc" id="L671">            return &quot;admin/permissions/detail&quot;;</span>
+<span class="nc" id="L672">        } catch (RuntimeException e) {</span>
+<span class="nc" id="L673">            model.addAttribute(&quot;error&quot;, &quot;权限不存在&quot;);</span>
+<span class="nc" id="L674">            return &quot;error&quot;;</span>
         }
     }
 
@@ -671,12 +683,12 @@ import java.util.Comparator;
      */
     @GetMapping(&quot;/permissions/new&quot;)
     public String newPermission(Model model) {
-<span class="nc" id="L674">        model.addAttribute(&quot;permission&quot;, new Permission());</span>
-<span class="nc" id="L675">        model.addAttribute(&quot;allPermissions&quot;, permissionService.getAllPermissions());</span>
-<span class="nc" id="L676">        model.addAttribute(&quot;activeMenu&quot;, &quot;permissions&quot;);</span>
-<span class="nc" id="L677">        model.addAttribute(&quot;pageTitle&quot;, &quot;➕ 新建权限&quot;);</span>
-<span class="nc" id="L678">        addCurrentUserToModel(model);</span>
-<span class="nc" id="L679">        return &quot;admin/permissions/form&quot;;</span>
+<span class="nc" id="L686">        model.addAttribute(&quot;permission&quot;, new Permission());</span>
+<span class="nc" id="L687">        model.addAttribute(&quot;allPermissions&quot;, permissionService.getAllPermissions());</span>
+<span class="nc" id="L688">        model.addAttribute(&quot;activeMenu&quot;, &quot;permissions&quot;);</span>
+<span class="nc" id="L689">        model.addAttribute(&quot;pageTitle&quot;, &quot;➕ 新建权限&quot;);</span>
+<span class="nc" id="L690">        addCurrentUserToModel(model);</span>
+<span class="nc" id="L691">        return &quot;admin/permissions/form&quot;;</span>
     }
 
     /**
@@ -689,17 +701,17 @@ import java.util.Comparator;
     @GetMapping(&quot;/permissions/edit/{id}&quot;)
     public String editPermission(@PathVariable Long id, Model model) {
         try {
-<span class="nc" id="L692">            Permission permission = permissionService.getPermissionById(id)</span>
-<span class="nc" id="L693">                    .orElseThrow(() -&gt; new RuntimeException(&quot;权限不存在&quot;));</span>
-<span class="nc" id="L694">            model.addAttribute(&quot;permission&quot;, permission);</span>
-<span class="nc" id="L695">            model.addAttribute(&quot;allPermissions&quot;, permissionService.getAllPermissions());</span>
-<span class="nc" id="L696">            model.addAttribute(&quot;activeMenu&quot;, &quot;permissions&quot;);</span>
-<span class="nc" id="L697">            model.addAttribute(&quot;pageTitle&quot;, &quot;✏️ 编辑权限&quot;);</span>
-<span class="nc" id="L698">            addCurrentUserToModel(model);</span>
-<span class="nc" id="L699">            return &quot;admin/permissions/form&quot;;</span>
-<span class="nc" id="L700">        } catch (RuntimeException e) {</span>
-<span class="nc" id="L701">            model.addAttribute(&quot;error&quot;, &quot;权限不存在&quot;);</span>
-<span class="nc" id="L702">            return &quot;error&quot;;</span>
+<span class="nc" id="L704">            Permission permission = permissionService.getPermissionById(id)</span>
+<span class="nc" id="L705">                    .orElseThrow(() -&gt; new RuntimeException(&quot;权限不存在&quot;));</span>
+<span class="nc" id="L706">            model.addAttribute(&quot;permission&quot;, permission);</span>
+<span class="nc" id="L707">            model.addAttribute(&quot;allPermissions&quot;, permissionService.getAllPermissions());</span>
+<span class="nc" id="L708">            model.addAttribute(&quot;activeMenu&quot;, &quot;permissions&quot;);</span>
+<span class="nc" id="L709">            model.addAttribute(&quot;pageTitle&quot;, &quot;✏️ 编辑权限&quot;);</span>
+<span class="nc" id="L710">            addCurrentUserToModel(model);</span>
+<span class="nc" id="L711">            return &quot;admin/permissions/form&quot;;</span>
+<span class="nc" id="L712">        } catch (RuntimeException e) {</span>
+<span class="nc" id="L713">            model.addAttribute(&quot;error&quot;, &quot;权限不存在&quot;);</span>
+<span class="nc" id="L714">            return &quot;error&quot;;</span>
         }
     }
 
@@ -713,17 +725,17 @@ import java.util.Comparator;
     @PostMapping(&quot;/permissions/save&quot;)
     public String savePermission(@ModelAttribute Permission permission, RedirectAttributes redirectAttributes) {
         try {
-<span class="nc bnc" id="L716" title="All 2 branches missed.">            if (permission.getId() == null) {</span>
-<span class="nc" id="L717">                permissionService.createPermission(permission);</span>
-<span class="nc" id="L718">                redirectAttributes.addFlashAttribute(&quot;success&quot;, &quot;权限创建成功&quot;);</span>
+<span class="nc bnc" id="L728" title="All 2 branches missed.">            if (permission.getId() == null) {</span>
+<span class="nc" id="L729">                permissionService.createPermission(permission);</span>
+<span class="nc" id="L730">                redirectAttributes.addFlashAttribute(&quot;success&quot;, &quot;权限创建成功&quot;);</span>
             } else {
-<span class="nc" id="L720">                permissionService.updatePermission(permission.getId(), permission);</span>
-<span class="nc" id="L721">                redirectAttributes.addFlashAttribute(&quot;success&quot;, &quot;权限更新成功&quot;);</span>
+<span class="nc" id="L732">                permissionService.updatePermission(permission.getId(), permission);</span>
+<span class="nc" id="L733">                redirectAttributes.addFlashAttribute(&quot;success&quot;, &quot;权限更新成功&quot;);</span>
             }
-<span class="nc" id="L723">        } catch (Exception e) {</span>
-<span class="nc" id="L724">            redirectAttributes.addFlashAttribute(&quot;error&quot;, &quot;操作失败: &quot; + e.getMessage());</span>
-<span class="nc" id="L725">        }</span>
-<span class="nc" id="L726">        return &quot;redirect:/admin/permissions&quot;;</span>
+<span class="nc" id="L735">        } catch (Exception e) {</span>
+<span class="nc" id="L736">            redirectAttributes.addFlashAttribute(&quot;error&quot;, &quot;操作失败: &quot; + e.getMessage());</span>
+<span class="nc" id="L737">        }</span>
+<span class="nc" id="L738">        return &quot;redirect:/admin/permissions&quot;;</span>
     }
 
     /**
@@ -736,12 +748,12 @@ import java.util.Comparator;
     @PostMapping(&quot;/permissions/delete/{id}&quot;)
     public String deletePermission(@PathVariable Long id, RedirectAttributes redirectAttributes) {
         try {
-<span class="nc" id="L739">            permissionService.deletePermission(id);</span>
-<span class="nc" id="L740">            redirectAttributes.addFlashAttribute(&quot;success&quot;, &quot;权限删除成功&quot;);</span>
-<span class="nc" id="L741">        } catch (Exception e) {</span>
-<span class="nc" id="L742">            redirectAttributes.addFlashAttribute(&quot;error&quot;, &quot;删除失败: &quot; + e.getMessage());</span>
-<span class="nc" id="L743">        }</span>
-<span class="nc" id="L744">        return &quot;redirect:/admin/permissions&quot;;</span>
+<span class="nc" id="L751">            permissionService.deletePermission(id);</span>
+<span class="nc" id="L752">            redirectAttributes.addFlashAttribute(&quot;success&quot;, &quot;权限删除成功&quot;);</span>
+<span class="nc" id="L753">        } catch (Exception e) {</span>
+<span class="nc" id="L754">            redirectAttributes.addFlashAttribute(&quot;error&quot;, &quot;删除失败: &quot; + e.getMessage());</span>
+<span class="nc" id="L755">        }</span>
+<span class="nc" id="L756">        return &quot;redirect:/admin/permissions&quot;;</span>
     }
 
     /**
@@ -754,12 +766,12 @@ import java.util.Comparator;
     @PostMapping(&quot;/permissions/batch-delete&quot;)
     public String batchDeletePermissions(@RequestParam List&lt;Long&gt; ids, RedirectAttributes redirectAttributes) {
         try {
-<span class="nc" id="L757">            permissionService.batchDeletePermissions(ids);</span>
-<span class="nc" id="L758">            redirectAttributes.addFlashAttribute(&quot;success&quot;, &quot;成功删除 &quot; + ids.size() + &quot; 个权限&quot;);</span>
-<span class="nc" id="L759">        } catch (Exception e) {</span>
-<span class="nc" id="L760">            redirectAttributes.addFlashAttribute(&quot;error&quot;, &quot;批量删除失败: &quot; + e.getMessage());</span>
-<span class="nc" id="L761">        }</span>
-<span class="nc" id="L762">        return &quot;redirect:/admin/permissions&quot;;</span>
+<span class="nc" id="L769">            permissionService.batchDeletePermissions(ids);</span>
+<span class="nc" id="L770">            redirectAttributes.addFlashAttribute(&quot;success&quot;, &quot;成功删除 &quot; + ids.size() + &quot; 个权限&quot;);</span>
+<span class="nc" id="L771">        } catch (Exception e) {</span>
+<span class="nc" id="L772">            redirectAttributes.addFlashAttribute(&quot;error&quot;, &quot;批量删除失败: &quot; + e.getMessage());</span>
+<span class="nc" id="L773">        }</span>
+<span class="nc" id="L774">        return &quot;redirect:/admin/permissions&quot;;</span>
     }
 
     /**
@@ -772,13 +784,13 @@ import java.util.Comparator;
     @PostMapping(&quot;/permissions/toggle-status/{id}&quot;)
     public String togglePermissionStatus(@PathVariable Long id, RedirectAttributes redirectAttributes) {
         try {
-<span class="nc" id="L775">            Permission permission = permissionService.togglePermissionStatus(id);</span>
-<span class="nc bnc" id="L776" title="All 2 branches missed.">            String statusText = permission.getStatus() ? &quot;启用&quot; : &quot;禁用&quot;;</span>
-<span class="nc" id="L777">            redirectAttributes.addFlashAttribute(&quot;success&quot;, &quot;权限已&quot; + statusText);</span>
-<span class="nc" id="L778">        } catch (Exception e) {</span>
-<span class="nc" id="L779">            redirectAttributes.addFlashAttribute(&quot;error&quot;, &quot;操作失败: &quot; + e.getMessage());</span>
-<span class="nc" id="L780">        }</span>
-<span class="nc" id="L781">        return &quot;redirect:/admin/permissions&quot;;</span>
+<span class="nc" id="L787">            Permission permission = permissionService.togglePermissionStatus(id);</span>
+<span class="nc bnc" id="L788" title="All 2 branches missed.">            String statusText = permission.getStatus() ? &quot;启用&quot; : &quot;禁用&quot;;</span>
+<span class="nc" id="L789">            redirectAttributes.addFlashAttribute(&quot;success&quot;, &quot;权限已&quot; + statusText);</span>
+<span class="nc" id="L790">        } catch (Exception e) {</span>
+<span class="nc" id="L791">            redirectAttributes.addFlashAttribute(&quot;error&quot;, &quot;操作失败: &quot; + e.getMessage());</span>
+<span class="nc" id="L792">        }</span>
+<span class="nc" id="L793">        return &quot;redirect:/admin/permissions&quot;;</span>
     }
 
     /**
@@ -803,27 +815,27 @@ import java.util.Comparator;
         
         Page&lt;AuditLog&gt; logs;
         
-<span class="nc bnc" id="L806" title="All 4 branches missed.">        if (operator != null &amp;&amp; !operator.isEmpty()) {</span>
-<span class="nc" id="L807">            logs = auditLogService.findByOperator(operator, page, size);</span>
-<span class="nc bnc" id="L808" title="All 4 branches missed.">        } else if (operationType != null &amp;&amp; !operationType.isEmpty()) {</span>
-<span class="nc" id="L809">            logs = auditLogService.findByOperationType(operationType, page, size);</span>
-<span class="nc bnc" id="L810" title="All 4 branches missed.">        } else if (targetType != null &amp;&amp; !targetType.isEmpty()) {</span>
-<span class="nc" id="L811">            logs = auditLogService.findByTargetType(targetType, page, size);</span>
+<span class="nc bnc" id="L818" title="All 4 branches missed.">        if (operator != null &amp;&amp; !operator.isEmpty()) {</span>
+<span class="nc" id="L819">            logs = auditLogService.findByOperator(operator, page, size);</span>
+<span class="nc bnc" id="L820" title="All 4 branches missed.">        } else if (operationType != null &amp;&amp; !operationType.isEmpty()) {</span>
+<span class="nc" id="L821">            logs = auditLogService.findByOperationType(operationType, page, size);</span>
+<span class="nc bnc" id="L822" title="All 4 branches missed.">        } else if (targetType != null &amp;&amp; !targetType.isEmpty()) {</span>
+<span class="nc" id="L823">            logs = auditLogService.findByTargetType(targetType, page, size);</span>
         } else {
-<span class="nc" id="L813">            logs = auditLogService.getAuditLogs(page, size);</span>
+<span class="nc" id="L825">            logs = auditLogService.getAuditLogs(page, size);</span>
         }
         
-<span class="nc" id="L816">        model.addAttribute(&quot;logs&quot;, logs);</span>
-<span class="nc" id="L817">        model.addAttribute(&quot;currentPage&quot;, page);</span>
-<span class="nc" id="L818">        model.addAttribute(&quot;pageSize&quot;, size);</span>
-<span class="nc" id="L819">        model.addAttribute(&quot;operator&quot;, operator);</span>
-<span class="nc" id="L820">        model.addAttribute(&quot;operationType&quot;, operationType);</span>
-<span class="nc" id="L821">        model.addAttribute(&quot;targetType&quot;, targetType);</span>
-<span class="nc" id="L822">        model.addAttribute(&quot;activeMenu&quot;, &quot;audit&quot;);</span>
-<span class="nc" id="L823">        model.addAttribute(&quot;pageTitle&quot;, &quot;审计日志&quot;);</span>
-<span class="nc" id="L824">        model.addAttribute(&quot;currentUsername&quot;, getCurrentUser());</span>
+<span class="nc" id="L828">        model.addAttribute(&quot;logs&quot;, logs);</span>
+<span class="nc" id="L829">        model.addAttribute(&quot;currentPage&quot;, page);</span>
+<span class="nc" id="L830">        model.addAttribute(&quot;pageSize&quot;, size);</span>
+<span class="nc" id="L831">        model.addAttribute(&quot;operator&quot;, operator);</span>
+<span class="nc" id="L832">        model.addAttribute(&quot;operationType&quot;, operationType);</span>
+<span class="nc" id="L833">        model.addAttribute(&quot;targetType&quot;, targetType);</span>
+<span class="nc" id="L834">        model.addAttribute(&quot;activeMenu&quot;, &quot;audit&quot;);</span>
+<span class="nc" id="L835">        model.addAttribute(&quot;pageTitle&quot;, &quot;审计日志&quot;);</span>
+<span class="nc" id="L836">        model.addAttribute(&quot;currentUsername&quot;, getCurrentUser());</span>
         
-<span class="nc" id="L826">        return &quot;admin/audit/logs&quot;;</span>
+<span class="nc" id="L838">        return &quot;admin/audit/logs&quot;;</span>
     }
     
     /**
@@ -836,12 +848,12 @@ import java.util.Comparator;
     @PostMapping(&quot;/audit-logs/delete/{id}&quot;)
     public String deleteAuditLog(@PathVariable Long id, RedirectAttributes redirectAttributes) {
         try {
-<span class="nc" id="L839">            auditLogRepository.deleteById(id);</span>
-<span class="nc" id="L840">            redirectAttributes.addFlashAttribute(&quot;success&quot;, &quot;日志删除成功&quot;);</span>
-<span class="nc" id="L841">        } catch (Exception e) {</span>
-<span class="nc" id="L842">            redirectAttributes.addFlashAttribute(&quot;error&quot;, &quot;删除失败: &quot; + e.getMessage());</span>
-<span class="nc" id="L843">        }</span>
-<span class="nc" id="L844">        return &quot;redirect:/admin/audit-logs&quot;;</span>
+<span class="nc" id="L851">            auditLogRepository.deleteById(id);</span>
+<span class="nc" id="L852">            redirectAttributes.addFlashAttribute(&quot;success&quot;, &quot;日志删除成功&quot;);</span>
+<span class="nc" id="L853">        } catch (Exception e) {</span>
+<span class="nc" id="L854">            redirectAttributes.addFlashAttribute(&quot;error&quot;, &quot;删除失败: &quot; + e.getMessage());</span>
+<span class="nc" id="L855">        }</span>
+<span class="nc" id="L856">        return &quot;redirect:/admin/audit-logs&quot;;</span>
     }
     
     /**
@@ -854,12 +866,12 @@ import java.util.Comparator;
     @PostMapping(&quot;/audit-logs/batch-delete&quot;)
     public String batchDeleteAuditLogs(@RequestParam List&lt;Long&gt; ids, RedirectAttributes redirectAttributes) {
         try {
-<span class="nc" id="L857">            auditLogRepository.deleteAllById(ids);</span>
-<span class="nc" id="L858">            redirectAttributes.addFlashAttribute(&quot;success&quot;, &quot;成功删除 &quot; + ids.size() + &quot; 条日志&quot;);</span>
-<span class="nc" id="L859">        } catch (Exception e) {</span>
-<span class="nc" id="L860">            redirectAttributes.addFlashAttribute(&quot;error&quot;, &quot;批量删除失败: &quot; + e.getMessage());</span>
-<span class="nc" id="L861">        }</span>
-<span class="nc" id="L862">        return &quot;redirect:/admin/audit-logs&quot;;</span>
+<span class="nc" id="L869">            auditLogRepository.deleteAllById(ids);</span>
+<span class="nc" id="L870">            redirectAttributes.addFlashAttribute(&quot;success&quot;, &quot;成功删除 &quot; + ids.size() + &quot; 条日志&quot;);</span>
+<span class="nc" id="L871">        } catch (Exception e) {</span>
+<span class="nc" id="L872">            redirectAttributes.addFlashAttribute(&quot;error&quot;, &quot;批量删除失败: &quot; + e.getMessage());</span>
+<span class="nc" id="L873">        }</span>
+<span class="nc" id="L874">        return &quot;redirect:/admin/audit-logs&quot;;</span>
     }
 
     /**
@@ -871,27 +883,27 @@ import java.util.Comparator;
     @ResponseBody
     public List&lt;Map&lt;String, Object&gt;&gt; getUserMenu() {
         try {
-<span class="nc" id="L874">            Authentication auth = SecurityContextHolder.getContext().getAuthentication();</span>
-<span class="nc bnc" id="L875" title="All 4 branches missed.">            if (auth == null || !auth.isAuthenticated()) {</span>
-<span class="nc" id="L876">                return Collections.emptyList();</span>
+<span class="nc" id="L886">            Authentication auth = SecurityContextHolder.getContext().getAuthentication();</span>
+<span class="nc bnc" id="L887" title="All 4 branches missed.">            if (auth == null || !auth.isAuthenticated()) {</span>
+<span class="nc" id="L888">                return Collections.emptyList();</span>
             }
             
-<span class="nc" id="L879">            String username = auth.getName();</span>
-<span class="nc" id="L880">            User user = userService.getUserByUsername(username);</span>
+<span class="nc" id="L891">            String username = auth.getName();</span>
+<span class="nc" id="L892">            User user = userService.getUserByUsername(username);</span>
             
             // 获取用户的所有启用的权限（只包含MENU类型）
-<span class="nc" id="L883">            List&lt;Permission&gt; menuPermissions = user.getRoles().stream()</span>
-<span class="nc" id="L884">                    .flatMap(role -&gt; role.getPermissions().stream())</span>
-<span class="nc" id="L885">                    .filter(Permission::getStatus)</span>
-<span class="nc" id="L886">                    .filter(p -&gt; &quot;MENU&quot;.equals(p.getType()))</span>
-<span class="nc" id="L887">                    .sorted(Comparator.comparingInt(Permission::getSortOrder))</span>
-<span class="nc" id="L888">                    .collect(Collectors.toList());</span>
+<span class="nc" id="L895">            List&lt;Permission&gt; menuPermissions = user.getRoles().stream()</span>
+<span class="nc" id="L896">                    .flatMap(role -&gt; role.getPermissions().stream())</span>
+<span class="nc" id="L897">                    .filter(Permission::getStatus)</span>
+<span class="nc" id="L898">                    .filter(p -&gt; &quot;MENU&quot;.equals(p.getType()))</span>
+<span class="nc" id="L899">                    .sorted(Comparator.comparingInt(Permission::getSortOrder))</span>
+<span class="nc" id="L900">                    .collect(Collectors.toList());</span>
             
             // 构建菜单树
-<span class="nc" id="L891">            return buildMenuTree(menuPermissions, null);</span>
-<span class="nc" id="L892">        } catch (Exception e) {</span>
-<span class="nc" id="L893">            e.printStackTrace();</span>
-<span class="nc" id="L894">            return Collections.emptyList();</span>
+<span class="nc" id="L903">            return buildMenuTree(menuPermissions, null);</span>
+<span class="nc" id="L904">        } catch (Exception e) {</span>
+<span class="nc" id="L905">            e.printStackTrace();</span>
+<span class="nc" id="L906">            return Collections.emptyList();</span>
         }
     }
     
@@ -903,30 +915,30 @@ import java.util.Comparator;
      * @return 菜单树结构列表，每个元素包含id、name、url、icon、children等属性
      */
     private List&lt;Map&lt;String, Object&gt;&gt; buildMenuTree(List&lt;Permission&gt; allMenus, Long parentId) {
-<span class="nc" id="L906">        List&lt;Map&lt;String, Object&gt;&gt; menuTree = new ArrayList&lt;&gt;();</span>
+<span class="nc" id="L918">        List&lt;Map&lt;String, Object&gt;&gt; menuTree = new ArrayList&lt;&gt;();</span>
         
-<span class="nc bnc" id="L908" title="All 2 branches missed.">        for (Permission permission : allMenus) {</span>
-<span class="nc bnc" id="L909" title="All 6 branches missed.">            if ((parentId == null &amp;&amp; permission.getParentId() == null) ||</span>
-<span class="nc bnc" id="L910" title="All 2 branches missed.">                (parentId != null &amp;&amp; parentId.equals(permission.getParentId()))) {</span>
+<span class="nc bnc" id="L920" title="All 2 branches missed.">        for (Permission permission : allMenus) {</span>
+<span class="nc bnc" id="L921" title="All 6 branches missed.">            if ((parentId == null &amp;&amp; permission.getParentId() == null) </span>
+<span class="nc bnc" id="L922" title="All 2 branches missed.">                || (parentId != null &amp;&amp; parentId.equals(permission.getParentId()))) {</span>
                 
-<span class="nc" id="L912">                Map&lt;String, Object&gt; menuItem = new HashMap&lt;&gt;();</span>
-<span class="nc" id="L913">                menuItem.put(&quot;id&quot;, permission.getId());</span>
-<span class="nc" id="L914">                menuItem.put(&quot;name&quot;, permission.getName());</span>
-<span class="nc bnc" id="L915" title="All 2 branches missed.">                menuItem.put(&quot;icon&quot;, permission.getIcon() != null ? permission.getIcon() : &quot;📄&quot;);</span>
-<span class="nc" id="L916">                menuItem.put(&quot;url&quot;, getUrlByPermissionCode(permission.getCode()));</span>
-<span class="nc" id="L917">                menuItem.put(&quot;sortOrder&quot;, permission.getSortOrder());</span>
+<span class="nc" id="L924">                Map&lt;String, Object&gt; menuItem = new HashMap&lt;&gt;();</span>
+<span class="nc" id="L925">                menuItem.put(&quot;id&quot;, permission.getId());</span>
+<span class="nc" id="L926">                menuItem.put(&quot;name&quot;, permission.getName());</span>
+<span class="nc bnc" id="L927" title="All 2 branches missed.">                menuItem.put(&quot;icon&quot;, permission.getIcon() != null ? permission.getIcon() : &quot;📄&quot;);</span>
+<span class="nc" id="L928">                menuItem.put(&quot;url&quot;, getUrlByPermissionCode(permission.getCode()));</span>
+<span class="nc" id="L929">                menuItem.put(&quot;sortOrder&quot;, permission.getSortOrder());</span>
                 
                 // 递归查找子菜单
-<span class="nc" id="L920">                List&lt;Map&lt;String, Object&gt;&gt; children = buildMenuTree(allMenus, permission.getId());</span>
-<span class="nc bnc" id="L921" title="All 2 branches missed.">                if (!children.isEmpty()) {</span>
-<span class="nc" id="L922">                    menuItem.put(&quot;children&quot;, children);</span>
+<span class="nc" id="L932">                List&lt;Map&lt;String, Object&gt;&gt; children = buildMenuTree(allMenus, permission.getId());</span>
+<span class="nc bnc" id="L933" title="All 2 branches missed.">                if (!children.isEmpty()) {</span>
+<span class="nc" id="L934">                    menuItem.put(&quot;children&quot;, children);</span>
                 }
                 
-<span class="nc" id="L925">                menuTree.add(menuItem);</span>
+<span class="nc" id="L937">                menuTree.add(menuItem);</span>
             }
-<span class="nc" id="L927">        }</span>
+<span class="nc" id="L939">        }</span>
         
-<span class="nc" id="L929">        return menuTree;</span>
+<span class="nc" id="L941">        return menuTree;</span>
     }
     
     /**
@@ -936,45 +948,47 @@ import java.util.Comparator;
      * @return 对应的URL地址，如果无法匹配则返回 &quot;#&quot;
      */
     private String getUrlByPermissionCode(String permissionCode) {
-<span class="nc bnc" id="L939" title="All 2 branches missed.">        if (permissionCode == null) return &quot;#&quot;;</span>
+<span class="nc bnc" id="L951" title="All 2 branches missed.">        if (permissionCode == null) {</span>
+<span class="nc" id="L952">            return &quot;#&quot;;</span>
+        }
         
-<span class="nc bnc" id="L941" title="All 7 branches missed.">        switch (permissionCode.toLowerCase()) {</span>
+<span class="nc bnc" id="L955" title="All 7 branches missed.">        switch (permissionCode.toLowerCase()) {</span>
             // 仪表盘
             case &quot;dashboard:menu&quot;:
             case &quot;dashboard:view&quot;:
-<span class="nc" id="L945">                return &quot;/admin/dashboard&quot;;</span>
+<span class="nc" id="L959">                return &quot;/admin/dashboard&quot;;</span>
             
             // 用户管理
             case &quot;user:menu&quot;:
             case &quot;user:view&quot;:
             case &quot;user:list&quot;:
-<span class="nc" id="L951">                return &quot;/admin/users&quot;;</span>
+<span class="nc" id="L965">                return &quot;/admin/users&quot;;</span>
             
             // 角色管理
             case &quot;role:menu&quot;:
             case &quot;role:view&quot;:
             case &quot;role:list&quot;:
-<span class="nc" id="L957">                return &quot;/admin/roles&quot;;</span>
+<span class="nc" id="L971">                return &quot;/admin/roles&quot;;</span>
             
             // 权限管理
             case &quot;permission:menu&quot;:
             case &quot;permission:view&quot;:
             case &quot;permission:list&quot;:
-<span class="nc" id="L963">                return &quot;/admin/permissions&quot;;</span>
+<span class="nc" id="L977">                return &quot;/admin/permissions&quot;;</span>
             
             // 审计日志
             case &quot;audit:menu&quot;:
             case &quot;audit:view&quot;:
             case &quot;audit:log&quot;:
-<span class="nc" id="L969">                return &quot;/admin/audit-logs&quot;;</span>
+<span class="nc" id="L983">                return &quot;/admin/audit-logs&quot;;</span>
             
             // 系统管理 - 个人信息
             case &quot;profile:menu&quot;:
             case &quot;profile:view&quot;:
-<span class="nc" id="L974">                return &quot;/admin/profile&quot;;</span>
+<span class="nc" id="L988">                return &quot;/admin/profile&quot;;</span>
             
             default:
-<span class="nc" id="L977">                return &quot;#&quot;;</span>
+<span class="nc" id="L991">                return &quot;#&quot;;</span>
         }
     }
 
@@ -984,16 +998,16 @@ import java.util.Comparator;
      * @param model Spring MVC模型对象，用于传递数据到视图
      */
     private void addCurrentUserToModel(Model model) {
-<span class="nc" id="L987">        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();</span>
-<span class="nc bnc" id="L988" title="All 4 branches missed.">        if (authentication != null &amp;&amp; authentication.isAuthenticated()) {</span>
-<span class="nc" id="L989">            String username = authentication.getName();</span>
-<span class="nc" id="L990">            model.addAttribute(&quot;currentUsername&quot;, username);</span>
+<span class="nc" id="L1001">        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();</span>
+<span class="nc bnc" id="L1002" title="All 4 branches missed.">        if (authentication != null &amp;&amp; authentication.isAuthenticated()) {</span>
+<span class="nc" id="L1003">            String username = authentication.getName();</span>
+<span class="nc" id="L1004">            model.addAttribute(&quot;currentUsername&quot;, username);</span>
             
             // 添加用户角色信息
-<span class="nc" id="L993">            var authorities = authentication.getAuthorities();</span>
-<span class="nc" id="L994">            model.addAttribute(&quot;currentUserRoles&quot;, authorities);</span>
+<span class="nc" id="L1007">            var authorities = authentication.getAuthorities();</span>
+<span class="nc" id="L1008">            model.addAttribute(&quot;currentUserRoles&quot;, authorities);</span>
         }
-<span class="nc" id="L996">    }</span>
+<span class="nc" id="L1010">    }</span>
     
     /**
      * 获取当前用户名
@@ -1001,11 +1015,11 @@ import java.util.Comparator;
      * @return 当前登录用户的用户名，如果未认证则返回 &quot;anonymous&quot;
      */
     private String getCurrentUser() {
-<span class="nc" id="L1004">        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();</span>
-<span class="nc bnc" id="L1005" title="All 4 branches missed.">        if (authentication != null &amp;&amp; authentication.isAuthenticated()) {</span>
-<span class="nc" id="L1006">            return authentication.getName();</span>
+<span class="nc" id="L1018">        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();</span>
+<span class="nc bnc" id="L1019" title="All 4 branches missed.">        if (authentication != null &amp;&amp; authentication.isAuthenticated()) {</span>
+<span class="nc" id="L1020">            return authentication.getName();</span>
         }
-<span class="nc" id="L1008">        return &quot;anonymous&quot;;</span>
+<span class="nc" id="L1022">        return &quot;anonymous&quot;;</span>
     }
 
     /**
@@ -1014,12 +1028,12 @@ import java.util.Comparator;
      * @return 当前登录用户的ID，如果获取失败则返回 null
      */
     private Long getCurrentUserId() {
-<span class="nc" id="L1017">        String username = getCurrentUser();</span>
+<span class="nc" id="L1031">        String username = getCurrentUser();</span>
         try {
-<span class="nc" id="L1019">            User user = userService.getUserByUsername(username);</span>
-<span class="nc" id="L1020">            return user.getId();</span>
-<span class="nc" id="L1021">        } catch (Exception e) {</span>
-<span class="nc" id="L1022">            return null;</span>
+<span class="nc" id="L1033">            User user = userService.getUserByUsername(username);</span>
+<span class="nc" id="L1034">            return user.getId();</span>
+<span class="nc" id="L1035">        } catch (Exception e) {</span>
+<span class="nc" id="L1036">            return null;</span>
         }
     }
 
@@ -1034,16 +1048,16 @@ import java.util.Comparator;
     @GetMapping(&quot;/profile&quot;)
     public String profile(Model model) {
         try {
-<span class="nc" id="L1037">            Long userId = getCurrentUserId();</span>
-<span class="nc" id="L1038">            User user = userService.getUserById(userId);</span>
-<span class="nc" id="L1039">            model.addAttribute(&quot;user&quot;, user);</span>
-<span class="nc" id="L1040">            model.addAttribute(&quot;activeMenu&quot;, &quot;profile&quot;);</span>
-<span class="nc" id="L1041">            model.addAttribute(&quot;pageTitle&quot;, &quot;👤 个人信息&quot;);</span>
-<span class="nc" id="L1042">            addCurrentUserToModel(model);</span>
-<span class="nc" id="L1043">            return &quot;admin/profile/index&quot;;</span>
-<span class="nc" id="L1044">        } catch (Exception e) {</span>
-<span class="nc" id="L1045">            model.addAttribute(&quot;error&quot;, &quot;获取用户信息失败: &quot; + e.getMessage());</span>
-<span class="nc" id="L1046">            return &quot;error&quot;;</span>
+<span class="nc" id="L1051">            Long userId = getCurrentUserId();</span>
+<span class="nc" id="L1052">            User user = userService.getUserById(userId);</span>
+<span class="nc" id="L1053">            model.addAttribute(&quot;user&quot;, user);</span>
+<span class="nc" id="L1054">            model.addAttribute(&quot;activeMenu&quot;, &quot;profile&quot;);</span>
+<span class="nc" id="L1055">            model.addAttribute(&quot;pageTitle&quot;, &quot;👤 个人信息&quot;);</span>
+<span class="nc" id="L1056">            addCurrentUserToModel(model);</span>
+<span class="nc" id="L1057">            return &quot;admin/profile/index&quot;;</span>
+<span class="nc" id="L1058">        } catch (Exception e) {</span>
+<span class="nc" id="L1059">            model.addAttribute(&quot;error&quot;, &quot;获取用户信息失败: &quot; + e.getMessage());</span>
+<span class="nc" id="L1060">            return &quot;error&quot;;</span>
         }
     }
 
@@ -1067,13 +1081,13 @@ import java.util.Comparator;
             @RequestParam(required = false) String remark,
             RedirectAttributes redirectAttributes) {
         try {
-<span class="nc" id="L1070">            Long userId = getCurrentUserId();</span>
-<span class="nc" id="L1071">            userService.updateCurrentUserProfile(userId, name, phone, age, avatar, remark);</span>
-<span class="nc" id="L1072">            redirectAttributes.addFlashAttribute(&quot;success&quot;, &quot;个人信息更新成功&quot;);</span>
-<span class="nc" id="L1073">        } catch (Exception e) {</span>
-<span class="nc" id="L1074">            redirectAttributes.addFlashAttribute(&quot;error&quot;, &quot;更新失败: &quot; + e.getMessage());</span>
-<span class="nc" id="L1075">        }</span>
-<span class="nc" id="L1076">        return &quot;redirect:/admin/profile&quot;;</span>
+<span class="nc" id="L1084">            Long userId = getCurrentUserId();</span>
+<span class="nc" id="L1085">            userService.updateCurrentUserProfile(userId, name, phone, age, avatar, remark);</span>
+<span class="nc" id="L1086">            redirectAttributes.addFlashAttribute(&quot;success&quot;, &quot;个人信息更新成功&quot;);</span>
+<span class="nc" id="L1087">        } catch (Exception e) {</span>
+<span class="nc" id="L1088">            redirectAttributes.addFlashAttribute(&quot;error&quot;, &quot;更新失败: &quot; + e.getMessage());</span>
+<span class="nc" id="L1089">        }</span>
+<span class="nc" id="L1090">        return &quot;redirect:/admin/profile&quot;;</span>
     }
 
     /**
@@ -1084,10 +1098,10 @@ import java.util.Comparator;
      */
     @GetMapping(&quot;/profile/password&quot;)
     public String changePasswordPage(Model model) {
-<span class="nc" id="L1087">        model.addAttribute(&quot;activeMenu&quot;, &quot;profile&quot;);</span>
-<span class="nc" id="L1088">        model.addAttribute(&quot;pageTitle&quot;, &quot;🔑 修改密码&quot;);</span>
-<span class="nc" id="L1089">        addCurrentUserToModel(model);</span>
-<span class="nc" id="L1090">        return &quot;admin/profile/password&quot;;</span>
+<span class="nc" id="L1101">        model.addAttribute(&quot;activeMenu&quot;, &quot;profile&quot;);</span>
+<span class="nc" id="L1102">        model.addAttribute(&quot;pageTitle&quot;, &quot;🔑 修改密码&quot;);</span>
+<span class="nc" id="L1103">        addCurrentUserToModel(model);</span>
+<span class="nc" id="L1104">        return &quot;admin/profile/password&quot;;</span>
     }
 
     /**
@@ -1107,22 +1121,22 @@ import java.util.Comparator;
             RedirectAttributes redirectAttributes) {
         try {
             // 验证新密码一致性
-<span class="nc bnc" id="L1110" title="All 2 branches missed.">            if (!newPassword.equals(confirmPassword)) {</span>
-<span class="nc" id="L1111">                throw new RuntimeException(&quot;两次输入的新密码不一致&quot;);</span>
+<span class="nc bnc" id="L1124" title="All 2 branches missed.">            if (!newPassword.equals(confirmPassword)) {</span>
+<span class="nc" id="L1125">                throw new RuntimeException(&quot;两次输入的新密码不一致&quot;);</span>
             }
             
             // 验证新密码长度
-<span class="nc bnc" id="L1115" title="All 2 branches missed.">            if (newPassword.length() &lt; 6) {</span>
-<span class="nc" id="L1116">                throw new RuntimeException(&quot;新密码长度不能少于6位&quot;);</span>
+<span class="nc bnc" id="L1129" title="All 2 branches missed.">            if (newPassword.length() &lt; 6) {</span>
+<span class="nc" id="L1130">                throw new RuntimeException(&quot;新密码长度不能少于6位&quot;);</span>
             }
             
-<span class="nc" id="L1119">            Long userId = getCurrentUserId();</span>
-<span class="nc" id="L1120">            userService.changePassword(userId, oldPassword, newPassword);</span>
-<span class="nc" id="L1121">            redirectAttributes.addFlashAttribute(&quot;success&quot;, &quot;密码修改成功，请重新登录&quot;);</span>
-<span class="nc" id="L1122">            return &quot;redirect:/logout&quot;;</span>
-<span class="nc" id="L1123">        } catch (Exception e) {</span>
-<span class="nc" id="L1124">            redirectAttributes.addFlashAttribute(&quot;error&quot;, &quot;修改失败: &quot; + e.getMessage());</span>
-<span class="nc" id="L1125">            return &quot;redirect:/admin/profile/password&quot;;</span>
+<span class="nc" id="L1133">            Long userId = getCurrentUserId();</span>
+<span class="nc" id="L1134">            userService.changePassword(userId, oldPassword, newPassword);</span>
+<span class="nc" id="L1135">            redirectAttributes.addFlashAttribute(&quot;success&quot;, &quot;密码修改成功，请重新登录&quot;);</span>
+<span class="nc" id="L1136">            return &quot;redirect:/logout&quot;;</span>
+<span class="nc" id="L1137">        } catch (Exception e) {</span>
+<span class="nc" id="L1138">            redirectAttributes.addFlashAttribute(&quot;error&quot;, &quot;修改失败: &quot; + e.getMessage());</span>
+<span class="nc" id="L1139">            return &quot;redirect:/admin/profile/password&quot;;</span>
         }
     }
 }

@@ -233,14 +233,14 @@ import java.util.stream.Collectors;
 <span class="fc" id="L233">        String oldInfo = existingUser.toString();</span>
 
         // 如果修改了用户名，检查新用户名是否已被其他用户使用
-<span class="fc bfc" id="L236" title="All 2 branches covered.">        if (!existingUser.getUsername().equals(userDTO.getUsername()) &amp;&amp; </span>
-<span class="fc bfc" id="L237" title="All 2 branches covered.">            userRepository.existsByUsername(userDTO.getUsername())) {</span>
+<span class="fc bfc" id="L236" title="All 2 branches covered.">        if (!existingUser.getUsername().equals(userDTO.getUsername()) </span>
+<span class="fc bfc" id="L237" title="All 2 branches covered.">            &amp;&amp; userRepository.existsByUsername(userDTO.getUsername())) {</span>
 <span class="fc" id="L238">            throw new RuntimeException(&quot;用户名已存在: &quot; + userDTO.getUsername());</span>
         }
 
         // 如果修改了邮箱，检查新邮箱是否已被其他用户使用
-<span class="pc bpc" id="L242" title="1 of 2 branches missed.">        if (!existingUser.getEmail().equals(userDTO.getEmail()) &amp;&amp; </span>
-<span class="fc bfc" id="L243" title="All 2 branches covered.">            userRepository.existsByEmail(userDTO.getEmail())) {</span>
+<span class="pc bpc" id="L242" title="1 of 2 branches missed.">        if (!existingUser.getEmail().equals(userDTO.getEmail()) </span>
+<span class="fc bfc" id="L243" title="All 2 branches covered.">            &amp;&amp; userRepository.existsByEmail(userDTO.getEmail())) {</span>
 <span class="fc" id="L244">            throw new RuntimeException(&quot;邮箱已被注册: &quot; + userDTO.getEmail());</span>
         }
 

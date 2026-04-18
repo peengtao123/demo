@@ -10,14 +10,18 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
 /**
  * 权限服务类 - 提供权限相关的业务逻辑处理
  */
 @Service
 @Transactional
-<span class="fc" id="L20">public class PermissionService {</span>
+<span class="fc" id="L24">public class PermissionService {</span>
 
     @Autowired
     private PermissionRepository permissionRepository;
@@ -29,7 +33,7 @@ import java.util.*;
      */
     @Transactional(readOnly = true)
     public List&lt;Permission&gt; getAllPermissions() {
-<span class="nc" id="L32">        return permissionRepository.findAll(Sort.by(Sort.Direction.ASC, &quot;sortOrder&quot;, &quot;createTime&quot;));</span>
+<span class="nc" id="L36">        return permissionRepository.findAll(Sort.by(Sort.Direction.ASC, &quot;sortOrder&quot;, &quot;createTime&quot;));</span>
     }
 
     /**
@@ -41,8 +45,8 @@ import java.util.*;
      */
     @Transactional(readOnly = true)
     public Page&lt;Permission&gt; getPermissionsWithPaging(int page, int size) {
-<span class="nc" id="L44">        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.ASC, &quot;sortOrder&quot;, &quot;createTime&quot;));</span>
-<span class="nc" id="L45">        return permissionRepository.findAll(pageable);</span>
+<span class="nc" id="L48">        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.ASC, &quot;sortOrder&quot;, &quot;createTime&quot;));</span>
+<span class="nc" id="L49">        return permissionRepository.findAll(pageable);</span>
     }
 
     /**
@@ -55,8 +59,8 @@ import java.util.*;
      */
     @Transactional(readOnly = true)
     public Page&lt;Permission&gt; searchPermissions(String keyword, int page, int size) {
-<span class="nc" id="L58">        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.ASC, &quot;sortOrder&quot;, &quot;createTime&quot;));</span>
-<span class="nc" id="L59">        return permissionRepository.searchPermissions(keyword, pageable);</span>
+<span class="nc" id="L62">        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.ASC, &quot;sortOrder&quot;, &quot;createTime&quot;));</span>
+<span class="nc" id="L63">        return permissionRepository.searchPermissions(keyword, pageable);</span>
     }
 
     /**
@@ -67,7 +71,7 @@ import java.util.*;
      */
     @Transactional(readOnly = true)
     public Optional&lt;Permission&gt; getPermissionById(Long id) {
-<span class="nc" id="L70">        return permissionRepository.findById(id);</span>
+<span class="nc" id="L74">        return permissionRepository.findById(id);</span>
     }
 
     /**
@@ -79,26 +83,26 @@ import java.util.*;
      */
     public Permission createPermission(Permission permission) {
         // 检查权限编码是否已存在
-<span class="nc bnc" id="L82" title="All 2 branches missed.">        if (permissionRepository.findByCode(permission.getCode()).isPresent()) {</span>
-<span class="nc" id="L83">            throw new RuntimeException(&quot;权限编码已存在: &quot; + permission.getCode());</span>
+<span class="nc bnc" id="L86" title="All 2 branches missed.">        if (permissionRepository.findByCode(permission.getCode()).isPresent()) {</span>
+<span class="nc" id="L87">            throw new RuntimeException(&quot;权限编码已存在: &quot; + permission.getCode());</span>
         }
         
         // 检查权限名称是否已存在
-<span class="nc bnc" id="L87" title="All 2 branches missed.">        if (permissionRepository.findByName(permission.getName()).isPresent()) {</span>
-<span class="nc" id="L88">            throw new RuntimeException(&quot;权限名称已存在: &quot; + permission.getName());</span>
+<span class="nc bnc" id="L91" title="All 2 branches missed.">        if (permissionRepository.findByName(permission.getName()).isPresent()) {</span>
+<span class="nc" id="L92">            throw new RuntimeException(&quot;权限名称已存在: &quot; + permission.getName());</span>
         }
         
-<span class="nc bnc" id="L91" title="All 2 branches missed.">        if (permission.getStatus() == null) {</span>
-<span class="nc" id="L92">            permission.setStatus(true);</span>
+<span class="nc bnc" id="L95" title="All 2 branches missed.">        if (permission.getStatus() == null) {</span>
+<span class="nc" id="L96">            permission.setStatus(true);</span>
         }
-<span class="nc bnc" id="L94" title="All 2 branches missed.">        if (permission.getSortOrder() == null) {</span>
-<span class="nc" id="L95">            permission.setSortOrder(0);</span>
+<span class="nc bnc" id="L98" title="All 2 branches missed.">        if (permission.getSortOrder() == null) {</span>
+<span class="nc" id="L99">            permission.setSortOrder(0);</span>
         }
-<span class="nc bnc" id="L97" title="All 4 branches missed.">        if (permission.getType() == null || permission.getType().isEmpty()) {</span>
-<span class="nc" id="L98">            permission.setType(&quot;MENU&quot;);</span>
+<span class="nc bnc" id="L101" title="All 4 branches missed.">        if (permission.getType() == null || permission.getType().isEmpty()) {</span>
+<span class="nc" id="L102">            permission.setType(&quot;MENU&quot;);</span>
         }
         
-<span class="nc" id="L101">        return permissionRepository.save(permission);</span>
+<span class="nc" id="L105">        return permissionRepository.save(permission);</span>
     }
 
     /**
@@ -110,31 +114,31 @@ import java.util.*;
      * @throws RuntimeException 如果权限不存在或新编码/名称已被其他权限使用则抛出异常
      */
     public Permission updatePermission(Long id, Permission permissionDetails) {
-<span class="nc" id="L113">        Permission permission = permissionRepository.findById(id)</span>
-<span class="nc" id="L114">                .orElseThrow(() -&gt; new RuntimeException(&quot;权限不存在: &quot; + id));</span>
+<span class="nc" id="L117">        Permission permission = permissionRepository.findById(id)</span>
+<span class="nc" id="L118">                .orElseThrow(() -&gt; new RuntimeException(&quot;权限不存在: &quot; + id));</span>
         
         // 如果修改了编码，检查新编码是否已被其他权限使用
-<span class="nc bnc" id="L117" title="All 2 branches missed.">        if (!permission.getCode().equals(permissionDetails.getCode()) &amp;&amp; </span>
-<span class="nc bnc" id="L118" title="All 2 branches missed.">            permissionRepository.findByCode(permissionDetails.getCode()).isPresent()) {</span>
-<span class="nc" id="L119">            throw new RuntimeException(&quot;权限编码已存在: &quot; + permissionDetails.getCode());</span>
+<span class="nc bnc" id="L121" title="All 2 branches missed.">        if (!permission.getCode().equals(permissionDetails.getCode()) </span>
+<span class="nc bnc" id="L122" title="All 2 branches missed.">            &amp;&amp; permissionRepository.findByCode(permissionDetails.getCode()).isPresent()) {</span>
+<span class="nc" id="L123">            throw new RuntimeException(&quot;权限编码已存在: &quot; + permissionDetails.getCode());</span>
         }
         
         // 如果修改了名称，检查新名称是否已被其他权限使用
-<span class="nc bnc" id="L123" title="All 2 branches missed.">        if (!permission.getName().equals(permissionDetails.getName()) &amp;&amp; </span>
-<span class="nc bnc" id="L124" title="All 2 branches missed.">            permissionRepository.findByName(permissionDetails.getName()).isPresent()) {</span>
-<span class="nc" id="L125">            throw new RuntimeException(&quot;权限名称已存在: &quot; + permissionDetails.getName());</span>
+<span class="nc bnc" id="L127" title="All 2 branches missed.">        if (!permission.getName().equals(permissionDetails.getName()) </span>
+<span class="nc bnc" id="L128" title="All 2 branches missed.">            &amp;&amp; permissionRepository.findByName(permissionDetails.getName()).isPresent()) {</span>
+<span class="nc" id="L129">            throw new RuntimeException(&quot;权限名称已存在: &quot; + permissionDetails.getName());</span>
         }
         
-<span class="nc" id="L128">        permission.setName(permissionDetails.getName());</span>
-<span class="nc" id="L129">        permission.setCode(permissionDetails.getCode());</span>
-<span class="nc" id="L130">        permission.setDescription(permissionDetails.getDescription());</span>
-<span class="nc" id="L131">        permission.setIcon(permissionDetails.getIcon());</span>
-<span class="nc" id="L132">        permission.setStatus(permissionDetails.getStatus());</span>
-<span class="nc" id="L133">        permission.setParentId(permissionDetails.getParentId());</span>
-<span class="nc" id="L134">        permission.setSortOrder(permissionDetails.getSortOrder());</span>
-<span class="nc" id="L135">        permission.setType(permissionDetails.getType());</span>
+<span class="nc" id="L132">        permission.setName(permissionDetails.getName());</span>
+<span class="nc" id="L133">        permission.setCode(permissionDetails.getCode());</span>
+<span class="nc" id="L134">        permission.setDescription(permissionDetails.getDescription());</span>
+<span class="nc" id="L135">        permission.setIcon(permissionDetails.getIcon());</span>
+<span class="nc" id="L136">        permission.setStatus(permissionDetails.getStatus());</span>
+<span class="nc" id="L137">        permission.setParentId(permissionDetails.getParentId());</span>
+<span class="nc" id="L138">        permission.setSortOrder(permissionDetails.getSortOrder());</span>
+<span class="nc" id="L139">        permission.setType(permissionDetails.getType());</span>
         
-<span class="nc" id="L137">        return permissionRepository.save(permission);</span>
+<span class="nc" id="L141">        return permissionRepository.save(permission);</span>
     }
 
     /**
@@ -144,17 +148,17 @@ import java.util.*;
      * @throws RuntimeException 如果权限不存在或正在被角色使用则抛出异常
      */
     public void deletePermission(Long id) {
-<span class="nc" id="L147">        Permission permission = permissionRepository.findById(id)</span>
-<span class="nc" id="L148">                .orElseThrow(() -&gt; new RuntimeException(&quot;权限不存在: &quot; + id));</span>
+<span class="nc" id="L151">        Permission permission = permissionRepository.findById(id)</span>
+<span class="nc" id="L152">                .orElseThrow(() -&gt; new RuntimeException(&quot;权限不存在: &quot; + id));</span>
         
         // 检查是否有角色使用该权限
-<span class="nc" id="L151">        long roleCount = permissionRepository.countRolesByPermissionId(id);</span>
-<span class="nc bnc" id="L152" title="All 2 branches missed.">        if (roleCount &gt; 0) {</span>
-<span class="nc" id="L153">            throw new RuntimeException(&quot;该权限正在被 &quot; + roleCount + &quot; 个角色使用，无法删除&quot;);</span>
+<span class="nc" id="L155">        long roleCount = permissionRepository.countRolesByPermissionId(id);</span>
+<span class="nc bnc" id="L156" title="All 2 branches missed.">        if (roleCount &gt; 0) {</span>
+<span class="nc" id="L157">            throw new RuntimeException(&quot;该权限正在被 &quot; + roleCount + &quot; 个角色使用，无法删除&quot;);</span>
         }
         
-<span class="nc" id="L156">        permissionRepository.delete(permission);</span>
-<span class="nc" id="L157">    }</span>
+<span class="nc" id="L160">        permissionRepository.delete(permission);</span>
+<span class="nc" id="L161">    }</span>
 
     /**
      * 批量删除权限
@@ -163,16 +167,16 @@ import java.util.*;
      * @throws RuntimeException 如果任何权限正在被角色使用则抛出异常
      */
     public void batchDeletePermissions(List&lt;Long&gt; ids) {
-<span class="nc bnc" id="L166" title="All 2 branches missed.">        for (Long id : ids) {</span>
-<span class="nc" id="L167">            long roleCount = permissionRepository.countRolesByPermissionId(id);</span>
-<span class="nc bnc" id="L168" title="All 2 branches missed.">            if (roleCount &gt; 0) {</span>
-<span class="nc" id="L169">                Permission permission = permissionRepository.findById(id).orElse(null);</span>
-<span class="nc bnc" id="L170" title="All 2 branches missed.">                String permName = permission != null ? permission.getName() : &quot;ID:&quot; + id;</span>
-<span class="nc" id="L171">                throw new RuntimeException(&quot;权限 '&quot; + permName + &quot;' 正在被角色使用，无法删除&quot;);</span>
+<span class="nc bnc" id="L170" title="All 2 branches missed.">        for (Long id : ids) {</span>
+<span class="nc" id="L171">            long roleCount = permissionRepository.countRolesByPermissionId(id);</span>
+<span class="nc bnc" id="L172" title="All 2 branches missed.">            if (roleCount &gt; 0) {</span>
+<span class="nc" id="L173">                Permission permission = permissionRepository.findById(id).orElse(null);</span>
+<span class="nc bnc" id="L174" title="All 2 branches missed.">                String permName = permission != null ? permission.getName() : &quot;ID:&quot; + id;</span>
+<span class="nc" id="L175">                throw new RuntimeException(&quot;权限 '&quot; + permName + &quot;' 正在被角色使用，无法删除&quot;);</span>
             }
-<span class="nc" id="L173">        }</span>
-<span class="nc" id="L174">        permissionRepository.deleteAllById(ids);</span>
-<span class="nc" id="L175">    }</span>
+<span class="nc" id="L177">        }</span>
+<span class="nc" id="L178">        permissionRepository.deleteAllById(ids);</span>
+<span class="nc" id="L179">    }</span>
 
     /**
      * 启用/禁用权限
@@ -182,10 +186,10 @@ import java.util.*;
      * @throws RuntimeException 如果权限不存在则抛出异常
      */
     public Permission togglePermissionStatus(Long id) {
-<span class="nc" id="L185">        Permission permission = permissionRepository.findById(id)</span>
-<span class="nc" id="L186">                .orElseThrow(() -&gt; new RuntimeException(&quot;权限不存在: &quot; + id));</span>
-<span class="nc bnc" id="L187" title="All 2 branches missed.">        permission.setStatus(!permission.getStatus());</span>
-<span class="nc" id="L188">        return permissionRepository.save(permission);</span>
+<span class="nc" id="L189">        Permission permission = permissionRepository.findById(id)</span>
+<span class="nc" id="L190">                .orElseThrow(() -&gt; new RuntimeException(&quot;权限不存在: &quot; + id));</span>
+<span class="nc bnc" id="L191" title="All 2 branches missed.">        permission.setStatus(!permission.getStatus());</span>
+<span class="nc" id="L192">        return permissionRepository.save(permission);</span>
     }
 
     /**
@@ -196,7 +200,7 @@ import java.util.*;
      */
     @Transactional(readOnly = true)
     public Optional&lt;Permission&gt; findByCode(String code) {
-<span class="nc" id="L199">        return permissionRepository.findByCode(code);</span>
+<span class="nc" id="L203">        return permissionRepository.findByCode(code);</span>
     }
 
     /**
@@ -207,7 +211,7 @@ import java.util.*;
      */
     @Transactional(readOnly = true)
     public Optional&lt;Permission&gt; findByName(String name) {
-<span class="nc" id="L210">        return permissionRepository.findByName(name);</span>
+<span class="nc" id="L214">        return permissionRepository.findByName(name);</span>
     }
 
     /**
@@ -217,7 +221,7 @@ import java.util.*;
      */
     @Transactional(readOnly = true)
     public List&lt;Permission&gt; getEnabledPermissions() {
-<span class="nc" id="L220">        return permissionRepository.findByStatus(true);</span>
+<span class="nc" id="L224">        return permissionRepository.findByStatus(true);</span>
     }
 
     /**
@@ -228,7 +232,7 @@ import java.util.*;
      */
     @Transactional(readOnly = true)
     public List&lt;Permission&gt; getChildPermissions(Long parentId) {
-<span class="nc" id="L231">        return permissionRepository.findByParentId(parentId);</span>
+<span class="nc" id="L235">        return permissionRepository.findByParentId(parentId);</span>
     }
 
     /**
@@ -239,7 +243,7 @@ import java.util.*;
      */
     @Transactional(readOnly = true)
     public List&lt;Permission&gt; getPermissionsByType(String type) {
-<span class="nc" id="L242">        return permissionRepository.findByType(type);</span>
+<span class="nc" id="L246">        return permissionRepository.findByType(type);</span>
     }
 
     /**
@@ -249,8 +253,8 @@ import java.util.*;
      */
     @Transactional(readOnly = true)
     public List&lt;Map&lt;String, Object&gt;&gt; buildPermissionTree() {
-<span class="nc" id="L252">        List&lt;Permission&gt; allPermissions = permissionRepository.findAll(Sort.by(Sort.Direction.ASC, &quot;sortOrder&quot;));</span>
-<span class="nc" id="L253">        return buildTree(allPermissions, null);</span>
+<span class="nc" id="L256">        List&lt;Permission&gt; allPermissions = permissionRepository.findAll(Sort.by(Sort.Direction.ASC, &quot;sortOrder&quot;));</span>
+<span class="nc" id="L257">        return buildTree(allPermissions, null);</span>
     }
 
     /**
@@ -261,31 +265,31 @@ import java.util.*;
      * @return 树形结构的节点列表
      */
     private List&lt;Map&lt;String, Object&gt;&gt; buildTree(List&lt;Permission&gt; permissions, Long parentId) {
-<span class="nc" id="L264">        List&lt;Map&lt;String, Object&gt;&gt; tree = new ArrayList&lt;&gt;();</span>
+<span class="nc" id="L268">        List&lt;Map&lt;String, Object&gt;&gt; tree = new ArrayList&lt;&gt;();</span>
         
-<span class="nc bnc" id="L266" title="All 2 branches missed.">        for (Permission permission : permissions) {</span>
-<span class="nc bnc" id="L267" title="All 6 branches missed.">            if ((parentId == null &amp;&amp; permission.getParentId() == null) ||</span>
-<span class="nc bnc" id="L268" title="All 2 branches missed.">                (parentId != null &amp;&amp; parentId.equals(permission.getParentId()))) {</span>
+<span class="nc bnc" id="L270" title="All 2 branches missed.">        for (Permission permission : permissions) {</span>
+<span class="nc bnc" id="L271" title="All 6 branches missed.">            if ((parentId == null &amp;&amp; permission.getParentId() == null) </span>
+<span class="nc bnc" id="L272" title="All 2 branches missed.">                || (parentId != null &amp;&amp; parentId.equals(permission.getParentId()))) {</span>
                 
-<span class="nc" id="L270">                Map&lt;String, Object&gt; node = new HashMap&lt;&gt;();</span>
-<span class="nc" id="L271">                node.put(&quot;id&quot;, permission.getId());</span>
-<span class="nc" id="L272">                node.put(&quot;name&quot;, permission.getName());</span>
-<span class="nc" id="L273">                node.put(&quot;code&quot;, permission.getCode());</span>
-<span class="nc" id="L274">                node.put(&quot;icon&quot;, permission.getIcon());</span>
-<span class="nc" id="L275">                node.put(&quot;type&quot;, permission.getType());</span>
-<span class="nc" id="L276">                node.put(&quot;status&quot;, permission.getStatus());</span>
+<span class="nc" id="L274">                Map&lt;String, Object&gt; node = new HashMap&lt;&gt;();</span>
+<span class="nc" id="L275">                node.put(&quot;id&quot;, permission.getId());</span>
+<span class="nc" id="L276">                node.put(&quot;name&quot;, permission.getName());</span>
+<span class="nc" id="L277">                node.put(&quot;code&quot;, permission.getCode());</span>
+<span class="nc" id="L278">                node.put(&quot;icon&quot;, permission.getIcon());</span>
+<span class="nc" id="L279">                node.put(&quot;type&quot;, permission.getType());</span>
+<span class="nc" id="L280">                node.put(&quot;status&quot;, permission.getStatus());</span>
                 
                 // 递归查找子节点
-<span class="nc" id="L279">                List&lt;Map&lt;String, Object&gt;&gt; children = buildTree(permissions, permission.getId());</span>
-<span class="nc bnc" id="L280" title="All 2 branches missed.">                if (!children.isEmpty()) {</span>
-<span class="nc" id="L281">                    node.put(&quot;children&quot;, children);</span>
+<span class="nc" id="L283">                List&lt;Map&lt;String, Object&gt;&gt; children = buildTree(permissions, permission.getId());</span>
+<span class="nc bnc" id="L284" title="All 2 branches missed.">                if (!children.isEmpty()) {</span>
+<span class="nc" id="L285">                    node.put(&quot;children&quot;, children);</span>
                 }
                 
-<span class="nc" id="L284">                tree.add(node);</span>
+<span class="nc" id="L288">                tree.add(node);</span>
             }
-<span class="nc" id="L286">        }</span>
+<span class="nc" id="L290">        }</span>
         
-<span class="nc" id="L288">        return tree;</span>
+<span class="nc" id="L292">        return tree;</span>
     }
 
     /**
@@ -295,7 +299,7 @@ import java.util.*;
      */
     @Transactional(readOnly = true)
     public long countEnabledPermissions() {
-<span class="nc" id="L298">        return permissionRepository.countByStatus(true);</span>
+<span class="nc" id="L302">        return permissionRepository.countByStatus(true);</span>
     }
 
     /**
@@ -305,7 +309,7 @@ import java.util.*;
      */
     @Transactional(readOnly = true)
     public long countDisabledPermissions() {
-<span class="nc" id="L308">        return permissionRepository.countByStatus(false);</span>
+<span class="nc" id="L312">        return permissionRepository.countByStatus(false);</span>
     }
 
     /**
@@ -316,7 +320,7 @@ import java.util.*;
      */
     @Transactional(readOnly = true)
     public boolean isPermissionInUse(Long permissionId) {
-<span class="nc bnc" id="L319" title="All 2 branches missed.">        return permissionRepository.countRolesByPermissionId(permissionId) &gt; 0;</span>
+<span class="nc bnc" id="L323" title="All 2 branches missed.">        return permissionRepository.countRolesByPermissionId(permissionId) &gt; 0;</span>
     }
 
     /**
@@ -327,7 +331,7 @@ import java.util.*;
      */
     @Transactional(readOnly = true)
     public long getRolesCountByPermission(Long permissionId) {
-<span class="nc" id="L330">        return permissionRepository.countRolesByPermissionId(permissionId);</span>
+<span class="nc" id="L334">        return permissionRepository.countRolesByPermissionId(permissionId);</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

@@ -1,6 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="zh"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>AuditLog.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">demo</a> &gt; <a href="index.source.html" class="el_package">com.example.demo.entity</a> &gt; <span class="el_source">AuditLog.java</span></div><h1>AuditLog.java</h1><pre class="source lang-java linenums">package com.example.demo.entity;
 
-import jakarta.persistence.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EntityListeners;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
@@ -156,8 +162,8 @@ public class AuditLog {
      * 无参构造函数
      * &lt;p&gt;JPA规范要求必须提供无参构造函数&lt;/p&gt;
      */
-<span class="fc" id="L159">    public AuditLog() {</span>
-<span class="fc" id="L160">    }</span>
+<span class="fc" id="L165">    public AuditLog() {</span>
+<span class="fc" id="L166">    }</span>
 
     /**
      * 便捷构造函数
@@ -169,13 +175,13 @@ public class AuditLog {
      * @param description 操作描述
      */
     public AuditLog(String operator, String operationType, String targetType, 
-<span class="fc" id="L172">                   String targetId, String description) {</span>
-<span class="fc" id="L173">        this.operator = operator;</span>
-<span class="fc" id="L174">        this.operationType = operationType;</span>
-<span class="fc" id="L175">        this.targetType = targetType;</span>
-<span class="fc" id="L176">        this.targetId = targetId;</span>
-<span class="fc" id="L177">        this.description = description;</span>
-<span class="fc" id="L178">    }</span>
+<span class="fc" id="L178">                   String targetId, String description) {</span>
+<span class="fc" id="L179">        this.operator = operator;</span>
+<span class="fc" id="L180">        this.operationType = operationType;</span>
+<span class="fc" id="L181">        this.targetType = targetType;</span>
+<span class="fc" id="L182">        this.targetId = targetId;</span>
+<span class="fc" id="L183">        this.description = description;</span>
+<span class="fc" id="L184">    }</span>
 
     // Getters and Setters
     
@@ -185,7 +191,7 @@ public class AuditLog {
      * @return 日志ID
      */
     public Long getId() {
-<span class="nc" id="L188">        return id;</span>
+<span class="nc" id="L194">        return id;</span>
     }
 
     /**
@@ -194,8 +200,8 @@ public class AuditLog {
      * @param id 日志ID
      */
     public void setId(Long id) {
-<span class="nc" id="L197">        this.id = id;</span>
-<span class="nc" id="L198">    }</span>
+<span class="nc" id="L203">        this.id = id;</span>
+<span class="nc" id="L204">    }</span>
 
     /**
      * 获取操作人
@@ -203,7 +209,7 @@ public class AuditLog {
      * @return 操作人用户名
      */
     public String getOperator() {
-<span class="nc" id="L206">        return operator;</span>
+<span class="nc" id="L212">        return operator;</span>
     }
 
     /**
@@ -212,8 +218,8 @@ public class AuditLog {
      * @param operator 操作人用户名
      */
     public void setOperator(String operator) {
-<span class="nc" id="L215">        this.operator = operator;</span>
-<span class="nc" id="L216">    }</span>
+<span class="nc" id="L221">        this.operator = operator;</span>
+<span class="nc" id="L222">    }</span>
 
     /**
      * 获取操作类型
@@ -221,7 +227,7 @@ public class AuditLog {
      * @return 操作类型
      */
     public String getOperationType() {
-<span class="nc" id="L224">        return operationType;</span>
+<span class="nc" id="L230">        return operationType;</span>
     }
 
     /**
@@ -230,8 +236,8 @@ public class AuditLog {
      * @param operationType 操作类型
      */
     public void setOperationType(String operationType) {
-<span class="nc" id="L233">        this.operationType = operationType;</span>
-<span class="nc" id="L234">    }</span>
+<span class="nc" id="L239">        this.operationType = operationType;</span>
+<span class="nc" id="L240">    }</span>
 
     /**
      * 获取目标类型
@@ -239,7 +245,7 @@ public class AuditLog {
      * @return 目标类型
      */
     public String getTargetType() {
-<span class="nc" id="L242">        return targetType;</span>
+<span class="nc" id="L248">        return targetType;</span>
     }
 
     /**
@@ -248,8 +254,8 @@ public class AuditLog {
      * @param targetType 目标类型
      */
     public void setTargetType(String targetType) {
-<span class="nc" id="L251">        this.targetType = targetType;</span>
-<span class="nc" id="L252">    }</span>
+<span class="nc" id="L257">        this.targetType = targetType;</span>
+<span class="nc" id="L258">    }</span>
 
     /**
      * 获取目标ID
@@ -257,7 +263,7 @@ public class AuditLog {
      * @return 目标ID
      */
     public String getTargetId() {
-<span class="nc" id="L260">        return targetId;</span>
+<span class="nc" id="L266">        return targetId;</span>
     }
 
     /**
@@ -266,8 +272,8 @@ public class AuditLog {
      * @param targetId 目标ID
      */
     public void setTargetId(String targetId) {
-<span class="nc" id="L269">        this.targetId = targetId;</span>
-<span class="nc" id="L270">    }</span>
+<span class="nc" id="L275">        this.targetId = targetId;</span>
+<span class="nc" id="L276">    }</span>
 
     /**
      * 获取操作描述
@@ -275,7 +281,7 @@ public class AuditLog {
      * @return 操作描述
      */
     public String getDescription() {
-<span class="nc" id="L278">        return description;</span>
+<span class="nc" id="L284">        return description;</span>
     }
 
     /**
@@ -284,8 +290,8 @@ public class AuditLog {
      * @param description 操作描述
      */
     public void setDescription(String description) {
-<span class="nc" id="L287">        this.description = description;</span>
-<span class="nc" id="L288">    }</span>
+<span class="nc" id="L293">        this.description = description;</span>
+<span class="nc" id="L294">    }</span>
 
     /**
      * 获取旧值
@@ -293,7 +299,7 @@ public class AuditLog {
      * @return 修改前的值（JSON格式）
      */
     public String getOldValue() {
-<span class="nc" id="L296">        return oldValue;</span>
+<span class="nc" id="L302">        return oldValue;</span>
     }
 
     /**
@@ -302,8 +308,8 @@ public class AuditLog {
      * @param oldValue 修改前的值
      */
     public void setOldValue(String oldValue) {
-<span class="fc" id="L305">        this.oldValue = oldValue;</span>
-<span class="fc" id="L306">    }</span>
+<span class="fc" id="L311">        this.oldValue = oldValue;</span>
+<span class="fc" id="L312">    }</span>
 
     /**
      * 获取新值
@@ -311,7 +317,7 @@ public class AuditLog {
      * @return 修改后的值（JSON格式）
      */
     public String getNewValue() {
-<span class="nc" id="L314">        return newValue;</span>
+<span class="nc" id="L320">        return newValue;</span>
     }
 
     /**
@@ -320,8 +326,8 @@ public class AuditLog {
      * @param newValue 修改后的值
      */
     public void setNewValue(String newValue) {
-<span class="fc" id="L323">        this.newValue = newValue;</span>
-<span class="fc" id="L324">    }</span>
+<span class="fc" id="L329">        this.newValue = newValue;</span>
+<span class="fc" id="L330">    }</span>
 
     /**
      * 获取IP地址
@@ -329,7 +335,7 @@ public class AuditLog {
      * @return 操作人IP地址
      */
     public String getIpAddress() {
-<span class="nc" id="L332">        return ipAddress;</span>
+<span class="nc" id="L338">        return ipAddress;</span>
     }
 
     /**
@@ -338,8 +344,8 @@ public class AuditLog {
      * @param ipAddress IP地址
      */
     public void setIpAddress(String ipAddress) {
-<span class="fc" id="L341">        this.ipAddress = ipAddress;</span>
-<span class="fc" id="L342">    }</span>
+<span class="fc" id="L347">        this.ipAddress = ipAddress;</span>
+<span class="fc" id="L348">    }</span>
 
     /**
      * 获取创建时间
@@ -347,7 +353,7 @@ public class AuditLog {
      * @return 操作发生的时间戳
      */
     public LocalDateTime getCreateTime() {
-<span class="nc" id="L350">        return createTime;</span>
+<span class="nc" id="L356">        return createTime;</span>
     }
 
     /**
@@ -356,8 +362,8 @@ public class AuditLog {
      * @param createTime 创建时间戳
      */
     public void setCreateTime(LocalDateTime createTime) {
-<span class="nc" id="L359">        this.createTime = createTime;</span>
-<span class="nc" id="L360">    }</span>
+<span class="nc" id="L365">        this.createTime = createTime;</span>
+<span class="nc" id="L366">    }</span>
 
     /**
      * 生成审计日志的字符串表示
@@ -367,13 +373,13 @@ public class AuditLog {
      */
     @Override
     public String toString() {
-<span class="nc" id="L370">        return &quot;AuditLog{&quot; +</span>
-                &quot;id=&quot; + id +
-                &quot;, operator='&quot; + operator + '\'' +
-                &quot;, operationType='&quot; + operationType + '\'' +
-                &quot;, targetType='&quot; + targetType + '\'' +
-                &quot;, targetId='&quot; + targetId + '\'' +
-                &quot;, createTime=&quot; + createTime +
+<span class="nc" id="L376">        return &quot;AuditLog{&quot; </span>
+                + &quot;id=&quot; + id 
+                + &quot;, operator='&quot; + operator + '\'' 
+                + &quot;, operationType='&quot; + operationType + '\'' 
+                + &quot;, targetType='&quot; + targetType + '\'' 
+                + &quot;, targetId='&quot; + targetId + '\'' 
+                + &quot;, createTime=&quot; + createTime +
                 '}';
     }
 }

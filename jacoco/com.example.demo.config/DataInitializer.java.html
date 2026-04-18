@@ -245,36 +245,36 @@ import java.util.stream.Collectors;
                 // ============ 初始化用户 ============
                 // 管理员账号
 <span class="fc" id="L247">                User admin = new User(&quot;admin&quot;, &quot;admin@example.com&quot;, &quot;管理员&quot;);</span>
-<span class="fc" id="L248">                admin.setPhone(&quot;13800138000&quot;);</span>
-<span class="fc" id="L249">                admin.setAge(30);</span>
-<span class="fc" id="L250">                admin.setPassword(passwordEncoder.encode(&quot;admin123&quot;));</span>
+<span class="fc" id="L248">                admin.setPassword(passwordEncoder.encode(&quot;admin123&quot;));</span>
+<span class="fc" id="L249">                admin.setPhone(&quot;13800138000&quot;);</span>
+<span class="fc" id="L250">                admin.setAge(30);</span>
 <span class="fc" id="L251">                Set&lt;Role&gt; adminRoles = new HashSet&lt;&gt;();</span>
 <span class="fc" id="L252">                adminRoles.add(adminRole);</span>
 <span class="fc" id="L253">                admin.setRoles(adminRoles);</span>
                 
                 // 普通用户1
 <span class="fc" id="L256">                User user1 = new User(&quot;zhangsan&quot;, &quot;zhangsan@example.com&quot;, &quot;张三&quot;);</span>
-<span class="fc" id="L257">                user1.setPhone(&quot;13800138001&quot;);</span>
-<span class="fc" id="L258">                user1.setAge(25);</span>
-<span class="fc" id="L259">                user1.setPassword(passwordEncoder.encode(&quot;user123&quot;));</span>
+<span class="fc" id="L257">                user1.setPassword(passwordEncoder.encode(&quot;user123&quot;));</span>
+<span class="fc" id="L258">                user1.setPhone(&quot;13800138001&quot;);</span>
+<span class="fc" id="L259">                user1.setAge(25);</span>
 <span class="fc" id="L260">                Set&lt;Role&gt; user1Roles = new HashSet&lt;&gt;();</span>
 <span class="fc" id="L261">                user1Roles.add(userRole);</span>
 <span class="fc" id="L262">                user1.setRoles(user1Roles);</span>
                 
                 // 普通用户2
 <span class="fc" id="L265">                User user2 = new User(&quot;lisi&quot;, &quot;lisi@example.com&quot;, &quot;李四&quot;);</span>
-<span class="fc" id="L266">                user2.setPhone(&quot;13800138002&quot;);</span>
-<span class="fc" id="L267">                user2.setAge(30);</span>
-<span class="fc" id="L268">                user2.setPassword(passwordEncoder.encode(&quot;user123&quot;));</span>
+<span class="fc" id="L266">                user2.setPassword(passwordEncoder.encode(&quot;user123&quot;));</span>
+<span class="fc" id="L267">                user2.setPhone(&quot;13800138002&quot;);</span>
+<span class="fc" id="L268">                user2.setAge(30);</span>
 <span class="fc" id="L269">                Set&lt;Role&gt; user2Roles = new HashSet&lt;&gt;();</span>
 <span class="fc" id="L270">                user2Roles.add(userRole);</span>
 <span class="fc" id="L271">                user2.setRoles(user2Roles);</span>
                 
                 // 编辑者用户
 <span class="fc" id="L274">                User user3 = new User(&quot;wangwu&quot;, &quot;wangwu@example.com&quot;, &quot;王五&quot;);</span>
-<span class="fc" id="L275">                user3.setPhone(&quot;13800138003&quot;);</span>
-<span class="fc" id="L276">                user3.setAge(28);</span>
-<span class="fc" id="L277">                user3.setPassword(passwordEncoder.encode(&quot;user123&quot;));</span>
+<span class="fc" id="L275">                user3.setPassword(passwordEncoder.encode(&quot;user123&quot;));</span>
+<span class="fc" id="L276">                user3.setPhone(&quot;13800138003&quot;);</span>
+<span class="fc" id="L277">                user3.setAge(28);</span>
 <span class="fc" id="L278">                Set&lt;Role&gt; user3Roles = new HashSet&lt;&gt;();</span>
 <span class="fc" id="L279">                user3Roles.add(editorRole);</span>
 <span class="fc" id="L280">                user3.setRoles(user3Roles);</span>

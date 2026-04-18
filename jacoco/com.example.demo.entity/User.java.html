@@ -1,47 +1,60 @@
 <?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="zh"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>User.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">demo</a> &gt; <a href="index.source.html" class="el_package">com.example.demo.entity</a> &gt; <span class="el_source">User.java</span></div><h1>User.java</h1><pre class="source lang-java linenums">package com.example.demo.entity;
 
-import jakarta.persistence.*;
-import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Size;
-import org.springframework.data.annotation.CreatedDate;
-import org.springframework.data.annotation.LastModifiedDate;
-import org.springframework.data.jpa.domain.support.AuditingEntityListener;
-
 import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EntityListeners;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinTable;
+import jakarta.persistence.ManyToMany;
+import jakarta.persistence.Table;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
+
 /**
  * 用户实体类
- * &lt;p&gt;对应数据库中的users表，存储系统用户的基本信息、认证信息和关联关系。&lt;/p&gt;
+ * &lt;p&gt;
+ * 对应数据库中的users表，存储系统用户的基本信息、认证信息和关联关系。
+ * &lt;/p&gt;
  * 
  * &lt;h2&gt;主要功能&lt;/h2&gt;
  * &lt;ul&gt;
- *   &lt;li&gt;用户基本信息管理（用户名、邮箱、姓名、电话等）&lt;/li&gt;
- *   &lt;li&gt;用户认证信息（密码加密存储）&lt;/li&gt;
- *   &lt;li&gt;多角色关联（通过user_role中间表）&lt;/li&gt;
- *   &lt;li&gt;用户状态管理（启用/禁用）&lt;/li&gt;
- *   &lt;li&gt;登录信息追踪（最后登录时间、IP）&lt;/li&gt;
- *   &lt;li&gt;审计字段自动维护（创建时间、更新时间）&lt;/li&gt;
+ * &lt;li&gt;用户基本信息管理（用户名、邮箱、姓名、电话等）&lt;/li&gt;
+ * &lt;li&gt;用户认证信息（密码加密存储）&lt;/li&gt;
+ * &lt;li&gt;多角色关联（通过user_role中间表）&lt;/li&gt;
+ * &lt;li&gt;用户状态管理（启用/禁用）&lt;/li&gt;
+ * &lt;li&gt;登录信息追踪（最后登录时间、IP）&lt;/li&gt;
+ * &lt;li&gt;审计字段自动维护（创建时间、更新时间）&lt;/li&gt;
  * &lt;/ul&gt;
  * 
  * &lt;h2&gt;数据约束&lt;/h2&gt;
  * &lt;ul&gt;
- *   &lt;li&gt;用户名：3-50个字符，全局唯一，必填&lt;/li&gt;
- *   &lt;li&gt;邮箱：标准邮箱格式，全局唯一，必填&lt;/li&gt;
- *   &lt;li&gt;姓名：最多100个字符，必填&lt;/li&gt;
- *   &lt;li&gt;密码：必填，建议加密存储&lt;/li&gt;
- *   &lt;li&gt;电话：可选，最多20个字符&lt;/li&gt;
- *   &lt;li&gt;头像URL：可选，最多500个字符&lt;/li&gt;
- *   &lt;li&gt;备注：可选，最多500个字符&lt;/li&gt;
+ * &lt;li&gt;用户名：3-50个字符，全局唯一，必填&lt;/li&gt;
+ * &lt;li&gt;邮箱：标准邮箱格式，全局唯一，必填&lt;/li&gt;
+ * &lt;li&gt;姓名：最多100个字符，必填&lt;/li&gt;
+ * &lt;li&gt;密码：必填，建议加密存储&lt;/li&gt;
+ * &lt;li&gt;电话：可选，最多20个字符&lt;/li&gt;
+ * &lt;li&gt;头像URL：可选，最多500个字符&lt;/li&gt;
+ * &lt;li&gt;备注：可选，最多500个字符&lt;/li&gt;
  * &lt;/ul&gt;
  * 
  * &lt;h3&gt;关联关系&lt;/h3&gt;
  * &lt;ul&gt;
- *   &lt;li&gt;与Role：多对多关系，通过user_role中间表关联&lt;/li&gt;
- *   &lt;li&gt;一个用户可以拥有多个角色&lt;/li&gt;
- *   &lt;li&gt;使用EAGER加载策略，确保权限验证时能立即获取角色信息&lt;/li&gt;
+ * &lt;li&gt;与Role：多对多关系，通过user_role中间表关联&lt;/li&gt;
+ * &lt;li&gt;一个用户可以拥有多个角色&lt;/li&gt;
+ * &lt;li&gt;使用EAGER加载策略，确保权限验证时能立即获取角色信息&lt;/li&gt;
  * &lt;/ul&gt;
  * 
  * @author Demo Team
@@ -65,7 +78,9 @@ public class User {
 
     /**
      * 用户名，用于登录和身份标识
-     * &lt;p&gt;约束：3-50个字符，全局唯一，不能为空&lt;/p&gt;
+     * &lt;p&gt;
+     * 约束：3-50个字符，全局唯一，不能为空
+     * &lt;/p&gt;
      */
     @NotBlank(message = &quot;用户名不能为空&quot;)
     @Size(min = 3, max = 50, message = &quot;用户名长度必须在3-50个字符之间&quot;)
@@ -74,7 +89,9 @@ public class User {
 
     /**
      * 邮箱地址，用于联系和密码找回
-     * &lt;p&gt;约束：标准邮箱格式，全局唯一，不能为空&lt;/p&gt;
+     * &lt;p&gt;
+     * 约束：标准邮箱格式，全局唯一，不能为空
+     * &lt;/p&gt;
      */
     @NotBlank(message = &quot;邮箱不能为空&quot;)
     @Email(message = &quot;邮箱格式不正确&quot;)
@@ -83,7 +100,9 @@ public class User {
 
     /**
      * 真实姓名，用于显示
-     * &lt;p&gt;约束：最多100个字符，不能为空&lt;/p&gt;
+     * &lt;p&gt;
+     * 约束：最多100个字符，不能为空
+     * &lt;/p&gt;
      */
     @NotBlank(message = &quot;姓名不能为空&quot;)
     @Size(max = 100, message = &quot;姓名长度不能超过100个字符&quot;)
@@ -92,20 +111,26 @@ public class User {
 
     /**
      * 联系电话
-     * &lt;p&gt;约束：可选，最多20个字符&lt;/p&gt;
+     * &lt;p&gt;
+     * 约束：可选，最多20个字符
+     * &lt;/p&gt;
      */
     @Column(length = 20)
     private String phone;
 
     /**
      * 年龄
-     * &lt;p&gt;约束：可选，整数类型&lt;/p&gt;
+     * &lt;p&gt;
+     * 约束：可选，整数类型
+     * &lt;/p&gt;
      */
     private Integer age;
 
     /**
      * 登录密码（应加密存储）
-     * &lt;p&gt;约束：不能为空，建议使用BCrypt等强哈希算法加密&lt;/p&gt;
+     * &lt;p&gt;
+     * 约束：不能为空，建议使用BCrypt等强哈希算法加密
+     * &lt;/p&gt;
      */
     @NotBlank(message = &quot;密码不能为空&quot;)
     @Column(nullable = false)
@@ -113,64 +138,80 @@ public class User {
 
     /**
      * 角色标识（保留字段，用于向后兼容）
-     * &lt;p&gt;默认值为&quot;USER&quot;，新的权限系统使用roles集合&lt;/p&gt;
+     * &lt;p&gt;
+     * 默认值为&quot;USER&quot;，新的权限系统使用roles集合
+     * &lt;/p&gt;
      * 
      * @deprecated 请使用 {@link #roles} 字段进行权限管理
      */
-<span class="fc" id="L120">    @Column(length = 50)</span>
+<span class="fc" id="L147">    @Column(length = 50)</span>
     private String role = &quot;USER&quot;; // 默认角色为USER（保留字段用于兼容）
 
     /**
      * 用户拥有的角色集合
-     * &lt;p&gt;关联关系：多对多，通过user_role中间表关联&lt;/p&gt;
-     * &lt;p&gt;加载策略：EAGER（立即加载），确保权限验证时可用&lt;/p&gt;
+     * &lt;p&gt;
+     * 关联关系：多对多，通过user_role中间表关联
+     * &lt;/p&gt;
+     * &lt;p&gt;
+     * 加载策略：EAGER（立即加载），确保权限验证时可用
+     * &lt;/p&gt;
      */
-<span class="fc" id="L128">    @ManyToMany(fetch = FetchType.EAGER)</span>
-    @JoinTable(
-        name = &quot;user_role&quot;,
-        joinColumns = @JoinColumn(name = &quot;user_id&quot;),
-        inverseJoinColumns = @JoinColumn(name = &quot;role_id&quot;)
-    )
+<span class="fc" id="L159">    @ManyToMany(fetch = FetchType.EAGER)</span>
+    @JoinTable(name = &quot;user_role&quot;, joinColumns = @JoinColumn(name = &quot;user_id&quot;), inverseJoinColumns = @JoinColumn(name = &quot;role_id&quot;))
     private Set&lt;Role&gt; roles = new HashSet&lt;&gt;();
 
     /**
      * 用户状态
-     * &lt;p&gt;true: 启用（可登录），false: 禁用（不可登录）&lt;/p&gt;
-     * &lt;p&gt;默认值：true（启用）&lt;/p&gt;
+     * &lt;p&gt;
+     * true: 启用（可登录），false: 禁用（不可登录）
+     * &lt;/p&gt;
+     * &lt;p&gt;
+     * 默认值：true（启用）
+     * &lt;/p&gt;
      */
-<span class="fc" id="L141">    @Column(nullable = false)</span>
-<span class="fc" id="L142">    private Boolean status = true; // true: 启用, false: 禁用</span>
+<span class="fc" id="L172">    @Column(nullable = false)</span>
+<span class="fc" id="L173">    private Boolean status = true; // true: 启用, false: 禁用</span>
 
     /**
      * 头像URL地址
-     * &lt;p&gt;约束：可选，最多500个字符，支持HTTP/HTTPS链接或Base64&lt;/p&gt;
+     * &lt;p&gt;
+     * 约束：可选，最多500个字符，支持HTTP/HTTPS链接或Base64
+     * &lt;/p&gt;
      */
     @Column(length = 500)
     private String avatar;
 
     /**
      * 最后登录时间
-     * &lt;p&gt;每次成功登录后自动更新&lt;/p&gt;
+     * &lt;p&gt;
+     * 每次成功登录后自动更新
+     * &lt;/p&gt;
      */
     private LocalDateTime lastLoginTime;
 
     /**
      * 最后登录IP地址
-     * &lt;p&gt;约束：可选，最多50个字符，用于安全审计&lt;/p&gt;
+     * &lt;p&gt;
+     * 约束：可选，最多50个字符，用于安全审计
+     * &lt;/p&gt;
      */
     @Column(length = 50)
     private String lastLoginIp;
 
     /**
      * 备注信息
-     * &lt;p&gt;约束：可选，最多500个字符，用于管理员记录特殊说明&lt;/p&gt;
+     * &lt;p&gt;
+     * 约束：可选，最多500个字符，用于管理员记录特殊说明
+     * &lt;/p&gt;
      */
     @Column(length = 500)
     private String remark;
 
     /**
      * 创建时间，由JPA审计功能自动填充
-     * &lt;p&gt;特性：不可更新，仅在创建时设置&lt;/p&gt;
+     * &lt;p&gt;
+     * 特性：不可更新，仅在创建时设置
+     * &lt;/p&gt;
      */
     @CreatedDate
     @Column(updatable = false)
@@ -178,40 +219,44 @@ public class User {
 
     /**
      * 更新时间，由JPA审计功能自动维护
-     * &lt;p&gt;特性：每次更新实体时自动刷新&lt;/p&gt;
+     * &lt;p&gt;
+     * 特性：每次更新实体时自动刷新
+     * &lt;/p&gt;
      */
     @LastModifiedDate
     private LocalDateTime updateTime;
 
     /**
      * 无参构造函数
-     * &lt;p&gt;JPA规范要求必须提供无参构造函数&lt;/p&gt;
+     * &lt;p&gt;
+     * JPA规范要求必须提供无参构造函数
+     * &lt;/p&gt;
      */
-<span class="fc" id="L190">    public User() {</span>
-<span class="fc" id="L191">    }</span>
+<span class="fc" id="L235">    public User() {</span>
+<span class="fc" id="L236">    }</span>
 
     /**
      * 便捷构造函数
      * 
      * @param username 用户名
-     * @param email 邮箱
-     * @param name 姓名
+     * @param email    邮箱
+     * @param name     姓名
      */
-<span class="fc" id="L200">    public User(String username, String email, String name) {</span>
-<span class="fc" id="L201">        this.username = username;</span>
-<span class="fc" id="L202">        this.email = email;</span>
-<span class="fc" id="L203">        this.name = name;</span>
-<span class="fc" id="L204">    }</span>
+<span class="fc" id="L245">    public User(String username, String email, String name) {</span>
+<span class="fc" id="L246">        this.username = username;</span>
+<span class="fc" id="L247">        this.email = email;</span>
+<span class="fc" id="L248">        this.name = name;</span>
+<span class="fc" id="L249">    }</span>
 
     // Getters and Setters
-    
+
     /**
      * 获取用户ID
      * 
      * @return 用户ID
      */
     public Long getId() {
-<span class="fc" id="L214">        return id;</span>
+<span class="fc" id="L259">        return id;</span>
     }
 
     /**
@@ -220,8 +265,8 @@ public class User {
      * @param id 用户ID
      */
     public void setId(Long id) {
-<span class="fc" id="L223">        this.id = id;</span>
-<span class="fc" id="L224">    }</span>
+<span class="fc" id="L268">        this.id = id;</span>
+<span class="fc" id="L269">    }</span>
 
     /**
      * 获取用户名
@@ -229,7 +274,7 @@ public class User {
      * @return 用户名
      */
     public String getUsername() {
-<span class="fc" id="L232">        return username;</span>
+<span class="fc" id="L277">        return username;</span>
     }
 
     /**
@@ -238,8 +283,8 @@ public class User {
      * @param username 用户名
      */
     public void setUsername(String username) {
-<span class="fc" id="L241">        this.username = username;</span>
-<span class="fc" id="L242">    }</span>
+<span class="fc" id="L286">        this.username = username;</span>
+<span class="fc" id="L287">    }</span>
 
     /**
      * 获取邮箱
@@ -247,7 +292,7 @@ public class User {
      * @return 邮箱地址
      */
     public String getEmail() {
-<span class="fc" id="L250">        return email;</span>
+<span class="fc" id="L295">        return email;</span>
     }
 
     /**
@@ -256,8 +301,8 @@ public class User {
      * @param email 邮箱地址
      */
     public void setEmail(String email) {
-<span class="fc" id="L259">        this.email = email;</span>
-<span class="fc" id="L260">    }</span>
+<span class="fc" id="L304">        this.email = email;</span>
+<span class="fc" id="L305">    }</span>
 
     /**
      * 获取姓名
@@ -265,7 +310,7 @@ public class User {
      * @return 真实姓名
      */
     public String getName() {
-<span class="fc" id="L268">        return name;</span>
+<span class="fc" id="L313">        return name;</span>
     }
 
     /**
@@ -274,8 +319,8 @@ public class User {
      * @param name 真实姓名
      */
     public void setName(String name) {
-<span class="fc" id="L277">        this.name = name;</span>
-<span class="fc" id="L278">    }</span>
+<span class="fc" id="L322">        this.name = name;</span>
+<span class="fc" id="L323">    }</span>
 
     /**
      * 获取电话
@@ -283,7 +328,7 @@ public class User {
      * @return 联系电话
      */
     public String getPhone() {
-<span class="fc" id="L286">        return phone;</span>
+<span class="fc" id="L331">        return phone;</span>
     }
 
     /**
@@ -292,8 +337,8 @@ public class User {
      * @param phone 联系电话
      */
     public void setPhone(String phone) {
-<span class="fc" id="L295">        this.phone = phone;</span>
-<span class="fc" id="L296">    }</span>
+<span class="fc" id="L340">        this.phone = phone;</span>
+<span class="fc" id="L341">    }</span>
 
     /**
      * 获取年龄
@@ -301,7 +346,7 @@ public class User {
      * @return 年龄
      */
     public Integer getAge() {
-<span class="fc" id="L304">        return age;</span>
+<span class="fc" id="L349">        return age;</span>
     }
 
     /**
@@ -310,8 +355,8 @@ public class User {
      * @param age 年龄
      */
     public void setAge(Integer age) {
-<span class="fc" id="L313">        this.age = age;</span>
-<span class="fc" id="L314">    }</span>
+<span class="fc" id="L358">        this.age = age;</span>
+<span class="fc" id="L359">    }</span>
 
     /**
      * 获取密码
@@ -319,7 +364,7 @@ public class User {
      * @return 加密后的密码
      */
     public String getPassword() {
-<span class="fc" id="L322">        return password;</span>
+<span class="fc" id="L367">        return password;</span>
     }
 
     /**
@@ -328,8 +373,8 @@ public class User {
      * @param password 明文或加密后的密码
      */
     public void setPassword(String password) {
-<span class="fc" id="L331">        this.password = password;</span>
-<span class="fc" id="L332">    }</span>
+<span class="fc" id="L376">        this.password = password;</span>
+<span class="fc" id="L377">    }</span>
 
     /**
      * 获取角色标识（兼容字段）
@@ -338,7 +383,7 @@ public class User {
      * @deprecated 请使用 {@link #getRoles()} 获取角色集合
      */
     public String getRole() {
-<span class="fc" id="L341">        return role;</span>
+<span class="fc" id="L386">        return role;</span>
     }
 
     /**
@@ -348,8 +393,8 @@ public class User {
      * @deprecated 请使用 {@link #setRoles(Set)} 设置角色集合
      */
     public void setRole(String role) {
-<span class="fc" id="L351">        this.role = role;</span>
-<span class="fc" id="L352">    }</span>
+<span class="fc" id="L396">        this.role = role;</span>
+<span class="fc" id="L397">    }</span>
 
     /**
      * 获取用户拥有的角色集合
@@ -357,7 +402,7 @@ public class User {
      * @return 角色集合
      */
     public Set&lt;Role&gt; getRoles() {
-<span class="fc" id="L360">        return roles;</span>
+<span class="fc" id="L405">        return roles;</span>
     }
 
     /**
@@ -366,8 +411,8 @@ public class User {
      * @param roles 角色集合
      */
     public void setRoles(Set&lt;Role&gt; roles) {
-<span class="fc" id="L369">        this.roles = roles;</span>
-<span class="fc" id="L370">    }</span>
+<span class="fc" id="L414">        this.roles = roles;</span>
+<span class="fc" id="L415">    }</span>
 
     /**
      * 获取用户状态
@@ -375,7 +420,7 @@ public class User {
      * @return true表示启用，false表示禁用
      */
     public Boolean getStatus() {
-<span class="fc" id="L378">        return status;</span>
+<span class="fc" id="L423">        return status;</span>
     }
 
     /**
@@ -384,8 +429,8 @@ public class User {
      * @param status true表示启用，false表示禁用
      */
     public void setStatus(Boolean status) {
-<span class="fc" id="L387">        this.status = status;</span>
-<span class="fc" id="L388">    }</span>
+<span class="fc" id="L432">        this.status = status;</span>
+<span class="fc" id="L433">    }</span>
 
     /**
      * 获取头像URL
@@ -393,7 +438,7 @@ public class User {
      * @return 头像地址
      */
     public String getAvatar() {
-<span class="fc" id="L396">        return avatar;</span>
+<span class="fc" id="L441">        return avatar;</span>
     }
 
     /**
@@ -402,8 +447,8 @@ public class User {
      * @param avatar 头像地址
      */
     public void setAvatar(String avatar) {
-<span class="fc" id="L405">        this.avatar = avatar;</span>
-<span class="fc" id="L406">    }</span>
+<span class="fc" id="L450">        this.avatar = avatar;</span>
+<span class="fc" id="L451">    }</span>
 
     /**
      * 获取最后登录时间
@@ -411,7 +456,7 @@ public class User {
      * @return 最后登录时间戳
      */
     public LocalDateTime getLastLoginTime() {
-<span class="fc" id="L414">        return lastLoginTime;</span>
+<span class="fc" id="L459">        return lastLoginTime;</span>
     }
 
     /**
@@ -420,8 +465,8 @@ public class User {
      * @param lastLoginTime 最后登录时间戳
      */
     public void setLastLoginTime(LocalDateTime lastLoginTime) {
-<span class="fc" id="L423">        this.lastLoginTime = lastLoginTime;</span>
-<span class="fc" id="L424">    }</span>
+<span class="fc" id="L468">        this.lastLoginTime = lastLoginTime;</span>
+<span class="fc" id="L469">    }</span>
 
     /**
      * 获取最后登录IP
@@ -429,7 +474,7 @@ public class User {
      * @return IP地址
      */
     public String getLastLoginIp() {
-<span class="fc" id="L432">        return lastLoginIp;</span>
+<span class="fc" id="L477">        return lastLoginIp;</span>
     }
 
     /**
@@ -438,8 +483,8 @@ public class User {
      * @param lastLoginIp IP地址
      */
     public void setLastLoginIp(String lastLoginIp) {
-<span class="fc" id="L441">        this.lastLoginIp = lastLoginIp;</span>
-<span class="fc" id="L442">    }</span>
+<span class="fc" id="L486">        this.lastLoginIp = lastLoginIp;</span>
+<span class="fc" id="L487">    }</span>
 
     /**
      * 获取备注信息
@@ -447,7 +492,7 @@ public class User {
      * @return 备注内容
      */
     public String getRemark() {
-<span class="fc" id="L450">        return remark;</span>
+<span class="fc" id="L495">        return remark;</span>
     }
 
     /**
@@ -456,8 +501,8 @@ public class User {
      * @param remark 备注内容
      */
     public void setRemark(String remark) {
-<span class="fc" id="L459">        this.remark = remark;</span>
-<span class="fc" id="L460">    }</span>
+<span class="fc" id="L504">        this.remark = remark;</span>
+<span class="fc" id="L505">    }</span>
 
     /**
      * 获取创建时间
@@ -465,7 +510,7 @@ public class User {
      * @return 创建时间戳
      */
     public LocalDateTime getCreateTime() {
-<span class="fc" id="L468">        return createTime;</span>
+<span class="fc" id="L513">        return createTime;</span>
     }
 
     /**
@@ -474,8 +519,8 @@ public class User {
      * @param createTime 创建时间戳
      */
     public void setCreateTime(LocalDateTime createTime) {
-<span class="fc" id="L477">        this.createTime = createTime;</span>
-<span class="fc" id="L478">    }</span>
+<span class="fc" id="L522">        this.createTime = createTime;</span>
+<span class="fc" id="L523">    }</span>
 
     /**
      * 获取更新时间
@@ -483,7 +528,7 @@ public class User {
      * @return 最后更新时间戳
      */
     public LocalDateTime getUpdateTime() {
-<span class="fc" id="L486">        return updateTime;</span>
+<span class="fc" id="L531">        return updateTime;</span>
     }
 
     /**
@@ -492,18 +537,20 @@ public class User {
      * @param updateTime 更新时间戳
      */
     public void setUpdateTime(LocalDateTime updateTime) {
-<span class="fc" id="L495">        this.updateTime = updateTime;</span>
-<span class="fc" id="L496">    }</span>
+<span class="fc" id="L540">        this.updateTime = updateTime;</span>
+<span class="fc" id="L541">    }</span>
 
     /**
      * 生成用户的字符串表示
-     * &lt;p&gt;包含主要字段信息，用于调试和日志记录&lt;/p&gt;
+     * &lt;p&gt;
+     * 包含主要字段信息，用于调试和日志记录
+     * &lt;/p&gt;
      * 
      * @return 用户信息的字符串形式
      */
     @Override
     public String toString() {
-<span class="fc" id="L506">        return &quot;User{&quot; +</span>
+<span class="fc" id="L553">        return &quot;User{&quot; +</span>
                 &quot;id=&quot; + id +
                 &quot;, username='&quot; + username + '\'' +
                 &quot;, email='&quot; + email + '\'' +

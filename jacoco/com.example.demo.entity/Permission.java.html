@@ -1,6 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="zh"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Permission.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">demo</a> &gt; <a href="index.source.html" class="el_package">com.example.demo.entity</a> &gt; <span class="el_source">Permission.java</span></div><h1>Permission.java</h1><pre class="source lang-java linenums">package com.example.demo.entity;
 
-import jakarta.persistence.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EntityListeners;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.ManyToMany;
+import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import org.springframework.data.annotation.CreatedDate;
@@ -121,8 +128,8 @@ public class Permission {
      * &lt;p&gt;true: 启用（可分配给角色），false: 禁用（不可分配）&lt;/p&gt;
      * &lt;p&gt;默认值：true（启用）&lt;/p&gt;
      */
-<span class="fc" id="L124">    @Column(nullable = false)</span>
-<span class="fc" id="L125">    private Boolean status = true;</span>
+<span class="fc" id="L131">    @Column(nullable = false)</span>
+<span class="fc" id="L132">    private Boolean status = true;</span>
 
     /**
      * 父权限ID，用于构建树形结构
@@ -137,8 +144,8 @@ public class Permission {
      * &lt;p&gt;约束：可选，默认为0，数值越小越靠前&lt;/p&gt;
      * &lt;p&gt;同一父节点下的子节点按此字段排序&lt;/p&gt;
      */
-<span class="fc" id="L140">    @Column(name = &quot;sort_order&quot;)</span>
-<span class="fc" id="L141">    private Integer sortOrder = 0;</span>
+<span class="fc" id="L147">    @Column(name = &quot;sort_order&quot;)</span>
+<span class="fc" id="L148">    private Integer sortOrder = 0;</span>
 
     /**
      * 权限类型，区分不同种类的权限
@@ -150,7 +157,7 @@ public class Permission {
      *   &lt;li&gt;API - API权限（控制接口访问）&lt;/li&gt;
      * &lt;/ul&gt;
      */
-<span class="fc" id="L153">    @Column(length = 50)</span>
+<span class="fc" id="L160">    @Column(length = 50)</span>
     private String type = &quot;MENU&quot;;
 
     /**
@@ -173,15 +180,15 @@ public class Permission {
      * &lt;p&gt;关联关系：多对多，Permission是反方（Inverse Side）&lt;/p&gt;
      * &lt;p&gt;映射：通过Role.permissions字段中的mappedBy指定&lt;/p&gt;
      */
-<span class="fc" id="L176">    @ManyToMany(mappedBy = &quot;permissions&quot;)</span>
+<span class="fc" id="L183">    @ManyToMany(mappedBy = &quot;permissions&quot;)</span>
     private Set&lt;Role&gt; roles = new HashSet&lt;&gt;();
 
     /**
      * 无参构造函数
      * &lt;p&gt;JPA规范要求必须提供无参构造函数&lt;/p&gt;
      */
-<span class="fc" id="L183">    public Permission() {</span>
-<span class="fc" id="L184">    }</span>
+<span class="fc" id="L190">    public Permission() {</span>
+<span class="fc" id="L191">    }</span>
 
     /**
      * 便捷构造函数
@@ -190,11 +197,11 @@ public class Permission {
      * @param code 权限编码
      * @param description 权限描述
      */
-<span class="fc" id="L193">    public Permission(String name, String code, String description) {</span>
-<span class="fc" id="L194">        this.name = name;</span>
-<span class="fc" id="L195">        this.code = code;</span>
-<span class="fc" id="L196">        this.description = description;</span>
-<span class="fc" id="L197">    }</span>
+<span class="fc" id="L200">    public Permission(String name, String code, String description) {</span>
+<span class="fc" id="L201">        this.name = name;</span>
+<span class="fc" id="L202">        this.code = code;</span>
+<span class="fc" id="L203">        this.description = description;</span>
+<span class="fc" id="L204">    }</span>
 
     // Getters and Setters
     
@@ -204,7 +211,7 @@ public class Permission {
      * @return 权限ID
      */
     public Long getId() {
-<span class="fc" id="L207">        return id;</span>
+<span class="fc" id="L214">        return id;</span>
     }
 
     /**
@@ -213,8 +220,8 @@ public class Permission {
      * @param id 权限ID
      */
     public void setId(Long id) {
-<span class="nc" id="L216">        this.id = id;</span>
-<span class="nc" id="L217">    }</span>
+<span class="nc" id="L223">        this.id = id;</span>
+<span class="nc" id="L224">    }</span>
 
     /**
      * 获取权限名称
@@ -222,7 +229,7 @@ public class Permission {
      * @return 权限名称
      */
     public String getName() {
-<span class="nc" id="L225">        return name;</span>
+<span class="nc" id="L232">        return name;</span>
     }
 
     /**
@@ -231,8 +238,8 @@ public class Permission {
      * @param name 权限名称
      */
     public void setName(String name) {
-<span class="nc" id="L234">        this.name = name;</span>
-<span class="nc" id="L235">    }</span>
+<span class="nc" id="L241">        this.name = name;</span>
+<span class="nc" id="L242">    }</span>
 
     /**
      * 获取权限编码
@@ -240,7 +247,7 @@ public class Permission {
      * @return 权限编码
      */
     public String getCode() {
-<span class="fc" id="L243">        return code;</span>
+<span class="fc" id="L250">        return code;</span>
     }
 
     /**
@@ -249,8 +256,8 @@ public class Permission {
      * @param code 权限编码
      */
     public void setCode(String code) {
-<span class="nc" id="L252">        this.code = code;</span>
-<span class="nc" id="L253">    }</span>
+<span class="nc" id="L259">        this.code = code;</span>
+<span class="nc" id="L260">    }</span>
 
     /**
      * 获取权限描述
@@ -258,7 +265,7 @@ public class Permission {
      * @return 权限描述
      */
     public String getDescription() {
-<span class="nc" id="L261">        return description;</span>
+<span class="nc" id="L268">        return description;</span>
     }
 
     /**
@@ -267,8 +274,8 @@ public class Permission {
      * @param description 权限描述
      */
     public void setDescription(String description) {
-<span class="nc" id="L270">        this.description = description;</span>
-<span class="nc" id="L271">    }</span>
+<span class="nc" id="L277">        this.description = description;</span>
+<span class="nc" id="L278">    }</span>
 
     /**
      * 获取权限图标
@@ -276,7 +283,7 @@ public class Permission {
      * @return 图标类名
      */
     public String getIcon() {
-<span class="nc" id="L279">        return icon;</span>
+<span class="nc" id="L286">        return icon;</span>
     }
 
     /**
@@ -285,8 +292,8 @@ public class Permission {
      * @param icon 图标类名（如Bootstrap Icons）
      */
     public void setIcon(String icon) {
-<span class="fc" id="L288">        this.icon = icon;</span>
-<span class="fc" id="L289">    }</span>
+<span class="fc" id="L295">        this.icon = icon;</span>
+<span class="fc" id="L296">    }</span>
 
     /**
      * 获取权限状态
@@ -294,7 +301,7 @@ public class Permission {
      * @return true表示启用，false表示禁用
      */
     public Boolean getStatus() {
-<span class="nc" id="L297">        return status;</span>
+<span class="nc" id="L304">        return status;</span>
     }
 
     /**
@@ -303,8 +310,8 @@ public class Permission {
      * @param status true表示启用，false表示禁用
      */
     public void setStatus(Boolean status) {
-<span class="nc" id="L306">        this.status = status;</span>
-<span class="nc" id="L307">    }</span>
+<span class="nc" id="L313">        this.status = status;</span>
+<span class="nc" id="L314">    }</span>
 
     /**
      * 获取父权限ID
@@ -312,7 +319,7 @@ public class Permission {
      * @return 父权限ID，null表示根节点
      */
     public Long getParentId() {
-<span class="nc" id="L315">        return parentId;</span>
+<span class="nc" id="L322">        return parentId;</span>
     }
 
     /**
@@ -321,8 +328,8 @@ public class Permission {
      * @param parentId 父权限ID
      */
     public void setParentId(Long parentId) {
-<span class="fc" id="L324">        this.parentId = parentId;</span>
-<span class="fc" id="L325">    }</span>
+<span class="fc" id="L331">        this.parentId = parentId;</span>
+<span class="fc" id="L332">    }</span>
 
     /**
      * 获取排序号
@@ -330,7 +337,7 @@ public class Permission {
      * @return 排序号
      */
     public Integer getSortOrder() {
-<span class="nc" id="L333">        return sortOrder;</span>
+<span class="nc" id="L340">        return sortOrder;</span>
     }
 
     /**
@@ -339,8 +346,8 @@ public class Permission {
      * @param sortOrder 排序号
      */
     public void setSortOrder(Integer sortOrder) {
-<span class="fc" id="L342">        this.sortOrder = sortOrder;</span>
-<span class="fc" id="L343">    }</span>
+<span class="fc" id="L349">        this.sortOrder = sortOrder;</span>
+<span class="fc" id="L350">    }</span>
 
     /**
      * 获取权限类型
@@ -348,7 +355,7 @@ public class Permission {
      * @return 权限类型（MENU/BUTTON/API）
      */
     public String getType() {
-<span class="nc" id="L351">        return type;</span>
+<span class="nc" id="L358">        return type;</span>
     }
 
     /**
@@ -357,8 +364,8 @@ public class Permission {
      * @param type 权限类型
      */
     public void setType(String type) {
-<span class="fc" id="L360">        this.type = type;</span>
-<span class="fc" id="L361">    }</span>
+<span class="fc" id="L367">        this.type = type;</span>
+<span class="fc" id="L368">    }</span>
 
     /**
      * 获取创建时间
@@ -366,7 +373,7 @@ public class Permission {
      * @return 创建时间戳
      */
     public LocalDateTime getCreateTime() {
-<span class="nc" id="L369">        return createTime;</span>
+<span class="nc" id="L376">        return createTime;</span>
     }
 
     /**
@@ -375,8 +382,8 @@ public class Permission {
      * @param createTime 创建时间戳
      */
     public void setCreateTime(LocalDateTime createTime) {
-<span class="nc" id="L378">        this.createTime = createTime;</span>
-<span class="nc" id="L379">    }</span>
+<span class="nc" id="L385">        this.createTime = createTime;</span>
+<span class="nc" id="L386">    }</span>
 
     /**
      * 获取更新时间
@@ -384,7 +391,7 @@ public class Permission {
      * @return 最后更新时间戳
      */
     public LocalDateTime getUpdateTime() {
-<span class="nc" id="L387">        return updateTime;</span>
+<span class="nc" id="L394">        return updateTime;</span>
     }
 
     /**
@@ -393,8 +400,8 @@ public class Permission {
      * @param updateTime 更新时间戳
      */
     public void setUpdateTime(LocalDateTime updateTime) {
-<span class="nc" id="L396">        this.updateTime = updateTime;</span>
-<span class="nc" id="L397">    }</span>
+<span class="nc" id="L403">        this.updateTime = updateTime;</span>
+<span class="nc" id="L404">    }</span>
 
     /**
      * 获取拥有该权限的角色集合
@@ -402,7 +409,7 @@ public class Permission {
      * @return 角色集合
      */
     public Set&lt;Role&gt; getRoles() {
-<span class="nc" id="L405">        return roles;</span>
+<span class="nc" id="L412">        return roles;</span>
     }
 
     /**
@@ -411,8 +418,8 @@ public class Permission {
      * @param roles 角色集合
      */
     public void setRoles(Set&lt;Role&gt; roles) {
-<span class="nc" id="L414">        this.roles = roles;</span>
-<span class="nc" id="L415">    }</span>
+<span class="nc" id="L421">        this.roles = roles;</span>
+<span class="nc" id="L422">    }</span>
 
     /**
      * 生成权限的字符串表示
@@ -422,7 +429,7 @@ public class Permission {
      */
     @Override
     public String toString() {
-<span class="nc" id="L425">        return &quot;Permission{&quot; +</span>
+<span class="nc" id="L432">        return &quot;Permission{&quot; +</span>
                 &quot;id=&quot; + id +
                 &quot;, name='&quot; + name + '\'' +
                 &quot;, code='&quot; + code + '\'' +

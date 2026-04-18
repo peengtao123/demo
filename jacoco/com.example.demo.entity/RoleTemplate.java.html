@@ -1,6 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="zh"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>RoleTemplate.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">demo</a> &gt; <a href="index.source.html" class="el_package">com.example.demo.entity</a> &gt; <span class="el_source">RoleTemplate.java</span></div><h1>RoleTemplate.java</h1><pre class="source lang-java linenums">package com.example.demo.entity;
 
-import jakarta.persistence.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EntityListeners;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinTable;
+import jakarta.persistence.ManyToMany;
+import jakarta.persistence.Table;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
@@ -38,7 +47,7 @@ public class RoleTemplate {
     @Column(length = 50)
     private String icon;
 
-<span class="pc" id="L41">    @ManyToMany</span>
+<span class="pc" id="L50">    @ManyToMany</span>
     @JoinTable(
         name = &quot;template_permission&quot;,
         joinColumns = @JoinColumn(name = &quot;template_id&quot;),
@@ -53,8 +62,8 @@ public class RoleTemplate {
     /**
      * 默认构造函数
      */
-<span class="fc" id="L56">    public RoleTemplate() {</span>
-<span class="fc" id="L57">    }</span>
+<span class="fc" id="L65">    public RoleTemplate() {</span>
+<span class="fc" id="L66">    }</span>
 
     /**
      * 带参数的构造函数
@@ -63,11 +72,11 @@ public class RoleTemplate {
      * @param name 模板名称
      * @param description 模板描述
      */
-<span class="nc" id="L66">    public RoleTemplate(String code, String name, String description) {</span>
-<span class="nc" id="L67">        this.code = code;</span>
-<span class="nc" id="L68">        this.name = name;</span>
-<span class="nc" id="L69">        this.description = description;</span>
-<span class="nc" id="L70">    }</span>
+<span class="nc" id="L75">    public RoleTemplate(String code, String name, String description) {</span>
+<span class="nc" id="L76">        this.code = code;</span>
+<span class="nc" id="L77">        this.name = name;</span>
+<span class="nc" id="L78">        this.description = description;</span>
+<span class="nc" id="L79">    }</span>
 
     // Getters and Setters
     
@@ -77,7 +86,7 @@ public class RoleTemplate {
      * @return 模板ID
      */
     public Long getId() {
-<span class="nc" id="L80">        return id;</span>
+<span class="nc" id="L89">        return id;</span>
     }
 
     /**
@@ -86,8 +95,8 @@ public class RoleTemplate {
      * @param id 模板ID
      */
     public void setId(Long id) {
-<span class="nc" id="L89">        this.id = id;</span>
-<span class="nc" id="L90">    }</span>
+<span class="nc" id="L98">        this.id = id;</span>
+<span class="nc" id="L99">    }</span>
 
     /**
      * 获取模板编码
@@ -95,7 +104,7 @@ public class RoleTemplate {
      * @return 模板编码
      */
     public String getCode() {
-<span class="nc" id="L98">        return code;</span>
+<span class="nc" id="L107">        return code;</span>
     }
 
     /**
@@ -104,8 +113,8 @@ public class RoleTemplate {
      * @param code 模板编码
      */
     public void setCode(String code) {
-<span class="nc" id="L107">        this.code = code;</span>
-<span class="nc" id="L108">    }</span>
+<span class="nc" id="L116">        this.code = code;</span>
+<span class="nc" id="L117">    }</span>
 
     /**
      * 获取模板名称
@@ -113,7 +122,7 @@ public class RoleTemplate {
      * @return 模板名称
      */
     public String getName() {
-<span class="nc" id="L116">        return name;</span>
+<span class="nc" id="L125">        return name;</span>
     }
 
     /**
@@ -122,8 +131,8 @@ public class RoleTemplate {
      * @param name 模板名称
      */
     public void setName(String name) {
-<span class="nc" id="L125">        this.name = name;</span>
-<span class="nc" id="L126">    }</span>
+<span class="nc" id="L134">        this.name = name;</span>
+<span class="nc" id="L135">    }</span>
 
     /**
      * 获取模板描述
@@ -131,7 +140,7 @@ public class RoleTemplate {
      * @return 模板描述
      */
     public String getDescription() {
-<span class="nc" id="L134">        return description;</span>
+<span class="nc" id="L143">        return description;</span>
     }
 
     /**
@@ -140,8 +149,8 @@ public class RoleTemplate {
      * @param description 模板描述
      */
     public void setDescription(String description) {
-<span class="nc" id="L143">        this.description = description;</span>
-<span class="nc" id="L144">    }</span>
+<span class="nc" id="L152">        this.description = description;</span>
+<span class="nc" id="L153">    }</span>
 
     /**
      * 获取模板图标
@@ -149,7 +158,7 @@ public class RoleTemplate {
      * @return 图标类名
      */
     public String getIcon() {
-<span class="nc" id="L152">        return icon;</span>
+<span class="nc" id="L161">        return icon;</span>
     }
 
     /**
@@ -158,8 +167,8 @@ public class RoleTemplate {
      * @param icon 图标类名
      */
     public void setIcon(String icon) {
-<span class="nc" id="L161">        this.icon = icon;</span>
-<span class="nc" id="L162">    }</span>
+<span class="nc" id="L170">        this.icon = icon;</span>
+<span class="nc" id="L171">    }</span>
 
     /**
      * 获取权限集合
@@ -167,7 +176,7 @@ public class RoleTemplate {
      * @return 权限集合
      */
     public Set&lt;Permission&gt; getPermissions() {
-<span class="nc" id="L170">        return permissions;</span>
+<span class="nc" id="L179">        return permissions;</span>
     }
 
     /**
@@ -176,8 +185,8 @@ public class RoleTemplate {
      * @param permissions 权限集合
      */
     public void setPermissions(Set&lt;Permission&gt; permissions) {
-<span class="nc" id="L179">        this.permissions = permissions;</span>
-<span class="nc" id="L180">    }</span>
+<span class="nc" id="L188">        this.permissions = permissions;</span>
+<span class="nc" id="L189">    }</span>
 
     /**
      * 获取创建时间
@@ -185,7 +194,7 @@ public class RoleTemplate {
      * @return 创建时间
      */
     public LocalDateTime getCreateTime() {
-<span class="nc" id="L188">        return createTime;</span>
+<span class="nc" id="L197">        return createTime;</span>
     }
 
     /**
@@ -194,12 +203,12 @@ public class RoleTemplate {
      * @param createTime 创建时间
      */
     public void setCreateTime(LocalDateTime createTime) {
-<span class="nc" id="L197">        this.createTime = createTime;</span>
-<span class="nc" id="L198">    }</span>
+<span class="nc" id="L206">        this.createTime = createTime;</span>
+<span class="nc" id="L207">    }</span>
 
     @Override
     public String toString() {
-<span class="nc" id="L202">        return &quot;RoleTemplate{&quot; +</span>
+<span class="nc" id="L211">        return &quot;RoleTemplate{&quot; +</span>
                 &quot;id=&quot; + id +
                 &quot;, code='&quot; + code + '\'' +
                 &quot;, name='&quot; + name + '\'' +
