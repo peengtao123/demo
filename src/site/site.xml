@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/DECORATION/1.8.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/DECORATION/1.8.0 
+         http://maven.apache.org/xsd/decoration-1.8.0.xsd">
+    
+    <!-- 皮肤配置 -->
+    <skin>
+        <groupId>org.apache.maven.skins</groupId>
+        <artifactId>maven-fluido-skin</artifactId>
+        <version>1.11.1</version>
+    </skin>
+    
+    <!-- 自定义配置 -->
+    <custom>
+        <fluidoSkin>
+            <topBarEnabled>true</topBarEnabled>
+            <sideBarEnabled>true</sideBarEnabled>
+            <sourceLineNumbersEnabled>true</sourceLineNumbersEnabled>
+        </fluidoSkin>
+    </custom>
+    
+    <!-- 横幅 -->
+    <bannerLeft>
+        <name>Demo Project</name>
+        <href>https://github.com/example/demo</href>
+    </bannerLeft>
+    
+    <!-- 版本信息 -->
+    <version position="left"/>
+    <publishDate position="right"/>
+    
+    <!-- 导航菜单 -->
+    <body>
+        <!-- 顶部链接 -->
+        <links>
+            <item name="GitHub" href="https://github.com/example/demo"/>
+        </links>
+        
+        <!-- 左侧菜单 -->
+        <menu name="项目信息">
+            <item name="首页" href="index.html"/>
+            <item name="项目摘要" href="summary.html"/>
+            <item name="依赖信息" href="dependencies.html"/>
+            <item name="团队信息" href="team.html"/>
+            <item name="源码管理" href="scm.html"/>
+        </menu>
+        
+        <menu name="开发文档">
+            <item name="快速开始" href="quick-start.html"/>
+            <item name="用户指南" href="user-guide.html"/>
+            <item name="API文档" href="apidocs/index.html"/>
+        </menu>
+        
+        <menu name="代码质量">
+            <item name="测试报告" href="surefire-report.html"/>
+            <item name="代码覆盖率" href="jacoco/index.html"/>
+        </menu>
+        
+        <menu ref="reports"/>
+    </body>
+</project>
