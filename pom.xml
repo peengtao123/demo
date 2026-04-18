@@ -12,19 +12,29 @@
     <artifactId>demo</artifactId>
     <version>0.0.1-SNAPSHOT</version>
     <name>demo</name>
-    <description>demo</description>
-    <url/>
+    <description>基于Spring Boot的管理系统演示项目，包含完整的用户管理、角色权限控制、动态菜单、审计日志等功能模块。采用Spring Security实现安全认证，Thymeleaf作为模板引擎，H2作为内存数据库。</description>
+    <url>https://github.com/example/demo</url>
     <licenses>
-        <license/>
+        <license>
+            <name>MIT License</name>
+            <url>https://opensource.org/licenses/MIT</url>
+            <distribution>repo</distribution>
+        </license>
     </licenses>
     <developers>
-        <developer/>
+        <developer>
+            <id>developer</id>
+            <name>Development Team</name>
+            <email>dev@example.com</email>
+            <organization>Example Organization</organization>
+            <organizationUrl>https://www.example.com</organizationUrl>
+        </developer>
     </developers>
     <scm>
-        <connection/>
-        <developerConnection/>
-        <tag/>
-        <url/>
+        <connection>scm:git:git://github.com/example/demo.git</connection>
+        <developerConnection>scm:git:ssh://github.com/example/demo.git</developerConnection>
+        <tag>HEAD</tag>
+        <url>https://github.com/example/demo</url>
     </scm>
     <properties>
         <java.version>17</java.version>
