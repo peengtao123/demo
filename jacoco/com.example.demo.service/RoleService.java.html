@@ -287,15 +287,26 @@ import java.util.stream.Collectors;
 <span class="nc" id="L287">        Role updatedRole = roleRepository.save(role);</span>
         
         // 记录审计日志
-<span class="nc" id="L290">        auditLogService.log(</span>
-<span class="nc" id="L291">            getCurrentUser(),</span>
+<span class="nc" id="L290">        String oldPermissionInfo = oldPermissions.stream()</span>
+<span class="nc" id="L291">                .map(p -&gt; p.getName() + &quot;(&quot; + p.getCode() + &quot;)&quot;)</span>
+<span class="nc" id="L292">                .sorted()</span>
+<span class="nc" id="L293">                .collect(Collectors.joining(&quot;, &quot;));</span>
+<span class="nc" id="L294">        String newPermissionInfo = permissions.stream()</span>
+<span class="nc" id="L295">                .map(p -&gt; p.getName() + &quot;(&quot; + p.getCode() + &quot;)&quot;)</span>
+<span class="nc" id="L296">                .sorted()</span>
+<span class="nc" id="L297">                .collect(Collectors.joining(&quot;, &quot;));</span>
+        
+<span class="nc" id="L299">        auditLogService.logWithChanges(</span>
+<span class="nc" id="L300">            getCurrentUser(),</span>
             &quot;PERMISSION_ASSIGN&quot;,
             &quot;ROLE&quot;,
-<span class="nc" id="L294">            roleId.toString(),</span>
-<span class="nc" id="L295">            &quot;为角色分配权限: &quot; + role.getName() + &quot; (权限数量: &quot; + permissionIds.size() + &quot;)&quot;</span>
+<span class="nc" id="L303">            roleId.toString(),</span>
+<span class="nc" id="L304">            &quot;为角色分配权限: &quot; + updatedRole.getName(),</span>
+            &quot;旧权限: [&quot; + oldPermissionInfo + &quot;]&quot;,
+            &quot;新权限: [&quot; + newPermissionInfo + &quot;]&quot;
         );
         
-<span class="nc" id="L298">        return updatedRole;</span>
+<span class="nc" id="L309">        return updatedRole;</span>
     }
 
     /**
@@ -307,9 +318,9 @@ import java.util.stream.Collectors;
      */
     @Transactional(readOnly = true)
     public Set&lt;Permission&gt; getRolePermissions(Long roleId) {
-<span class="nc" id="L310">        Role role = roleRepository.findById(roleId)</span>
-<span class="nc" id="L311">                .orElseThrow(() -&gt; new RuntimeException(&quot;角色不存在: &quot; + roleId));</span>
-<span class="nc" id="L312">        return role.getPermissions();</span>
+<span class="nc" id="L321">        Role role = roleRepository.findById(roleId)</span>
+<span class="nc" id="L322">                .orElseThrow(() -&gt; new RuntimeException(&quot;角色不存在: &quot; + roleId));</span>
+<span class="nc" id="L323">        return role.getPermissions();</span>
     }
 
     /**
@@ -320,7 +331,7 @@ import java.util.stream.Collectors;
      */
     @Transactional(readOnly = true)
     public Optional&lt;Role&gt; findByName(String name) {
-<span class="nc" id="L323">        return roleRepository.findByName(name);</span>
+<span class="nc" id="L334">        return roleRepository.findByName(name);</span>
     }
 
     /**
@@ -330,7 +341,7 @@ import java.util.stream.Collectors;
      */
     @Transactional(readOnly = true)
     public List&lt;Role&gt; getEnabledRoles() {
-<span class="nc" id="L333">        return roleRepository.findByStatus(true);</span>
+<span class="nc" id="L344">        return roleRepository.findByStatus(true);</span>
     }
 
     /**
@@ -340,7 +351,7 @@ import java.util.stream.Collectors;
      */
     @Transactional(readOnly = true)
     public long countEnabledRoles() {
-<span class="nc" id="L343">        return roleRepository.countByStatus(true);</span>
+<span class="nc" id="L354">        return roleRepository.countByStatus(true);</span>
     }
 
     /**
@@ -350,7 +361,7 @@ import java.util.stream.Collectors;
      */
     @Transactional(readOnly = true)
     public long countDisabledRoles() {
-<span class="nc" id="L353">        return roleRepository.countByStatus(false);</span>
+<span class="nc" id="L364">        return roleRepository.countByStatus(false);</span>
     }
 
     /**
@@ -361,7 +372,7 @@ import java.util.stream.Collectors;
      */
     @Transactional(readOnly = true)
     public boolean isRoleInUse(Long roleId) {
-<span class="nc bnc" id="L364" title="All 2 branches missed.">        return roleRepository.countUsersByRoleId(roleId) &gt; 0;</span>
+<span class="nc bnc" id="L375" title="All 2 branches missed.">        return roleRepository.countUsersByRoleId(roleId) &gt; 0;</span>
     }
 
     /**
@@ -372,7 +383,7 @@ import java.util.stream.Collectors;
      */
     @Transactional(readOnly = true)
     public long getUsersCountByRole(Long roleId) {
-<span class="nc" id="L375">        return roleRepository.countUsersByRoleId(roleId);</span>
+<span class="nc" id="L386">        return roleRepository.countUsersByRoleId(roleId);</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

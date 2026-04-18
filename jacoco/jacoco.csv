@@ -1,8 +1,8 @@
 GROUP,PACKAGE,CLASS,INSTRUCTION_MISSED,INSTRUCTION_COVERED,BRANCH_MISSED,BRANCH_COVERED,LINE_MISSED,LINE_COVERED,COMPLEXITY_MISSED,COMPLEXITY_COVERED,METHOD_MISSED,METHOD_COVERED
 demo,com.example.demo.service,RoleTemplateService,175,3,10,0,35,1,11,1,6,1
-demo,com.example.demo.service,CustomUserDetailsService,66,3,6,0,12,1,5,1,2,1
-demo,com.example.demo.service,UserService,363,313,8,16,90,76,19,22,14,15
-demo,com.example.demo.service,RoleService,527,3,24,0,103,1,37,1,25,1
+demo,com.example.demo.service,CustomUserDetailsService,64,3,6,0,12,1,5,1,2,1
+demo,com.example.demo.service,UserService,332,313,6,16,81,76,18,22,14,15
+demo,com.example.demo.service,RoleService,561,3,24,0,111,1,39,1,27,1
 demo,com.example.demo.service,AuditLogService,114,42,0,0,15,10,8,3,8,3
 demo,com.example.demo.service,PermissionService,486,3,44,0,82,1,45,1,23,1
 demo,com.example.demo.interceptor,PermissionInterceptor,89,3,12,0,25,1,10,1,4,1

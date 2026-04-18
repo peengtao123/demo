@@ -2,10 +2,8 @@
 
 import com.example.demo.entity.User;
 import com.example.demo.service.UserService;
-import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.web.context.request.ServletRequestAttributes;
 import org.thymeleaf.context.ITemplateContext;
 import org.thymeleaf.engine.AttributeName;
 import org.thymeleaf.model.IProcessableElementTag;
@@ -89,7 +87,7 @@ public class HasPermissionAttributeTagProcessor extends AbstractAttributeTagProc
      * @param dialectPrefix Thymeleaf方言前缀，通常为&quot;perm&quot;
      */
     public HasPermissionAttributeTagProcessor(String dialectPrefix) {
-<span class="nc" id="L92">        super(</span>
+<span class="nc" id="L90">        super(</span>
             TemplateMode.HTML,
             dialectPrefix,
             null,
@@ -99,7 +97,7 @@ public class HasPermissionAttributeTagProcessor extends AbstractAttributeTagProc
             PRECEDENCE,
             true
         );
-<span class="nc" id="L102">    }</span>
+<span class="nc" id="L100">    }</span>
 
     /**
      * 处理hasPermission属性的核心方法
@@ -129,37 +127,37 @@ public class HasPermissionAttributeTagProcessor extends AbstractAttributeTagProc
                             IElementTagStructureHandler structureHandler) {
         
         // 获取Spring上下文
-<span class="nc" id="L132">        org.springframework.context.ApplicationContext appContext = </span>
-<span class="nc" id="L133">            SpringContextUtils.getApplicationContext(context);</span>
-<span class="nc" id="L134">        UserService userService = appContext.getBean(UserService.class);</span>
+<span class="nc" id="L130">        org.springframework.context.ApplicationContext appContext = </span>
+<span class="nc" id="L131">            SpringContextUtils.getApplicationContext(context);</span>
+<span class="nc" id="L132">        UserService userService = appContext.getBean(UserService.class);</span>
 
         // 获取当前用户
-<span class="nc" id="L137">        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();</span>
-<span class="nc bnc" id="L138" title="All 4 branches missed.">        if (authentication == null || !authentication.isAuthenticated()) {</span>
-<span class="nc" id="L139">            structureHandler.removeElement();</span>
-<span class="nc" id="L140">            return;</span>
+<span class="nc" id="L135">        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();</span>
+<span class="nc bnc" id="L136" title="All 4 branches missed.">        if (authentication == null || !authentication.isAuthenticated()) {</span>
+<span class="nc" id="L137">            structureHandler.removeElement();</span>
+<span class="nc" id="L138">            return;</span>
         }
 
-<span class="nc" id="L143">        String username = authentication.getName();</span>
+<span class="nc" id="L141">        String username = authentication.getName();</span>
         try {
-<span class="nc" id="L145">            User user = userService.getUserByUsername(username);</span>
+<span class="nc" id="L143">            User user = userService.getUserByUsername(username);</span>
             
             // 获取用户的所有权限编码
-<span class="nc" id="L148">            Set&lt;String&gt; userPermissions = user.getRoles().stream()</span>
-<span class="nc" id="L149">                    .flatMap(role -&gt; role.getPermissions().stream())</span>
-<span class="nc" id="L150">                    .filter(permission -&gt; permission.getStatus())</span>
-<span class="nc" id="L151">                    .map(permission -&gt; permission.getCode())</span>
-<span class="nc" id="L152">                    .collect(Collectors.toSet());</span>
+<span class="nc" id="L146">            Set&lt;String&gt; userPermissions = user.getRoles().stream()</span>
+<span class="nc" id="L147">                    .flatMap(role -&gt; role.getPermissions().stream())</span>
+<span class="nc" id="L148">                    .filter(permission -&gt; permission.getStatus())</span>
+<span class="nc" id="L149">                    .map(permission -&gt; permission.getCode())</span>
+<span class="nc" id="L150">                    .collect(Collectors.toSet());</span>
 
             // 检查是否有指定权限
-<span class="nc bnc" id="L155" title="All 2 branches missed.">            if (!userPermissions.contains(attributeValue)) {</span>
-<span class="nc" id="L156">                structureHandler.removeElement();</span>
+<span class="nc bnc" id="L153" title="All 2 branches missed.">            if (!userPermissions.contains(attributeValue)) {</span>
+<span class="nc" id="L154">                structureHandler.removeElement();</span>
             }
-<span class="nc" id="L158">        } catch (Exception e) {</span>
+<span class="nc" id="L156">        } catch (Exception e) {</span>
             // 如果获取用户失败，隐藏元素
-<span class="nc" id="L160">            structureHandler.removeElement();</span>
-<span class="nc" id="L161">        }</span>
-<span class="nc" id="L162">    }</span>
+<span class="nc" id="L158">            structureHandler.removeElement();</span>
+<span class="nc" id="L159">        }</span>
+<span class="nc" id="L160">    }</span>
 }
 
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

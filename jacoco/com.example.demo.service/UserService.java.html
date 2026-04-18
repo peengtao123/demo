@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="zh"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>UserService.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">demo</a> &gt; <a href="index.source.html" class="el_package">com.example.demo.service</a> &gt; <span class="el_source">UserService.java</span></div><h1>UserService.java</h1><pre class="source lang-java linenums">package com.example.demo.service;
 
 import com.example.demo.dto.UserDTO;
-import com.example.demo.entity.Role;
 import com.example.demo.entity.User;
 import com.example.demo.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,9 +16,7 @@ import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
 import java.time.LocalDateTime;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
@@ -82,7 +79,7 @@ import java.util.stream.Collectors;
  */
 @Service
 @Transactional
-<span class="fc" id="L85">public class UserService {</span>
+<span class="fc" id="L82">public class UserService {</span>
 
     @Autowired
     private UserRepository userRepository;
@@ -100,9 +97,9 @@ import java.util.stream.Collectors;
      */
     private String getCurrentUser() {
         try {
-<span class="nc" id="L103">            return SecurityContextHolder.getContext().getAuthentication().getName();</span>
-<span class="fc" id="L104">        } catch (Exception e) {</span>
-<span class="fc" id="L105">            return &quot;system&quot;;</span>
+<span class="nc" id="L100">            return SecurityContextHolder.getContext().getAuthentication().getName();</span>
+<span class="fc" id="L101">        } catch (Exception e) {</span>
+<span class="fc" id="L102">            return &quot;system&quot;;</span>
         }
     }
 
@@ -114,14 +111,14 @@ import java.util.stream.Collectors;
     private String getClientIp() {
         try {
             ServletRequestAttributes attributes = 
-<span class="fc" id="L117">                (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();</span>
-<span class="fc bfc" id="L118" title="All 2 branches covered.">            if (attributes != null) {</span>
-<span class="fc" id="L119">                return attributes.getRequest().getRemoteAddr();</span>
+<span class="fc" id="L114">                (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();</span>
+<span class="fc bfc" id="L115" title="All 2 branches covered.">            if (attributes != null) {</span>
+<span class="fc" id="L116">                return attributes.getRequest().getRemoteAddr();</span>
             }
-<span class="nc" id="L121">        } catch (Exception e) {</span>
+<span class="nc" id="L118">        } catch (Exception e) {</span>
             // ignore
-<span class="fc" id="L123">        }</span>
-<span class="fc" id="L124">        return &quot;unknown&quot;;</span>
+<span class="fc" id="L120">        }</span>
+<span class="fc" id="L121">        return &quot;unknown&quot;;</span>
     }
 
     /**
@@ -133,36 +130,36 @@ import java.util.stream.Collectors;
      */
     public User createUser(UserDTO userDTO) {
         // 检查用户名是否已存在
-<span class="fc bfc" id="L136" title="All 2 branches covered.">        if (userRepository.existsByUsername(userDTO.getUsername())) {</span>
-<span class="fc" id="L137">            throw new RuntimeException(&quot;用户名已存在: &quot; + userDTO.getUsername());</span>
+<span class="fc bfc" id="L133" title="All 2 branches covered.">        if (userRepository.existsByUsername(userDTO.getUsername())) {</span>
+<span class="fc" id="L134">            throw new RuntimeException(&quot;用户名已存在: &quot; + userDTO.getUsername());</span>
         }
         
         // 检查邮箱是否已存在
-<span class="fc bfc" id="L141" title="All 2 branches covered.">        if (userRepository.existsByEmail(userDTO.getEmail())) {</span>
-<span class="fc" id="L142">            throw new RuntimeException(&quot;邮箱已被注册: &quot; + userDTO.getEmail());</span>
+<span class="fc bfc" id="L138" title="All 2 branches covered.">        if (userRepository.existsByEmail(userDTO.getEmail())) {</span>
+<span class="fc" id="L139">            throw new RuntimeException(&quot;邮箱已被注册: &quot; + userDTO.getEmail());</span>
         }
 
-<span class="fc" id="L145">        User user = convertToEntity(userDTO);</span>
+<span class="fc" id="L142">        User user = convertToEntity(userDTO);</span>
         // 加密密码
-<span class="pc bpc" id="L147" title="1 of 4 branches missed.">        if (userDTO.getPassword() != null &amp;&amp; !userDTO.getPassword().isEmpty()) {</span>
-<span class="fc" id="L148">            user.setPassword(passwordEncoder.encode(userDTO.getPassword()));</span>
+<span class="pc bpc" id="L144" title="1 of 4 branches missed.">        if (userDTO.getPassword() != null &amp;&amp; !userDTO.getPassword().isEmpty()) {</span>
+<span class="fc" id="L145">            user.setPassword(passwordEncoder.encode(userDTO.getPassword()));</span>
         } else {
-<span class="fc" id="L150">            user.setPassword(passwordEncoder.encode(&quot;123456&quot;)); // 默认密码</span>
+<span class="fc" id="L147">            user.setPassword(passwordEncoder.encode(&quot;123456&quot;)); // 默认密码</span>
         }
         
-<span class="fc" id="L153">        User savedUser = userRepository.save(user);</span>
+<span class="fc" id="L150">        User savedUser = userRepository.save(user);</span>
         
         // 记录审计日志
-<span class="fc" id="L156">        auditLogService.logWithIp(</span>
-<span class="fc" id="L157">            getCurrentUser(),</span>
+<span class="fc" id="L153">        auditLogService.logWithIp(</span>
+<span class="fc" id="L154">            getCurrentUser(),</span>
             &quot;CREATE&quot;,
             &quot;USER&quot;,
-<span class="fc" id="L160">            savedUser.getId().toString(),</span>
-<span class="fc" id="L161">            &quot;创建用户: &quot; + savedUser.getUsername(),</span>
-<span class="fc" id="L162">            getClientIp()</span>
+<span class="fc" id="L157">            savedUser.getId().toString(),</span>
+<span class="fc" id="L158">            &quot;创建用户: &quot; + savedUser.getUsername(),</span>
+<span class="fc" id="L159">            getClientIp()</span>
         );
         
-<span class="fc" id="L165">        return savedUser;</span>
+<span class="fc" id="L162">        return savedUser;</span>
     }
 
     /**
@@ -174,8 +171,8 @@ import java.util.stream.Collectors;
      */
     @Transactional(readOnly = true)
     public User getUserById(Long id) {
-<span class="fc" id="L177">        return userRepository.findById(id)</span>
-<span class="fc" id="L178">                .orElseThrow(() -&gt; new RuntimeException(&quot;用户不存在，ID: &quot; + id));</span>
+<span class="fc" id="L174">        return userRepository.findById(id)</span>
+<span class="fc" id="L175">                .orElseThrow(() -&gt; new RuntimeException(&quot;用户不存在，ID: &quot; + id));</span>
     }
 
     /**
@@ -185,7 +182,7 @@ import java.util.stream.Collectors;
      */
     @Transactional(readOnly = true)
     public List&lt;User&gt; getAllUsers() {
-<span class="fc" id="L188">        return userRepository.findAll();</span>
+<span class="fc" id="L185">        return userRepository.findAll();</span>
     }
 
     /**
@@ -196,8 +193,8 @@ import java.util.stream.Collectors;
      */
     @Transactional(readOnly = true)
     public Page&lt;User&gt; getUsersWithPaging(int page, int size) {
-<span class="nc" id="L199">        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, &quot;createTime&quot;));</span>
-<span class="nc" id="L200">        return userRepository.findAll(pageable);</span>
+<span class="nc" id="L196">        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, &quot;createTime&quot;));</span>
+<span class="nc" id="L197">        return userRepository.findAll(pageable);</span>
     }
 
     /**
@@ -209,8 +206,8 @@ import java.util.stream.Collectors;
      */
     @Transactional(readOnly = true)
     public Page&lt;User&gt; searchUsers(String keyword, int page, int size) {
-<span class="nc" id="L212">        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, &quot;createTime&quot;));</span>
-<span class="nc" id="L213">        return userRepository.searchUsers(keyword, pageable);</span>
+<span class="nc" id="L209">        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, &quot;createTime&quot;));</span>
+<span class="nc" id="L210">        return userRepository.searchUsers(keyword, pageable);</span>
     }
 
     /**
@@ -220,7 +217,7 @@ import java.util.stream.Collectors;
      */
     @Transactional(readOnly = true)
     public List&lt;User&gt; getUsersByStatus(Boolean status) {
-<span class="nc" id="L223">        return userRepository.findByStatus(status);</span>
+<span class="nc" id="L220">        return userRepository.findByStatus(status);</span>
     }
 
     /**
@@ -232,41 +229,41 @@ import java.util.stream.Collectors;
      * @throws RuntimeException 如果用户不存在或用户名/邮箱已被其他用户使用则抛出异常
      */
     public User updateUser(Long id, UserDTO userDTO) {
-<span class="fc" id="L235">        User existingUser = getUserById(id);</span>
-<span class="fc" id="L236">        String oldInfo = existingUser.toString();</span>
+<span class="fc" id="L232">        User existingUser = getUserById(id);</span>
+<span class="fc" id="L233">        String oldInfo = existingUser.toString();</span>
 
         // 如果修改了用户名，检查新用户名是否已被其他用户使用
-<span class="fc bfc" id="L239" title="All 2 branches covered.">        if (!existingUser.getUsername().equals(userDTO.getUsername()) &amp;&amp; </span>
-<span class="fc bfc" id="L240" title="All 2 branches covered.">            userRepository.existsByUsername(userDTO.getUsername())) {</span>
-<span class="fc" id="L241">            throw new RuntimeException(&quot;用户名已存在: &quot; + userDTO.getUsername());</span>
+<span class="fc bfc" id="L236" title="All 2 branches covered.">        if (!existingUser.getUsername().equals(userDTO.getUsername()) &amp;&amp; </span>
+<span class="fc bfc" id="L237" title="All 2 branches covered.">            userRepository.existsByUsername(userDTO.getUsername())) {</span>
+<span class="fc" id="L238">            throw new RuntimeException(&quot;用户名已存在: &quot; + userDTO.getUsername());</span>
         }
 
         // 如果修改了邮箱，检查新邮箱是否已被其他用户使用
-<span class="pc bpc" id="L245" title="1 of 2 branches missed.">        if (!existingUser.getEmail().equals(userDTO.getEmail()) &amp;&amp; </span>
-<span class="fc bfc" id="L246" title="All 2 branches covered.">            userRepository.existsByEmail(userDTO.getEmail())) {</span>
-<span class="fc" id="L247">            throw new RuntimeException(&quot;邮箱已被注册: &quot; + userDTO.getEmail());</span>
+<span class="pc bpc" id="L242" title="1 of 2 branches missed.">        if (!existingUser.getEmail().equals(userDTO.getEmail()) &amp;&amp; </span>
+<span class="fc bfc" id="L243" title="All 2 branches covered.">            userRepository.existsByEmail(userDTO.getEmail())) {</span>
+<span class="fc" id="L244">            throw new RuntimeException(&quot;邮箱已被注册: &quot; + userDTO.getEmail());</span>
         }
 
-<span class="fc" id="L250">        existingUser.setUsername(userDTO.getUsername());</span>
-<span class="fc" id="L251">        existingUser.setEmail(userDTO.getEmail());</span>
-<span class="fc" id="L252">        existingUser.setName(userDTO.getName());</span>
-<span class="fc" id="L253">        existingUser.setPhone(userDTO.getPhone());</span>
-<span class="fc" id="L254">        existingUser.setAge(userDTO.getAge());</span>
+<span class="fc" id="L247">        existingUser.setUsername(userDTO.getUsername());</span>
+<span class="fc" id="L248">        existingUser.setEmail(userDTO.getEmail());</span>
+<span class="fc" id="L249">        existingUser.setName(userDTO.getName());</span>
+<span class="fc" id="L250">        existingUser.setPhone(userDTO.getPhone());</span>
+<span class="fc" id="L251">        existingUser.setAge(userDTO.getAge());</span>
 
-<span class="fc" id="L256">        User updatedUser = userRepository.save(existingUser);</span>
+<span class="fc" id="L253">        User updatedUser = userRepository.save(existingUser);</span>
         
         // 记录审计日志
-<span class="fc" id="L259">        auditLogService.logWithChanges(</span>
-<span class="fc" id="L260">            getCurrentUser(),</span>
+<span class="fc" id="L256">        auditLogService.logWithChanges(</span>
+<span class="fc" id="L257">            getCurrentUser(),</span>
             &quot;UPDATE&quot;,
             &quot;USER&quot;,
-<span class="fc" id="L263">            id.toString(),</span>
-<span class="fc" id="L264">            &quot;更新用户信息: &quot; + updatedUser.getUsername(),</span>
+<span class="fc" id="L260">            id.toString(),</span>
+<span class="fc" id="L261">            &quot;更新用户信息: &quot; + updatedUser.getUsername(),</span>
             oldInfo,
-<span class="fc" id="L266">            updatedUser.toString()</span>
+<span class="fc" id="L263">            updatedUser.toString()</span>
         );
         
-<span class="fc" id="L269">        return updatedUser;</span>
+<span class="fc" id="L266">        return updatedUser;</span>
     }
 
     /**
@@ -277,24 +274,27 @@ import java.util.stream.Collectors;
      * @return 更新后的用户实体对象
      */
     public User updateUserInfo(Long id, User user) {
-<span class="nc" id="L280">        User existingUser = getUserById(id);</span>
-<span class="nc" id="L281">        String oldInfo = &quot;name=&quot; + existingUser.getName() + &quot;, phone=&quot; + existingUser.getPhone();</span>
+<span class="nc" id="L277">        User existingUser = getUserById(id);</span>
+<span class="nc" id="L278">        String oldInfo = &quot;name=&quot; + existingUser.getName() + &quot;, phone=&quot; + existingUser.getPhone();</span>
         
-<span class="nc" id="L283">        existingUser.setName(user.getName());</span>
-<span class="nc" id="L284">        existingUser.setPhone(user.getPhone());</span>
-<span class="nc" id="L285">        existingUser.setAge(user.getAge());</span>
-<span class="nc" id="L286">        existingUser.setAvatar(user.getAvatar());</span>
-<span class="nc" id="L287">        existingUser.setRemark(user.getRemark());</span>
+<span class="nc" id="L280">        existingUser.setName(user.getName());</span>
+<span class="nc" id="L281">        existingUser.setPhone(user.getPhone());</span>
+<span class="nc" id="L282">        existingUser.setAge(user.getAge());</span>
+<span class="nc" id="L283">        existingUser.setAvatar(user.getAvatar());</span>
+<span class="nc" id="L284">        existingUser.setRemark(user.getRemark());</span>
         
-<span class="nc" id="L289">        User updatedUser = userRepository.save(existingUser);</span>
+<span class="nc" id="L286">        User updatedUser = userRepository.save(existingUser);</span>
         
         // 记录审计日志
-<span class="nc" id="L292">        auditLogService.log(</span>
-<span class="nc" id="L293">            getCurrentUser(),</span>
+<span class="nc" id="L289">        String newInfo = &quot;name=&quot; + updatedUser.getName() + &quot;, phone=&quot; + updatedUser.getPhone();</span>
+<span class="nc" id="L290">        auditLogService.logWithChanges(</span>
+<span class="nc" id="L291">            getCurrentUser(),</span>
             &quot;UPDATE&quot;,
             &quot;USER&quot;,
-<span class="nc" id="L296">            id.toString(),</span>
-<span class="nc" id="L297">            &quot;更新用户基本信息: &quot; + updatedUser.getUsername()</span>
+<span class="nc" id="L294">            id.toString(),</span>
+<span class="nc" id="L295">            &quot;更新用户基本信息: &quot; + updatedUser.getUsername(),</span>
+            oldInfo,
+            newInfo
         );
         
 <span class="nc" id="L300">        return updatedUser;</span>
@@ -426,15 +426,18 @@ import java.util.stream.Collectors;
 <span class="nc" id="L426">        User updatedUser = userRepository.save(user);</span>
         
         // 记录审计日志
-<span class="nc" id="L429">        auditLogService.log(</span>
-<span class="nc" id="L430">            getCurrentUser(),</span>
+<span class="nc" id="L429">        String newInfo = &quot;name=&quot; + updatedUser.getName() + &quot;, phone=&quot; + updatedUser.getPhone();</span>
+<span class="nc" id="L430">        auditLogService.logWithChanges(</span>
+<span class="nc" id="L431">            getCurrentUser(),</span>
             &quot;PROFILE_UPDATE&quot;,
             &quot;USER&quot;,
-<span class="nc" id="L433">            userId.toString(),</span>
-            &quot;更新个人信息&quot;
+<span class="nc" id="L434">            userId.toString(),</span>
+            &quot;更新个人信息&quot;,
+            oldInfo,
+            newInfo
         );
         
-<span class="nc" id="L437">        return updatedUser;</span>
+<span class="nc" id="L440">        return updatedUser;</span>
     }
 
     /**
@@ -446,27 +449,27 @@ import java.util.stream.Collectors;
      * @throws RuntimeException 如果用户不存在或原密码不正确则抛出异常
      */
     public void changePassword(Long userId, String oldPassword, String newPassword) {
-<span class="nc" id="L449">        User user = getUserById(userId);</span>
+<span class="nc" id="L452">        User user = getUserById(userId);</span>
         
         // 验证旧密码
-<span class="nc bnc" id="L452" title="All 2 branches missed.">        if (!passwordEncoder.matches(oldPassword, user.getPassword())) {</span>
-<span class="nc" id="L453">            throw new RuntimeException(&quot;原密码不正确&quot;);</span>
+<span class="nc bnc" id="L455" title="All 2 branches missed.">        if (!passwordEncoder.matches(oldPassword, user.getPassword())) {</span>
+<span class="nc" id="L456">            throw new RuntimeException(&quot;原密码不正确&quot;);</span>
         }
         
         // 设置新密码
-<span class="nc" id="L457">        user.setPassword(passwordEncoder.encode(newPassword));</span>
-<span class="nc" id="L458">        userRepository.save(user);</span>
+<span class="nc" id="L460">        user.setPassword(passwordEncoder.encode(newPassword));</span>
+<span class="nc" id="L461">        userRepository.save(user);</span>
         
         // 记录审计日志
-<span class="nc" id="L461">        auditLogService.logWithIp(</span>
-<span class="nc" id="L462">            getCurrentUser(),</span>
+<span class="nc" id="L464">        auditLogService.logWithIp(</span>
+<span class="nc" id="L465">            getCurrentUser(),</span>
             &quot;PASSWORD_CHANGE&quot;,
             &quot;USER&quot;,
-<span class="nc" id="L465">            userId.toString(),</span>
+<span class="nc" id="L468">            userId.toString(),</span>
             &quot;修改密码&quot;,
-<span class="nc" id="L467">            getClientIp()</span>
+<span class="nc" id="L470">            getClientIp()</span>
         );
-<span class="nc" id="L469">    }</span>
+<span class="nc" id="L472">    }</span>
 
     /**
      * 更新最后登录信息
@@ -476,11 +479,11 @@ import java.util.stream.Collectors;
      * @throws RuntimeException 如果用户不存在则抛出异常
      */
     public void updateLastLoginInfo(Long id, String ip) {
-<span class="nc" id="L479">        User user = getUserById(id);</span>
-<span class="nc" id="L480">        user.setLastLoginTime(LocalDateTime.now());</span>
-<span class="nc" id="L481">        user.setLastLoginIp(ip);</span>
-<span class="nc" id="L482">        userRepository.save(user);</span>
-<span class="nc" id="L483">    }</span>
+<span class="nc" id="L482">        User user = getUserById(id);</span>
+<span class="nc" id="L483">        user.setLastLoginTime(LocalDateTime.now());</span>
+<span class="nc" id="L484">        user.setLastLoginIp(ip);</span>
+<span class="nc" id="L485">        userRepository.save(user);</span>
+<span class="nc" id="L486">    }</span>
 
     /**
      * 为用户分配角色
@@ -488,33 +491,12 @@ import java.util.stream.Collectors;
      * @param userId 用户ID
      * @param roleIds 角色ID列表
      * @return 更新后的用户实体对象
-     * @throws RuntimeException 该方法已废弃，请使用 RoleService 分配角色
+     * @throws RuntimeException 该方法已废弃,请使用 RoleService 分配角色
      * @deprecated 请使用 RoleService 进行角色分配
      */
     public User assignRoles(Long userId, List&lt;Long&gt; roleIds) {
-<span class="nc" id="L495">        User user = getUserById(userId);</span>
-<span class="nc" id="L496">        Set&lt;Role&gt; oldRoles = new HashSet&lt;&gt;(user.getRoles());</span>
-        
-<span class="nc" id="L498">        Set&lt;Role&gt; roles = new HashSet&lt;&gt;();</span>
-<span class="nc bnc" id="L499" title="All 2 branches missed.">        for (Long roleId : roleIds) {</span>
-            // 这里需要通过RoleRepository获取角色，但UserService没有注入
-            // 所以我们需要通过其他方式，或者在Controller层处理
-<span class="nc" id="L502">            throw new RuntimeException(&quot;请使用RoleService分配角色&quot;);</span>
-        }
-        
-<span class="nc" id="L505">        user.setRoles(roles);</span>
-<span class="nc" id="L506">        User updatedUser = userRepository.save(user);</span>
-        
-        // 记录审计日志
-<span class="nc" id="L509">        auditLogService.log(</span>
-<span class="nc" id="L510">            getCurrentUser(),</span>
-            &quot;ROLE_ASSIGN&quot;,
-            &quot;USER&quot;,
-<span class="nc" id="L513">            userId.toString(),</span>
-<span class="nc" id="L514">            &quot;为用户分配角色: &quot; + user.getUsername()</span>
-        );
-        
-<span class="nc" id="L517">        return updatedUser;</span>
+        // 此方法已废弃，角色分配应通过 RoleService 处理
+<span class="nc" id="L499">        throw new RuntimeException(&quot;请使用RoleService分配角色&quot;);</span>
     }
 
     /**
@@ -526,8 +508,8 @@ import java.util.stream.Collectors;
      */
     @Transactional(readOnly = true)
     public User getUserByUsername(String username) {
-<span class="fc" id="L529">        return userRepository.findByUsername(username)</span>
-<span class="fc" id="L530">                .orElseThrow(() -&gt; new RuntimeException(&quot;用户不存在，用户名: &quot; + username));</span>
+<span class="fc" id="L511">        return userRepository.findByUsername(username)</span>
+<span class="fc" id="L512">                .orElseThrow(() -&gt; new RuntimeException(&quot;用户不存在，用户名: &quot; + username));</span>
     }
 
     /**
@@ -538,7 +520,7 @@ import java.util.stream.Collectors;
      */
     @Transactional(readOnly = true)
     public List&lt;User&gt; searchUsersByName(String name) {
-<span class="fc" id="L541">        return userRepository.findByNameContainingIgnoreCase(name);</span>
+<span class="fc" id="L523">        return userRepository.findByNameContainingIgnoreCase(name);</span>
     }
 
     /**
@@ -548,7 +530,7 @@ import java.util.stream.Collectors;
      */
     @Transactional(readOnly = true)
     public long countEnabledUsers() {
-<span class="nc" id="L551">        return userRepository.countByStatus(true);</span>
+<span class="nc" id="L533">        return userRepository.countByStatus(true);</span>
     }
 
     /**
@@ -558,7 +540,7 @@ import java.util.stream.Collectors;
      */
     @Transactional(readOnly = true)
     public long countDisabledUsers() {
-<span class="nc" id="L561">        return userRepository.countByStatus(false);</span>
+<span class="nc" id="L543">        return userRepository.countByStatus(false);</span>
     }
 
     /**
@@ -568,14 +550,14 @@ import java.util.stream.Collectors;
      * @return 转换后的用户实体对象，默认状态为启用
      */
     private User convertToEntity(UserDTO userDTO) {
-<span class="fc" id="L571">        User user = new User();</span>
-<span class="fc" id="L572">        user.setUsername(userDTO.getUsername());</span>
-<span class="fc" id="L573">        user.setEmail(userDTO.getEmail());</span>
-<span class="fc" id="L574">        user.setName(userDTO.getName());</span>
-<span class="fc" id="L575">        user.setPhone(userDTO.getPhone());</span>
-<span class="fc" id="L576">        user.setAge(userDTO.getAge());</span>
-<span class="fc" id="L577">        user.setStatus(true); // 默认启用</span>
-<span class="fc" id="L578">        return user;</span>
+<span class="fc" id="L553">        User user = new User();</span>
+<span class="fc" id="L554">        user.setUsername(userDTO.getUsername());</span>
+<span class="fc" id="L555">        user.setEmail(userDTO.getEmail());</span>
+<span class="fc" id="L556">        user.setName(userDTO.getName());</span>
+<span class="fc" id="L557">        user.setPhone(userDTO.getPhone());</span>
+<span class="fc" id="L558">        user.setAge(userDTO.getAge());</span>
+<span class="fc" id="L559">        user.setStatus(true); // 默认启用</span>
+<span class="fc" id="L560">        return user;</span>
     }
 
     /**
@@ -585,14 +567,14 @@ import java.util.stream.Collectors;
      * @return 转换后的用户数据传输对象
      */
     private UserDTO convertToDTO(User user) {
-<span class="fc" id="L588">        UserDTO dto = new UserDTO();</span>
-<span class="fc" id="L589">        dto.setId(user.getId());</span>
-<span class="fc" id="L590">        dto.setUsername(user.getUsername());</span>
-<span class="fc" id="L591">        dto.setEmail(user.getEmail());</span>
-<span class="fc" id="L592">        dto.setName(user.getName());</span>
-<span class="fc" id="L593">        dto.setPhone(user.getPhone());</span>
-<span class="fc" id="L594">        dto.setAge(user.getAge());</span>
-<span class="fc" id="L595">        return dto;</span>
+<span class="fc" id="L570">        UserDTO dto = new UserDTO();</span>
+<span class="fc" id="L571">        dto.setId(user.getId());</span>
+<span class="fc" id="L572">        dto.setUsername(user.getUsername());</span>
+<span class="fc" id="L573">        dto.setEmail(user.getEmail());</span>
+<span class="fc" id="L574">        dto.setName(user.getName());</span>
+<span class="fc" id="L575">        dto.setPhone(user.getPhone());</span>
+<span class="fc" id="L576">        dto.setAge(user.getAge());</span>
+<span class="fc" id="L577">        return dto;</span>
     }
 
     /**
@@ -602,9 +584,9 @@ import java.util.stream.Collectors;
      * @return 转换后的用户数据传输对象列表
      */
     public List&lt;UserDTO&gt; convertToDTOList(List&lt;User&gt; users) {
-<span class="fc" id="L605">        return users.stream()</span>
-<span class="fc" id="L606">                .map(this::convertToDTO)</span>
-<span class="fc" id="L607">                .collect(Collectors.toList());</span>
+<span class="fc" id="L587">        return users.stream()</span>
+<span class="fc" id="L588">                .map(this::convertToDTO)</span>
+<span class="fc" id="L589">                .collect(Collectors.toList());</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>
