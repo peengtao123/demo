@@ -14,6 +14,9 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+/**
+ * 角色模板服务类 - 提供角色模板管理和基于模板创建角色的功能
+ */
 @Service
 @Transactional
 public class RoleTemplateService {
@@ -29,6 +32,8 @@ public class RoleTemplateService {
 
     /**
      * 获取所有角色模板
+     *
+     * @return 所有角色模板列表
      */
     @Transactional(readOnly = true)
     public List<RoleTemplate> getAllTemplates() {
@@ -37,6 +42,10 @@ public class RoleTemplateService {
 
     /**
      * 根据编码获取模板
+     *
+     * @param code 角色模板编码
+     * @return 对应的角色模板对象
+     * @throws RuntimeException 如果模板不存在则抛出异常
      */
     @Transactional(readOnly = true)
     public RoleTemplate getTemplateByCode(String code) {
@@ -46,6 +55,12 @@ public class RoleTemplateService {
 
     /**
      * 从模板创建角色
+     *
+     * @param templateCode 角色模板编码
+     * @param roleName 新角色的名称
+     * @param description 新角色的描述（可选，为null时使用模板的描述）
+     * @return 创建成功的角色对象，包含模板中的所有权限
+     * @throws RuntimeException 如果模板不存在或角色名称已存在则抛出异常
      */
     public Role createRoleFromTemplate(String templateCode, String roleName, String description) {
         RoleTemplate template = getTemplateByCode(templateCode);
@@ -72,6 +87,14 @@ public class RoleTemplateService {
 
     /**
      * 初始化默认角色模板
+     *
+     * <p>系统启动时自动调用，创建三个默认的角色模板：
+     * <ul>
+     *   <li>超级管理员模板 - 拥有所有权限</li>
+     *   <li>内容编辑者模板 - 可以管理内容和用户</li>
+     *   <li>只读用户模板 - 只能查看数据，不能修改</li>
+     * </ul>
+     * 如果数据库中已有模板，则不会重复初始化。
      */
     @Transactional
     public void initializeDefaultTemplates() {

@@ -75,11 +75,16 @@ class WebMvcBeanTest {
     private UserDTO userDTO;
 
     @BeforeEach
-    void setUp() {
+    void setUp() throws Exception {
         logger.info("=== 开始WebMVC Bean测试准备 ===");
         
         // 初始化Mockito注解
         MockitoAnnotations.openMocks(this);
+        
+        // 使用反射将mock的userService注入到userController中
+        java.lang.reflect.Field field = UserController.class.getDeclaredField("userService");
+        field.setAccessible(true);
+        field.set(userController, userService);
         
         // 初始化MockMvc
         mockMvc = MockMvcBuilders.standaloneSetup(userController).build();
@@ -95,8 +100,9 @@ class WebMvcBeanTest {
         userDTO.setUsername("testuser");
         userDTO.setEmail("test@example.com");
         userDTO.setName("测试用户");
+        userDTO.setPassword("password123");  // 添加密码以满足验证要求
         
-        logger.info("测试数据准备完成");
+        logger.info("测试数据准备完成 - Mock Service已注入");
     }
 
     /**
@@ -294,17 +300,21 @@ class WebMvcBeanTest {
     void testCompleteWebMvcRequestFlow() throws Exception {
         logger.info("测试完整WebMVC请求处理流程...");
         
-        // 注意：使用standaloneSetup时，@Mock注解的service不会被自动注入
-        // 这里主要测试WebMVC的基础设施和配置
+        // Mock service的行为
+        when(userService.createUser(any(UserDTO.class))).thenReturn(testUser);
+        
+        // 准备测试数据
         String userJson = objectMapper.writeValueAsString(userDTO);
         
-        // 执行请求（即使没有mock service，也能测试WebMVC基础设施）
+        // 执行请求并验证响应
         mockMvc.perform(post("/api/users")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(userJson)
                 .accept(MediaType.APPLICATION_JSON))
             .andDo(print())
-            .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON));
+            .andExpect(status().isOk())
+            .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+            .andExpect(jsonPath("$.success").value(true));
         
         logger.info("✓ 完整请求流程测试通过 - WebMVC基础设施工作正常");
     }
@@ -317,9 +327,14 @@ class WebMvcBeanTest {
     void testGetRequestHandling() throws Exception {
         logger.info("测试GET请求处理...");
         
+        // Mock service的行为 - 确保在每次测试前设置
+        when(userService.getUserById(1L)).thenReturn(testUser);
+        
         mockMvc.perform(get("/api/users/1")
                 .accept(MediaType.APPLICATION_JSON))
-            .andDo(print());
+            .andDo(print())
+            .andExpect(status().isOk())
+            .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON));
         
         logger.info("✓ GET请求处理测试通过 - HandlerMapping和HandlerAdapter工作正常");
     }
@@ -332,9 +347,13 @@ class WebMvcBeanTest {
     void testExceptionHandlerFlow() throws Exception {
         logger.info("测试异常处理流程...");
         
+        // Mock service抛出异常
+        when(userService.getUserById(999L)).thenThrow(new RuntimeException("用户不存在"));
+        
         mockMvc.perform(get("/api/users/999")
                 .accept(MediaType.APPLICATION_JSON))
-            .andDo(print());
+            .andDo(print())
+            .andExpect(status().isNotFound());
         
         logger.info("✓ 异常处理测试通过 - 异常被正确处理");
     }
@@ -382,6 +401,10 @@ class WebMvcBeanTest {
         updateDTO.setUsername("updateduser");
         updateDTO.setEmail("updated@example.com");
         updateDTO.setName("更新后的用户");
+        updateDTO.setPassword("newpassword123");  // 添加密码以满足@Valid验证
+        
+        // Mock service的行为
+        when(userService.updateUser(any(Long.class), any(UserDTO.class))).thenReturn(testUser);
         
         String updateJson = objectMapper.writeValueAsString(updateDTO);
         
@@ -389,7 +412,9 @@ class WebMvcBeanTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(updateJson)
                 .accept(MediaType.APPLICATION_JSON))
-            .andDo(print());
+            .andDo(print())
+            .andExpect(status().isOk())
+            .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON));
         
         logger.info("✓ PUT请求处理测试通过");
     }
@@ -401,6 +426,9 @@ class WebMvcBeanTest {
     @DisplayName("测试13: DELETE请求处理流程")
     void testDeleteRequestHandling() throws Exception {
         logger.info("测试DELETE请求处理...");
+        
+        // Mock service的行为
+        when(userService.getUserById(1L)).thenReturn(testUser);
         
         mockMvc.perform(delete("/api/users/1")
                 .accept(MediaType.APPLICATION_JSON))
@@ -418,10 +446,15 @@ class WebMvcBeanTest {
     void testQueryParameterHandling() throws Exception {
         logger.info("测试查询参数处理...");
         
+        // Mock service的行为（假设searchUsersByName返回空列表）
+        when(userService.searchUsersByName("测试")).thenReturn(List.of());
+        
         mockMvc.perform(get("/api/users/search")
                 .param("name", "测试")
                 .accept(MediaType.APPLICATION_JSON))
-            .andDo(print());
+            .andDo(print())
+            .andExpect(status().isOk())
+            .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON));
         
         logger.info("✓ 查询参数处理测试通过 - 请求参数正确解析");
     }

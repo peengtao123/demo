@@ -24,7 +24,98 @@ import java.util.stream.Collectors;
 import java.util.Comparator;
 
 /**
- * 管理页面控制器 - 用于后台管理系统
+ * 管理后台控制器
+ * <p>提供系统管理后台的所有页面和API接口，包括用户管理、角色管理、权限管理、
+ * 审计日志、个人信息等功能。所有路由都以/admin为前缀。</p>
+ * 
+ * <h2>功能模块</h2>
+ * <ul>
+ *   <li><strong>仪表盘：</strong>/admin/dashboard - 显示系统统计信息</li>
+ *   <li><strong>用户管理：</strong>/admin/users - 用户的CRUD操作、状态切换、密码重置</li>
+ *   <li><strong>角色管理：</strong>/admin/roles - 角色的CRUD操作、权限分配、状态切换</li>
+ *   <li><strong>权限管理：</strong>/admin/permissions - 权限的CRUD操作、树形结构管理</li>
+ *   <li><strong>审计日志：</strong>/admin/audit-logs - 查看和删除操作日志</li>
+ *   <li><strong>个人信息：</strong>/admin/profile - 查看和修改个人资料、修改密码</li>
+ * </ul>
+ * 
+ * <h2>用户管理功能</h2>
+ * <ul>
+ *   <li>分页列表展示（支持关键词搜索）</li>
+ *   <li>查看详情：/admin/users/{id}</li>
+ *   <li>新建用户：/admin/users/new</li>
+ *   <li>编辑用户：/admin/users/edit/{id}</li>
+ *   <li>保存用户：POST /admin/users/save</li>
+ *   <li>删除用户：POST /admin/users/delete/{id}</li>
+ *   <li>批量删除：POST /admin/users/batch-delete</li>
+ *   <li>切换状态：POST /admin/users/toggle-status/{id}</li>
+ *   <li>重置密码：POST /admin/users/reset-password/{id}</li>
+ * </ul>
+ * 
+ * <h2>角色管理功能</h2>
+ * <ul>
+ *   <li>分页列表展示（支持关键词搜索）</li>
+ *   <li>查看详情：/admin/roles/{id}</li>
+ *   <li>新建角色：/admin/roles/new</li>
+ *   <li>编辑角色：/admin/roles/edit/{id}</li>
+ *   <li>保存角色：POST /admin/roles/save（支持权限分配）</li>
+ *   <li>删除角色：POST /admin/roles/delete/{id}</li>
+ *   <li>批量删除：POST /admin/roles/batch-delete</li>
+ *   <li>切换状态：POST /admin/roles/toggle-status/{id}</li>
+ * </ul>
+ * 
+ * <h2>权限管理功能</h2>
+ * <ul>
+ *   <li>树形结构展示（支持按类型筛选）</li>
+ *   <li>查看详情：/admin/permissions/{id}</li>
+ *   <li>新建权限：/admin/permissions/new</li>
+ *   <li>编辑权限：/admin/permissions/edit/{id}</li>
+ *   <li>保存权限：POST /admin/permissions/save</li>
+ *   <li>删除权限：POST /admin/permissions/delete/{id}</li>
+ *   <li>批量删除：POST /admin/permissions/batch-delete</li>
+ *   <li>切换状态：POST /admin/permissions/toggle-status/{id}</li>
+ * </ul>
+ * 
+ * <h2>审计日志功能</h2>
+ * <ul>
+ *   <li>分页列表展示（支持按操作人、类型、目标筛选）</li>
+ *   <li>删除日志：POST /admin/audit-logs/delete/{id}</li>
+ *   <li>批量删除：POST /admin/audit-logs/batch-delete</li>
+ *   <li>清空所有：POST /admin/audit-logs/clear-all</li>
+ * </ul>
+ * 
+ * <h2>个人信息功能</h2>
+ * <ul>
+ *   <li>查看资料：/admin/profile</li>
+ *   <li>更新资料：POST /admin/profile/update</li>
+ *   <li>修改密码页面：/admin/profile/password</li>
+ *   <li>执行修改密码：POST /admin/profile/change-password</li>
+ * </ul>
+ * 
+ * <h2>安全特性</h2>
+ * <ul>
+ *   <li>所有操作需要ADMIN角色（由SecurityConfig配置）</li>
+ *   <li>敏感操作记录审计日志</li>
+ *   <li>密码使用BCrypt加密存储</li>
+ *   <li>修改密码需验证原密码</li>
+ *   <li>只能修改当前登录用户的信息</li>
+ * </ul>
+ * 
+ * <h2>技术实现</h2>
+ * <ul>
+ *   <li>使用@Controller注解，返回Thymeleaf模板名称</li>
+ *   <li>使用Model传递数据到视图层</li>
+ *   <li>使用RedirectAttributes处理重定向消息</li>
+ *   <li>使用Spring Data JPA进行分页查询</li>
+ *   <li>所有写操作都记录审计日志</li>
+ * </ul>
+ * 
+ * @author Demo Team
+ * @version 2.0
+ * @since 2024-01-01
+ * @see UserService
+ * @see RoleService
+ * @see PermissionService
+ * @see AuditLogService
  */
 @Controller
 @RequestMapping("/admin")
@@ -50,6 +141,9 @@ public class AdminController {
 
     /**
      * 管理首页/仪表盘
+     *
+     * @param model Spring MVC模型对象，用于传递数据到视图
+     * @return 仪表盘页面模板名称
      */
     @GetMapping("/dashboard")
     public String dashboard(Model model) {
@@ -81,6 +175,12 @@ public class AdminController {
 
     /**
      * 用户管理列表页面（支持分页和搜索）
+     *
+     * @param page 页码，从0开始，默认为0
+     * @param size 每页大小，默认为10
+     * @param keyword 搜索关键词，可选
+     * @param model Spring MVC模型对象，用于传递数据到视图
+     * @return 用户列表页面模板名称
      */
     @GetMapping("/users")
     public String userList(
@@ -108,6 +208,10 @@ public class AdminController {
 
     /**
      * 用户详情页面
+     *
+     * @param id 用户ID
+     * @param model Spring MVC模型对象，用于传递数据到视图
+     * @return 用户详情页面模板名称
      */
     @GetMapping("/users/{id}")
     public String userDetail(@PathVariable Long id, Model model) {
@@ -126,6 +230,9 @@ public class AdminController {
 
     /**
      * 新建用户页面
+     *
+     * @param model Spring MVC模型对象，用于传递数据到视图
+     * @return 用户表单页面模板名称
      */
     @GetMapping("/users/new")
     public String newUser(Model model) {
@@ -139,6 +246,10 @@ public class AdminController {
 
     /**
      * 编辑用户页面
+     *
+     * @param id 用户ID
+     * @param model Spring MVC模型对象，用于传递数据到视图
+     * @return 用户表单页面模板名称
      */
     @GetMapping("/users/edit/{id}")
     public String editUser(@PathVariable Long id, Model model) {
@@ -157,7 +268,12 @@ public class AdminController {
     }
 
     /**
-     * 保存用户
+     * 保存用户（新建或更新）
+     *
+     * @param user 用户对象，包含用户基本信息
+     * @param roleIds 角色ID列表，用于分配角色
+     * @param redirectAttributes Spring重定向属性，用于传递Flash消息
+     * @return 重定向到用户列表页面
      */
     @PostMapping("/users/save")
     public String saveUser(@ModelAttribute User user, 
@@ -200,6 +316,9 @@ public class AdminController {
 
     /**
      * 为用户分配角色（辅助方法）
+     *
+     * @param userId 用户ID
+     * @param roleIds 角色ID列表
      */
     private void assignRolesToUser(Long userId, List<Long> roleIds) {
         User user = userService.getUserById(userId);
@@ -226,6 +345,10 @@ public class AdminController {
 
     /**
      * 删除用户
+     *
+     * @param id 用户ID
+     * @param redirectAttributes Spring重定向属性，用于传递Flash消息
+     * @return 重定向到用户列表页面
      */
     @PostMapping("/users/delete/{id}")
     public String deleteUser(@PathVariable Long id, RedirectAttributes redirectAttributes) {
@@ -240,6 +363,10 @@ public class AdminController {
 
     /**
      * 批量删除用户
+     *
+     * @param ids 用户ID列表
+     * @param redirectAttributes Spring重定向属性，用于传递Flash消息
+     * @return 重定向到用户列表页面
      */
     @PostMapping("/users/batch-delete")
     public String batchDeleteUsers(@RequestParam List<Long> ids, RedirectAttributes redirectAttributes) {
@@ -254,6 +381,10 @@ public class AdminController {
 
     /**
      * 启用/禁用用户
+     *
+     * @param id 用户ID
+     * @param redirectAttributes Spring重定向属性，用于传递Flash消息
+     * @return 重定向到用户列表页面
      */
     @PostMapping("/users/toggle-status/{id}")
     public String toggleUserStatus(@PathVariable Long id, RedirectAttributes redirectAttributes) {
@@ -269,6 +400,11 @@ public class AdminController {
 
     /**
      * 重置用户密码
+     *
+     * @param id 用户ID
+     * @param newPassword 新密码
+     * @param redirectAttributes Spring重定向属性，用于传递Flash消息
+     * @return 重定向到用户列表页面
      */
     @PostMapping("/users/reset-password/{id}")
     public String resetPassword(@PathVariable Long id, 
@@ -285,6 +421,12 @@ public class AdminController {
 
     /**
      * 角色管理列表页面（支持分页和搜索）
+     *
+     * @param page 页码，从0开始，默认为0
+     * @param size 每页大小，默认为10
+     * @param keyword 搜索关键词，可选
+     * @param model Spring MVC模型对象，用于传递数据到视图
+     * @return 角色列表页面模板名称
      */
     @GetMapping("/roles")
     public String roleList(
@@ -310,6 +452,10 @@ public class AdminController {
 
     /**
      * 角色详情页面
+     *
+     * @param id 角色ID
+     * @param model Spring MVC模型对象，用于传递数据到视图
+     * @return 角色详情页面模板名称
      */
     @GetMapping("/roles/{id}")
     public String roleDetail(@PathVariable Long id, Model model) {
@@ -330,6 +476,9 @@ public class AdminController {
 
     /**
      * 新建角色页面
+     *
+     * @param model Spring MVC模型对象，用于传递数据到视图
+     * @return 角色表单页面模板名称
      */
     @GetMapping("/roles/new")
     public String newRole(Model model) {
@@ -343,6 +492,10 @@ public class AdminController {
 
     /**
      * 编辑角色页面
+     *
+     * @param id 角色ID
+     * @param model Spring MVC模型对象，用于传递数据到视图
+     * @return 角色表单页面模板名称
      */
     @GetMapping("/roles/edit/{id}")
     public String editRole(@PathVariable Long id, Model model) {
@@ -362,7 +515,12 @@ public class AdminController {
     }
 
     /**
-     * 保存角色
+     * 保存角色（新建或更新）
+     *
+     * @param role 角色对象，包含角色基本信息
+     * @param permissionIds 权限ID列表，用于分配权限
+     * @param redirectAttributes Spring重定向属性，用于传递Flash消息
+     * @return 重定向到角色列表页面
      */
     @PostMapping("/roles/save")
     public String saveRole(@ModelAttribute Role role, 
@@ -398,6 +556,10 @@ public class AdminController {
 
     /**
      * 删除角色
+     *
+     * @param id 角色ID
+     * @param redirectAttributes Spring重定向属性，用于传递Flash消息
+     * @return 重定向到角色列表页面
      */
     @PostMapping("/roles/delete/{id}")
     public String deleteRole(@PathVariable Long id, RedirectAttributes redirectAttributes) {
@@ -412,6 +574,10 @@ public class AdminController {
 
     /**
      * 批量删除角色
+     *
+     * @param ids 角色ID列表
+     * @param redirectAttributes Spring重定向属性，用于传递Flash消息
+     * @return 重定向到角色列表页面
      */
     @PostMapping("/roles/batch-delete")
     public String batchDeleteRoles(@RequestParam List<Long> ids, RedirectAttributes redirectAttributes) {
@@ -426,6 +592,10 @@ public class AdminController {
 
     /**
      * 启用/禁用角色
+     *
+     * @param id 角色ID
+     * @param redirectAttributes Spring重定向属性，用于传递Flash消息
+     * @return 重定向到角色列表页面
      */
     @PostMapping("/roles/toggle-status/{id}")
     public String toggleRoleStatus(@PathVariable Long id, RedirectAttributes redirectAttributes) {
@@ -441,6 +611,12 @@ public class AdminController {
 
     /**
      * 权限管理列表页面（支持分页和搜索）
+     *
+     * @param page 页码，从0开始，默认为0
+     * @param size 每页大小，默认为10
+     * @param keyword 搜索关键词，可选
+     * @param model Spring MVC模型对象，用于传递数据到视图
+     * @return 权限列表页面模板名称
      */
     @GetMapping("/permissions")
     public String permissionList(
@@ -466,6 +642,10 @@ public class AdminController {
 
     /**
      * 权限详情页面
+     *
+     * @param id 权限ID
+     * @param model Spring MVC模型对象，用于传递数据到视图
+     * @return 权限详情页面模板名称
      */
     @GetMapping("/permissions/{id}")
     public String permissionDetail(@PathVariable Long id, Model model) {
@@ -485,6 +665,9 @@ public class AdminController {
 
     /**
      * 新建权限页面
+     *
+     * @param model Spring MVC模型对象，用于传递数据到视图
+     * @return 权限表单页面模板名称
      */
     @GetMapping("/permissions/new")
     public String newPermission(Model model) {
@@ -498,6 +681,10 @@ public class AdminController {
 
     /**
      * 编辑权限页面
+     *
+     * @param id 权限ID
+     * @param model Spring MVC模型对象，用于传递数据到视图
+     * @return 权限表单页面模板名称
      */
     @GetMapping("/permissions/edit/{id}")
     public String editPermission(@PathVariable Long id, Model model) {
@@ -517,7 +704,11 @@ public class AdminController {
     }
 
     /**
-     * 保存权限
+     * 保存权限（新建或更新）
+     *
+     * @param permission 权限对象，包含权限基本信息
+     * @param redirectAttributes Spring重定向属性，用于传递Flash消息
+     * @return 重定向到权限列表页面
      */
     @PostMapping("/permissions/save")
     public String savePermission(@ModelAttribute Permission permission, RedirectAttributes redirectAttributes) {
@@ -537,6 +728,10 @@ public class AdminController {
 
     /**
      * 删除权限
+     *
+     * @param id 权限ID
+     * @param redirectAttributes Spring重定向属性，用于传递Flash消息
+     * @return 重定向到权限列表页面
      */
     @PostMapping("/permissions/delete/{id}")
     public String deletePermission(@PathVariable Long id, RedirectAttributes redirectAttributes) {
@@ -551,6 +746,10 @@ public class AdminController {
 
     /**
      * 批量删除权限
+     *
+     * @param ids 权限ID列表
+     * @param redirectAttributes Spring重定向属性，用于传递Flash消息
+     * @return 重定向到权限列表页面
      */
     @PostMapping("/permissions/batch-delete")
     public String batchDeletePermissions(@RequestParam List<Long> ids, RedirectAttributes redirectAttributes) {
@@ -565,6 +764,10 @@ public class AdminController {
 
     /**
      * 启用/禁用权限
+     *
+     * @param id 权限ID
+     * @param redirectAttributes Spring重定向属性，用于传递Flash消息
+     * @return 重定向到权限列表页面
      */
     @PostMapping("/permissions/toggle-status/{id}")
     public String togglePermissionStatus(@PathVariable Long id, RedirectAttributes redirectAttributes) {
@@ -580,6 +783,14 @@ public class AdminController {
 
     /**
      * 审计日志列表页面
+     *
+     * @param page 页码，从0开始，默认为0
+     * @param size 每页大小，默认为20
+     * @param operator 操作人筛选条件，可选
+     * @param operationType 操作类型筛选条件，可选
+     * @param targetType 目标类型筛选条件，可选
+     * @param model Spring MVC模型对象，用于传递数据到视图
+     * @return 审计日志页面模板名称
      */
     @GetMapping("/audit-logs")
     public String auditLogs(
@@ -617,6 +828,10 @@ public class AdminController {
     
     /**
      * 删除审计日志
+     *
+     * @param id 日志ID
+     * @param redirectAttributes Spring重定向属性，用于传递Flash消息
+     * @return 重定向到审计日志列表页面
      */
     @PostMapping("/audit-logs/delete/{id}")
     public String deleteAuditLog(@PathVariable Long id, RedirectAttributes redirectAttributes) {
@@ -631,6 +846,10 @@ public class AdminController {
     
     /**
      * 批量删除审计日志
+     *
+     * @param ids 日志ID列表
+     * @param redirectAttributes Spring重定向属性，用于传递Flash消息
+     * @return 重定向到审计日志列表页面
      */
     @PostMapping("/audit-logs/batch-delete")
     public String batchDeleteAuditLogs(@RequestParam List<Long> ids, RedirectAttributes redirectAttributes) {
@@ -645,6 +864,8 @@ public class AdminController {
 
     /**
      * 获取当前用户的动态菜单（JSON API）
+     *
+     * @return 菜单树列表，每个菜单项包含id、name、url、icon、children等属性；如果用户未认证或发生异常则返回空列表
      */
     @GetMapping("/menu")
     @ResponseBody
@@ -676,6 +897,10 @@ public class AdminController {
     
     /**
      * 递归构建菜单树
+     *
+     * @param allMenus 所有菜单权限列表
+     * @param parentId 父菜单ID，null表示获取根菜单
+     * @return 菜单树结构列表，每个元素包含id、name、url、icon、children等属性
      */
     private List<Map<String, Object>> buildMenuTree(List<Permission> allMenus, Long parentId) {
         List<Map<String, Object>> menuTree = new ArrayList<>();
@@ -688,7 +913,7 @@ public class AdminController {
                 menuItem.put("id", permission.getId());
                 menuItem.put("name", permission.getName());
                 menuItem.put("icon", permission.getIcon() != null ? permission.getIcon() : "📄");
-                menuItem.put("url", getMenuUrl(permission.getCode()));
+                menuItem.put("url", getUrlByPermissionCode(permission.getCode()));
                 menuItem.put("sortOrder", permission.getSortOrder());
                 
                 // 递归查找子菜单
@@ -705,12 +930,15 @@ public class AdminController {
     }
     
     /**
-     * 根据权限编码获取菜单URL
+     * 根据权限代码获取对应的URL地址
+     *
+     * @param permissionCode 权限代码，如 "user:menu"、"role:view" 等
+     * @return 对应的URL地址，如果无法匹配则返回 "#"
      */
-    private String getMenuUrl(String code) {
-        if (code == null) return "#";
+    private String getUrlByPermissionCode(String permissionCode) {
+        if (permissionCode == null) return "#";
         
-        switch (code.toLowerCase()) {
+        switch (permissionCode.toLowerCase()) {
             // 仪表盘
             case "dashboard:menu":
             case "dashboard:view":
@@ -752,6 +980,8 @@ public class AdminController {
 
     /**
      * 添加当前用户信息到Model
+     *
+     * @param model Spring MVC模型对象，用于传递数据到视图
      */
     private void addCurrentUserToModel(Model model) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -767,6 +997,8 @@ public class AdminController {
     
     /**
      * 获取当前用户名
+     *
+     * @return 当前登录用户的用户名，如果未认证则返回 "anonymous"
      */
     private String getCurrentUser() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -778,6 +1010,8 @@ public class AdminController {
 
     /**
      * 获取当前用户ID
+     *
+     * @return 当前登录用户的ID，如果获取失败则返回 null
      */
     private Long getCurrentUserId() {
         String username = getCurrentUser();
@@ -793,6 +1027,9 @@ public class AdminController {
 
     /**
      * 个人信息页面
+     *
+     * @param model Spring MVC模型对象，用于传递数据到视图
+     * @return 个人信息页面模板名称
      */
     @GetMapping("/profile")
     public String profile(Model model) {
@@ -812,6 +1049,14 @@ public class AdminController {
 
     /**
      * 更新个人信息
+     *
+     * @param name 姓名
+     * @param phone 电话，可选
+     * @param age 年龄，可选
+     * @param avatar 头像URL，可选
+     * @param remark 备注，可选
+     * @param redirectAttributes Spring重定向属性，用于传递Flash消息
+     * @return 重定向到个人信息页面
      */
     @PostMapping("/profile/update")
     public String updateProfile(
@@ -833,6 +1078,9 @@ public class AdminController {
 
     /**
      * 修改密码页面
+     *
+     * @param model Spring MVC模型对象，用于传递数据到视图
+     * @return 修改密码页面模板名称
      */
     @GetMapping("/profile/password")
     public String changePasswordPage(Model model) {
@@ -844,6 +1092,12 @@ public class AdminController {
 
     /**
      * 执行修改密码
+     *
+     * @param oldPassword 旧密码
+     * @param newPassword 新密码
+     * @param confirmPassword 确认新密码
+     * @param redirectAttributes Spring重定向属性，用于传递Flash消息
+     * @return 重定向到登出页面或修改密码页面
      */
     @PostMapping("/profile/password/change")
     public String changePassword(

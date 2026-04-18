@@ -12,6 +12,9 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+/**
+ * 用户API控制器 - 提供RESTful API接口
+ */
 @RestController
 @RequestMapping("/api/users")
 public class UserController {
@@ -21,6 +24,9 @@ public class UserController {
 
     /**
      * 创建用户
+     *
+     * @param userDTO 用户数据传输对象，包含用户名、邮箱、姓名等信息，需通过 CreateGroup 验证
+     * @return 响应实体，成功时返回200状态码和创建的用户信息，失败时返回400状态码和错误信息
      */
     @PostMapping
     public ResponseEntity<ApiResponse<User>> createUser(@Validated(UserDTO.CreateGroup.class) @RequestBody UserDTO userDTO) {
@@ -34,6 +40,9 @@ public class UserController {
 
     /**
      * 根据ID查询用户
+     *
+     * @param id 用户ID
+     * @return 响应实体，成功时返回200状态码和用户信息，失败时返回404状态码
      */
     @GetMapping("/{id}")
     public ResponseEntity<ApiResponse<User>> getUserById(@PathVariable Long id) {
@@ -47,6 +56,8 @@ public class UserController {
 
     /**
      * 查询所有用户
+     *
+     * @return 响应实体，返回200状态码和所有用户列表
      */
     @GetMapping
     public ResponseEntity<ApiResponse<List<User>>> getAllUsers() {
@@ -56,6 +67,10 @@ public class UserController {
 
     /**
      * 更新用户
+     *
+     * @param id 用户ID
+     * @param userDTO 用户数据传输对象，包含需要更新的字段
+     * @return 响应实体，成功时返回200状态码和更新后的用户信息，失败时返回400状态码和错误信息
      */
     @PutMapping("/{id}")
     public ResponseEntity<ApiResponse<User>> updateUser(@PathVariable Long id, 
@@ -70,6 +85,9 @@ public class UserController {
 
     /**
      * 删除用户
+     *
+     * @param id 用户ID
+     * @return 响应实体，成功时返回200状态码和成功消息，失败时返回404状态码
      */
     @DeleteMapping("/{id}")
     public ResponseEntity<ApiResponse<Void>> deleteUser(@PathVariable Long id) {
@@ -83,6 +101,9 @@ public class UserController {
 
     /**
      * 根据用户名查询用户
+     *
+     * @param username 用户名
+     * @return 响应实体，成功时返回200状态码和用户信息，失败时返回404状态码
      */
     @GetMapping("/username/{username}")
     public ResponseEntity<ApiResponse<User>> getUserByUsername(@PathVariable String username) {
@@ -96,6 +117,9 @@ public class UserController {
 
     /**
      * 根据姓名搜索用户
+     *
+     * @param name 姓名关键词，支持模糊匹配
+     * @return 响应实体，返回200状态码和匹配的用户列表
      */
     @GetMapping("/search")
     public ResponseEntity<ApiResponse<List<User>>> searchUsers(@RequestParam String name) {

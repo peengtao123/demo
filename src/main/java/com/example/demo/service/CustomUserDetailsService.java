@@ -19,6 +19,9 @@ import java.util.stream.Collectors;
 
 /**
  * 自定义用户详情服务 - 用于Spring Security认证
+ * 
+ * <p>实现 UserDetailsService 接口，提供从数据库加载用户信息的功能。
+ * 在用户登录时，Spring Security 会调用此服务获取用户详情和权限信息。</p>
  */
 @Service
 public class CustomUserDetailsService implements UserDetailsService {
@@ -26,6 +29,16 @@ public class CustomUserDetailsService implements UserDetailsService {
     @Autowired
     private UserRepository userRepository;
 
+    /**
+     * 根据用户名加载用户详情
+     *
+     * <p>此方法由 Spring Security 在用户登录时自动调用。
+     * 从数据库中查询用户信息，并构建包含角色权限的 UserDetails 对象。</p>
+     *
+     * @param username 用户名
+     * @return 包含用户信息和权限的 UserDetails 对象
+     * @throws UsernameNotFoundException 如果用户不存在则抛出异常
+     */
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         User user = userRepository.findByUsername(username)

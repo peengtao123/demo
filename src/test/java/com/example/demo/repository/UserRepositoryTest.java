@@ -32,14 +32,17 @@ class UserRepositoryTest {
 
         // 创建测试用户
         testUser1 = new User("user1", "user1@example.com", "User One");
+        testUser1.setPassword("password123");
         testUser1.setPhone("13800138001");
         testUser1.setAge(25);
 
         testUser2 = new User("user2", "user2@example.com", "User Two");
+        testUser2.setPassword("password123");
         testUser2.setPhone("13800138002");
         testUser2.setAge(30);
 
         testUser3 = new User("user3", "user3@example.com", "User Three");
+        testUser3.setPassword("password123");
         testUser3.setPhone("13800138003");
         testUser3.setAge(35);
 

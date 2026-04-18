@@ -16,6 +16,9 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.*;
 import java.util.stream.Collectors;
 
+/**
+ * 角色服务类 - 提供角色相关的业务逻辑处理
+ */
 @Service
 @Transactional
 public class RoleService {
@@ -31,6 +34,8 @@ public class RoleService {
 
     /**
      * 获取当前操作用户名
+     *
+     * @return 当前登录用户的用户名，如果获取失败则返回 "system"
      */
     private String getCurrentUser() {
         try {
@@ -42,6 +47,8 @@ public class RoleService {
 
     /**
      * 获取所有角色（不分页）
+     *
+     * @return 按排序号和创建时间升序排列的所有角色列表
      */
     @Transactional(readOnly = true)
     public List<Role> getAllRoles() {
@@ -50,6 +57,10 @@ public class RoleService {
 
     /**
      * 分页查询角色列表
+     *
+     * @param page 页码（从0开始）
+     * @param size 每页大小
+     * @return 按排序号和创建时间升序排列的分页角色结果
      */
     @Transactional(readOnly = true)
     public Page<Role> getRolesWithPaging(int page, int size) {
@@ -59,6 +70,11 @@ public class RoleService {
 
     /**
      * 搜索角色
+     *
+     * @param keyword 搜索关键词，支持名称模糊匹配
+     * @param page 页码（从0开始）
+     * @param size 每页大小
+     * @return 按排序号和创建时间升序排列的分页搜索结果
      */
     @Transactional(readOnly = true)
     public Page<Role> searchRoles(String keyword, int page, int size) {
@@ -68,6 +84,9 @@ public class RoleService {
 
     /**
      * 根据ID查询角色
+     *
+     * @param id 角色ID
+     * @return 包含角色的Optional对象，如果不存在则返回空Optional
      */
     @Transactional(readOnly = true)
     public Optional<Role> getRoleById(Long id) {
@@ -76,6 +95,10 @@ public class RoleService {
 
     /**
      * 创建角色
+     *
+     * @param role 角色实体对象，包含名称、描述、图标等信息
+     * @return 创建成功的角色实体对象
+     * @throws RuntimeException 如果角色名称已存在则抛出异常
      */
     public Role createRole(Role role) {
         // 检查角色名是否已存在
@@ -106,6 +129,11 @@ public class RoleService {
 
     /**
      * 更新角色
+     *
+     * @param id 角色ID
+     * @param roleDetails 包含更新信息的角色对象
+     * @return 更新后的角色实体对象
+     * @throws RuntimeException 如果角色不存在或新名称已被其他角色使用则抛出异常
      */
     public Role updateRole(Long id, Role roleDetails) {
         Role role = roleRepository.findById(id)
@@ -142,6 +170,9 @@ public class RoleService {
 
     /**
      * 删除角色
+     *
+     * @param id 角色ID
+     * @throws RuntimeException 如果角色不存在或正在被用户使用则抛出异常
      */
     public void deleteRole(Long id) {
         Role role = roleRepository.findById(id)
@@ -168,6 +199,9 @@ public class RoleService {
 
     /**
      * 批量删除角色
+     *
+     * @param ids 角色ID列表
+     * @throws RuntimeException 如果任何角色正在被用户使用则抛出异常
      */
     public void batchDeleteRoles(List<Long> ids) {
         String deletedRoles = ids.stream()
@@ -203,6 +237,10 @@ public class RoleService {
 
     /**
      * 启用/禁用角色
+     *
+     * @param id 角色ID
+     * @return 更新后的角色实体对象，状态已切换
+     * @throws RuntimeException 如果角色不存在则抛出异常
      */
     public Role toggleRoleStatus(Long id) {
         Role role = roleRepository.findById(id)
@@ -226,6 +264,11 @@ public class RoleService {
 
     /**
      * 为角色分配权限
+     *
+     * @param roleId 角色ID
+     * @param permissionIds 权限ID列表
+     * @return 更新后的角色实体对象，包含新分配的权限
+     * @throws RuntimeException 如果角色或权限不存在则抛出异常
      */
     public Role assignPermissions(Long roleId, List<Long> permissionIds) {
         Role role = roleRepository.findById(roleId)
@@ -257,6 +300,10 @@ public class RoleService {
 
     /**
      * 获取角色的权限列表
+     *
+     * @param roleId 角色ID
+     * @return 角色关联的权限集合
+     * @throws RuntimeException 如果角色不存在则抛出异常
      */
     @Transactional(readOnly = true)
     public Set<Permission> getRolePermissions(Long roleId) {
@@ -267,6 +314,9 @@ public class RoleService {
 
     /**
      * 根据名称查询角色
+     *
+     * @param name 角色名称
+     * @return 包含角色的Optional对象，如果不存在则返回空Optional
      */
     @Transactional(readOnly = true)
     public Optional<Role> findByName(String name) {
@@ -275,6 +325,8 @@ public class RoleService {
 
     /**
      * 获取启用的角色列表
+     *
+     * @return 所有启用状态的角色列表
      */
     @Transactional(readOnly = true)
     public List<Role> getEnabledRoles() {
@@ -283,6 +335,8 @@ public class RoleService {
 
     /**
      * 统计启用角色数量
+     *
+     * @return 启用状态的角色数量
      */
     @Transactional(readOnly = true)
     public long countEnabledRoles() {
@@ -291,6 +345,8 @@ public class RoleService {
 
     /**
      * 统计禁用角色数量
+     *
+     * @return 禁用状态的角色数量
      */
     @Transactional(readOnly = true)
     public long countDisabledRoles() {
@@ -299,6 +355,9 @@ public class RoleService {
 
     /**
      * 检查角色是否被用户使用
+     *
+     * @param roleId 角色ID
+     * @return 如果角色正在被至少一个用户使用则返回 true，否则返回 false
      */
     @Transactional(readOnly = true)
     public boolean isRoleInUse(Long roleId) {
@@ -307,6 +366,9 @@ public class RoleService {
 
     /**
      * 获取使用该角色的用户数量
+     *
+     * @param roleId 角色ID
+     * @return 使用该角色的用户数量
      */
     @Transactional(readOnly = true)
     public long getUsersCountByRole(Long roleId) {

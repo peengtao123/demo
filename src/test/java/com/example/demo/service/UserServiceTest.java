@@ -9,6 +9,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.util.Arrays;
 import java.util.List;
@@ -16,6 +17,7 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 
 /**
@@ -28,6 +30,12 @@ class UserServiceTest {
     @Mock
     private UserRepository userRepository;
 
+    @Mock
+    private PasswordEncoder passwordEncoder;
+
+    @Mock
+    private AuditLogService auditLogService;
+
     @InjectMocks
     private UserService userService;
 
@@ -39,13 +47,19 @@ class UserServiceTest {
         // 创建测试用户
         testUser = new User("testuser", "test@example.com", "Test User");
         testUser.setId(1L);
+        testUser.setPassword("encodedPassword");
         testUser.setPhone("13800138000");
         testUser.setAge(25);
 
         // 创建测试DTO
         testUserDTO = new UserDTO("testuser", "test@example.com", "Test User");
+        testUserDTO.setPassword("password123");
         testUserDTO.setPhone("13800138000");
         testUserDTO.setAge(25);
+        
+        // 模拟PasswordEncoder行为（使用lenient模式避免UnnecessaryStubbing错误）
+        lenient().when(passwordEncoder.encode(anyString())).thenReturn("encodedPassword");
+        lenient().when(passwordEncoder.matches(anyString(), anyString())).thenReturn(true);
     }
 
     @Test

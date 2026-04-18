@@ -15,6 +15,8 @@ import java.util.List;
 
 /**
  * 页面控制器 - 用于返回Thymeleaf视图
+ * 
+ * <p>提供系统各个页面的路由和视图渲染功能，包括用户列表、用户详情和首页等。</p>
  */
 @Controller
 @RequestMapping("/pages")
@@ -25,6 +27,9 @@ public class PageController {
 
     /**
      * 用户列表页面
+     *
+     * @param model Spring MVC 模型对象，用于传递用户列表和当前用户信息到视图
+     * @return 用户列表页面模板名称 "users/list"
      */
     @GetMapping("/users")
     public String userList(Model model) {
@@ -36,6 +41,10 @@ public class PageController {
 
     /**
      * 用户详情页面
+     * 
+     * @param id 用户ID
+     * @param model 模型对象，用于传递数据到视图
+     * @return 视图名称
      */
     @GetMapping("/users/{id}")
     public String userDetail(@PathVariable Long id, Model model) {
@@ -52,6 +61,9 @@ public class PageController {
 
     /**
      * 首页
+     * 
+     * @param model 模型对象，用于传递数据到视图
+     * @return 视图名称
      */
     @GetMapping("/")
     public String home(Model model) {

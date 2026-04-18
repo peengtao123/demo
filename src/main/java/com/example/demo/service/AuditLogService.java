@@ -13,6 +13,9 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.List;
 
+/**
+ * 审计日志服务类 - 提供审计日志的记录和查询功能
+ */
 @Service
 @Transactional
 public class AuditLogService {
@@ -22,6 +25,12 @@ public class AuditLogService {
 
     /**
      * 记录审计日志
+     *
+     * @param operator 操作人用户名
+     * @param operationType 操作类型（如 CREATE、UPDATE、DELETE 等）
+     * @param targetType 目标对象类型（如 USER、ROLE、PERMISSION 等）
+     * @param targetId 目标对象ID
+     * @param description 操作描述信息
      */
     public void log(String operator, String operationType, String targetType, 
                    String targetId, String description) {
@@ -31,6 +40,13 @@ public class AuditLogService {
 
     /**
      * 记录审计日志（带IP地址）
+     *
+     * @param operator 操作人用户名
+     * @param operationType 操作类型（如 CREATE、UPDATE、DELETE 等）
+     * @param targetType 目标对象类型（如 USER、ROLE、PERMISSION 等）
+     * @param targetId 目标对象ID
+     * @param description 操作描述信息
+     * @param ipAddress 操作人的IP地址
      */
     public void logWithIp(String operator, String operationType, String targetType, 
                          String targetId, String description, String ipAddress) {
@@ -41,6 +57,14 @@ public class AuditLogService {
 
     /**
      * 记录审计日志（带变更前后值）
+     *
+     * @param operator 操作人用户名
+     * @param operationType 操作类型（如 CREATE、UPDATE、DELETE 等）
+     * @param targetType 目标对象类型（如 USER、ROLE、PERMISSION 等）
+     * @param targetId 目标对象ID
+     * @param description 操作描述信息
+     * @param oldValue 变更前的值
+     * @param newValue 变更后的值
      */
     public void logWithChanges(String operator, String operationType, String targetType, 
                               String targetId, String description, 
@@ -53,6 +77,10 @@ public class AuditLogService {
 
     /**
      * 分页查询审计日志
+     *
+     * @param page 页码（从0开始）
+     * @param size 每页大小
+     * @return 按创建时间降序排列的分页审计日志结果
      */
     @Transactional(readOnly = true)
     public Page<AuditLog> getAuditLogs(int page, int size) {
@@ -61,7 +89,12 @@ public class AuditLogService {
     }
 
     /**
-     * 根据操作人查询
+     * 根据操作人查询审计日志
+     *
+     * @param operator 操作人用户名
+     * @param page 页码（从0开始）
+     * @param size 每页大小
+     * @return 按创建时间降序排列的分页审计日志结果
      */
     @Transactional(readOnly = true)
     public Page<AuditLog> findByOperator(String operator, int page, int size) {
@@ -70,7 +103,12 @@ public class AuditLogService {
     }
 
     /**
-     * 根据操作类型查询
+     * 根据操作类型查询审计日志
+     *
+     * @param operationType 操作类型（如 CREATE、UPDATE、DELETE 等）
+     * @param page 页码（从0开始）
+     * @param size 每页大小
+     * @return 按创建时间降序排列的分页审计日志结果
      */
     @Transactional(readOnly = true)
     public Page<AuditLog> findByOperationType(String operationType, int page, int size) {
@@ -79,7 +117,12 @@ public class AuditLogService {
     }
 
     /**
-     * 根据目标类型查询
+     * 根据目标类型查询审计日志
+     *
+     * @param targetType 目标对象类型（如 USER、ROLE、PERMISSION 等）
+     * @param page 页码（从0开始）
+     * @param size 每页大小
+     * @return 按创建时间降序排列的分页审计日志结果
      */
     @Transactional(readOnly = true)
     public Page<AuditLog> findByTargetType(String targetType, int page, int size) {
@@ -88,7 +131,13 @@ public class AuditLogService {
     }
 
     /**
-     * 根据时间范围查询
+     * 根据时间范围查询审计日志
+     *
+     * @param start 开始时间
+     * @param end 结束时间
+     * @param page 页码（从0开始）
+     * @param size 每页大小
+     * @return 按创建时间降序排列的分页审计日志结果
      */
     @Transactional(readOnly = true)
     public Page<AuditLog> findByTimeRange(LocalDateTime start, LocalDateTime end, int page, int size) {
@@ -98,6 +147,8 @@ public class AuditLogService {
 
     /**
      * 获取最近的操作日志
+     *
+     * @return 按创建时间降序排列的最近10条审计日志列表
      */
     @Transactional(readOnly = true)
     public List<AuditLog> getRecentLogs() {
@@ -106,6 +157,9 @@ public class AuditLogService {
 
     /**
      * 统计指定操作类型的数量
+     *
+     * @param operationType 操作类型（如 CREATE、UPDATE、DELETE 等）
+     * @return 指定操作类型的审计日志数量
      */
     @Transactional(readOnly = true)
     public long countByOperationType(String operationType) {

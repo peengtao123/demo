@@ -12,6 +12,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
 
+/**
+ * 权限服务类 - 提供权限相关的业务逻辑处理
+ */
 @Service
 @Transactional
 public class PermissionService {
@@ -21,6 +24,8 @@ public class PermissionService {
 
     /**
      * 获取所有权限（不分页）
+     *
+     * @return 按排序号和创建时间升序排列的所有权限列表
      */
     @Transactional(readOnly = true)
     public List<Permission> getAllPermissions() {
@@ -29,6 +34,10 @@ public class PermissionService {
 
     /**
      * 分页查询权限列表
+     *
+     * @param page 页码（从0开始）
+     * @param size 每页大小
+     * @return 按排序号和创建时间升序排列的分页权限结果
      */
     @Transactional(readOnly = true)
     public Page<Permission> getPermissionsWithPaging(int page, int size) {
@@ -38,6 +47,11 @@ public class PermissionService {
 
     /**
      * 搜索权限
+     *
+     * @param keyword 搜索关键词，支持名称或编码模糊匹配
+     * @param page 页码（从0开始）
+     * @param size 每页大小
+     * @return 按排序号和创建时间升序排列的分页搜索结果
      */
     @Transactional(readOnly = true)
     public Page<Permission> searchPermissions(String keyword, int page, int size) {
@@ -47,6 +61,9 @@ public class PermissionService {
 
     /**
      * 根据ID查询权限
+     *
+     * @param id 权限ID
+     * @return 包含权限的Optional对象，如果不存在则返回空Optional
      */
     @Transactional(readOnly = true)
     public Optional<Permission> getPermissionById(Long id) {
@@ -55,6 +72,10 @@ public class PermissionService {
 
     /**
      * 创建权限
+     *
+     * @param permission 权限实体对象，包含名称、编码、类型等信息
+     * @return 创建成功的权限实体对象
+     * @throws RuntimeException 如果权限编码或名称已存在则抛出异常
      */
     public Permission createPermission(Permission permission) {
         // 检查权限编码是否已存在
@@ -82,6 +103,11 @@ public class PermissionService {
 
     /**
      * 更新权限
+     *
+     * @param id 权限ID
+     * @param permissionDetails 包含更新信息的权限对象
+     * @return 更新后的权限实体对象
+     * @throws RuntimeException 如果权限不存在或新编码/名称已被其他权限使用则抛出异常
      */
     public Permission updatePermission(Long id, Permission permissionDetails) {
         Permission permission = permissionRepository.findById(id)
@@ -113,6 +139,9 @@ public class PermissionService {
 
     /**
      * 删除权限
+     *
+     * @param id 权限ID
+     * @throws RuntimeException 如果权限不存在或正在被角色使用则抛出异常
      */
     public void deletePermission(Long id) {
         Permission permission = permissionRepository.findById(id)
@@ -129,6 +158,9 @@ public class PermissionService {
 
     /**
      * 批量删除权限
+     *
+     * @param ids 权限ID列表
+     * @throws RuntimeException 如果任何权限正在被角色使用则抛出异常
      */
     public void batchDeletePermissions(List<Long> ids) {
         for (Long id : ids) {
@@ -144,6 +176,10 @@ public class PermissionService {
 
     /**
      * 启用/禁用权限
+     *
+     * @param id 权限ID
+     * @return 更新后的权限实体对象，状态已切换
+     * @throws RuntimeException 如果权限不存在则抛出异常
      */
     public Permission togglePermissionStatus(Long id) {
         Permission permission = permissionRepository.findById(id)
@@ -154,6 +190,9 @@ public class PermissionService {
 
     /**
      * 根据编码查询权限
+     *
+     * @param code 权限编码
+     * @return 包含权限的Optional对象，如果不存在则返回空Optional
      */
     @Transactional(readOnly = true)
     public Optional<Permission> findByCode(String code) {
@@ -162,6 +201,9 @@ public class PermissionService {
 
     /**
      * 根据名称查询权限
+     *
+     * @param name 权限名称
+     * @return 包含权限的Optional对象，如果不存在则返回空Optional
      */
     @Transactional(readOnly = true)
     public Optional<Permission> findByName(String name) {
@@ -170,6 +212,8 @@ public class PermissionService {
 
     /**
      * 获取启用的权限列表
+     *
+     * @return 所有启用状态的权限列表
      */
     @Transactional(readOnly = true)
     public List<Permission> getEnabledPermissions() {
@@ -178,6 +222,9 @@ public class PermissionService {
 
     /**
      * 根据父级ID获取子权限
+     *
+     * @param parentId 父级权限ID
+     * @return 指定父级下的所有子权限列表
      */
     @Transactional(readOnly = true)
     public List<Permission> getChildPermissions(Long parentId) {
@@ -186,6 +233,9 @@ public class PermissionService {
 
     /**
      * 根据类型获取权限列表
+     *
+     * @param type 权限类型（如 MENU、BUTTON 等）
+     * @return 指定类型的权限列表
      */
     @Transactional(readOnly = true)
     public List<Permission> getPermissionsByType(String type) {
@@ -194,6 +244,8 @@ public class PermissionService {
 
     /**
      * 构建权限树
+     *
+     * @return 树形结构的权限列表，每个节点包含子节点信息
      */
     @Transactional(readOnly = true)
     public List<Map<String, Object>> buildPermissionTree() {
@@ -203,6 +255,10 @@ public class PermissionService {
 
     /**
      * 递归构建树形结构
+     *
+     * @param permissions 所有权限列表
+     * @param parentId 父级ID，null表示根节点
+     * @return 树形结构的节点列表
      */
     private List<Map<String, Object>> buildTree(List<Permission> permissions, Long parentId) {
         List<Map<String, Object>> tree = new ArrayList<>();
@@ -234,6 +290,8 @@ public class PermissionService {
 
     /**
      * 统计启用权限数量
+     *
+     * @return 启用状态的权限数量
      */
     @Transactional(readOnly = true)
     public long countEnabledPermissions() {
@@ -242,6 +300,8 @@ public class PermissionService {
 
     /**
      * 统计禁用权限数量
+     *
+     * @return 禁用状态的权限数量
      */
     @Transactional(readOnly = true)
     public long countDisabledPermissions() {
@@ -250,6 +310,9 @@ public class PermissionService {
 
     /**
      * 检查权限是否被角色使用
+     *
+     * @param permissionId 权限ID
+     * @return 如果权限正在被至少一个角色使用则返回 true，否则返回 false
      */
     @Transactional(readOnly = true)
     public boolean isPermissionInUse(Long permissionId) {
@@ -258,6 +321,9 @@ public class PermissionService {
 
     /**
      * 获取使用该权限的角色数量
+     *
+     * @param permissionId 权限ID
+     * @return 使用该权限的角色数量
      */
     @Transactional(readOnly = true)
     public long getRolesCountByPermission(Long permissionId) {

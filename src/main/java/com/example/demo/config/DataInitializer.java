@@ -15,9 +15,27 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+/**
+ * 数据初始化配置类
+ * <p>在应用启动时自动初始化测试数据，包括用户、角色和权限。</p>
+ * 
+ * @author Demo Team
+ * @version 1.0
+ * @since 2024-01-01
+ */
 @Configuration
 public class DataInitializer {
 
+    /**
+     * 初始化数据库测试数据
+     * <p>当数据库为空时，创建默认的用户、角色和权限数据。</p>
+     * 
+     * @param userRepository 用户仓库
+     * @param roleRepository 角色仓库
+     * @param permissionRepository 权限仓库
+     * @param passwordEncoder 密码编码器
+     * @return CommandLineRunner执行器
+     */
     @Bean
     CommandLineRunner initDatabase(UserRepository userRepository, 
                                    RoleRepository roleRepository,
