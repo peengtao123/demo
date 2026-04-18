@@ -1,0 +1,106 @@
+# Demo Project - Spring Boot 管理系统
+
+## 欢迎来到 Demo Project
+
+### 项目概述
+
+这是一个基于 Spring Boot 4.0.5 构建的 Java Web 应用程序，作为开发演示和初始模板。
+
+**主要特性：**
+
+- ✅ 完整的 RBAC 权限管理系统
+- ✅ 动态菜单和细粒度权限控制
+- ✅ Spring Security 安全认证
+- ✅ Thymeleaf 模板引擎
+- ✅ H2 数据库支持
+- ✅ 完善的单元测试和集成测试
+
+### 快速开始
+
+**1. 环境要求**
+   - JDK 17 或更高版本
+   - Maven 3.6+ 或使用项目自带的 mvnw wrapper
+
+**2. 克隆项目**
+
+```bash
+git clone https://github.com/example/demo.git
+cd demo
+```
+
+**3. 运行应用**
+
+```bash
+# 使用 Maven Wrapper (推荐)
+./mvnw spring-boot:run
+
+# 或使用系统 Maven
+mvn spring-boot:run
+```
+
+**4. 访问应用**
+
+打开浏览器访问：http://localhost:8080
+
+默认管理员账号：
+- 用户名：admin
+- 密码：admin123
+
+### 功能模块
+
+#### 用户管理
+- 用户 CRUD 操作
+- 用户角色分配
+- 用户详情查看
+
+#### 角色管理
+- 角色 CRUD 操作
+- 角色权限分配
+- 角色模板功能
+
+#### 权限管理
+- 权限 CRUD 操作
+- 权限类型管理（菜单/按钮）
+- 动态菜单配置
+
+#### 审计日志
+- 操作记录查询
+- 多维度筛选
+- 批量删除功能
+
+### 技术栈
+
+**后端技术：**
+- Spring Boot 4.0.5
+- Spring Security 7.0
+- Spring Data JPA
+- H2 Database
+- Thymeleaf
+
+**前端技术：**
+- Bootstrap 5
+- Bootstrap Icons
+- Thymeleaf 模板
+
+**测试框架：**
+- JUnit 5
+- Mockito
+- Spring Boot Test
+
+### 文档导航
+
+- [快速开始](quick-start.html) - 详细的入门指南
+- [用户指南](user-guide.html) - 完整的功能使用说明
+- [API文档](apidocs/index.html) - Java API 文档
+- [测试报告](surefire-report.html) - 单元测试结果
+- [代码覆盖率](jacoco/index.html) - JaCoCo 覆盖率报告
+
+### 更多信息
+
+- 项目源码：https://github.com/example/demo
+- 问题反馈：https://github.com/example/demo/issues
+- 更新日志：doc/01-入门指南/UPDATE_SUMMARY.md
+
+---
+
+最后更新: ${currentDate}

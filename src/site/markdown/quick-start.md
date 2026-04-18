@@ -58,6 +58,7 @@ mvn clean compile
 ```
 
 应用启动后，控制台会显示类似信息：
+
 ```
 Started DemoApplication in X.XXX seconds
 ```
@@ -78,7 +79,7 @@ Started DemoApplication in X.XXX seconds
 
 ### 用户管理
 
-访问路径：`/admin/users`
+访问路径：**/admin/users**
 
 - ✅ 创建新用户
 - ✅ 编辑用户信息
@@ -88,7 +89,7 @@ Started DemoApplication in X.XXX seconds
 
 ### 角色管理
 
-访问路径：`/admin/roles`
+访问路径：**/admin/roles**
 
 - ✅ 创建新角色
 - ✅ 编辑角色信息
@@ -98,7 +99,7 @@ Started DemoApplication in X.XXX seconds
 
 ### 权限管理
 
-访问路径：`/admin/permissions`
+访问路径：**/admin/permissions**
 
 - ✅ 创建权限（菜单/按钮）
 - ✅ 配置权限图标和排序
@@ -107,7 +108,7 @@ Started DemoApplication in X.XXX seconds
 
 ### 审计日志
 
-访问路径：`/admin/audit-logs`
+访问路径：**/admin/audit-logs**
 
 - ✅ 查看所有操作记录
 - ✅ 按操作人筛选
@@ -208,6 +209,7 @@ demo/
 ### Q1: 启动时端口被占用？
 
 **解决方案：**
+
 ```bash
 # 方法1：修改配置文件
 # 在 application.properties 中添加
@@ -220,6 +222,7 @@ server.port=8081
 ### Q2: 如何重置数据库？
 
 **解决方案：**
+
 ```bash
 # 停止应用
 # 删除 H2 数据库文件
@@ -232,15 +235,17 @@ rm -rf ./data/*
 ### Q3: 如何查看 H2 数据库控制台？
 
 **解决方案：**
+
 1. 启动应用后访问：http://localhost:8080/h2-console
 2. 配置连接：
-   - JDBC URL: `jdbc:h2:file:./data/demo`
-   - 用户名: `sa`
+   - JDBC URL: **jdbc:h2:file:./data/demo**
+   - 用户名: **sa**
    - 密码: （留空）
 
 ### Q4: 测试失败怎么办？
 
 **解决方案：**
+
 ```bash
 # 查看详细测试报告
 ./mvnw test
@@ -254,15 +259,15 @@ open target/site/surefire-report.html
 
 ## 下一步
 
-- 📖 阅读 [[用户指南][user-guide.html]] 了解详细功能
-- 📚 查看 [[API文档][apidocs/index.html]] 了解技术细节
-- 🔍 分析 [[测试报告][surefire-report.html]] 了解代码质量
-- 📊 查看 [[代码覆盖率][jacoco/index.html]] 了解测试覆盖情况
+- [用户指南](user-guide.html) 了解详细功能
+- [API文档](apidocs/index.html) 了解技术细节
+- [测试报告](surefire-report.html) 了解代码质量
+- [代码覆盖率](jacoco/index.html) 了解测试覆盖情况
 
 ---
 
 **需要帮助？**
 
-- 查看项目文档：`doc/` 目录
+- 查看项目文档：**doc/** 目录
 - 提交 Issue：https://github.com/example/demo/issues
-- 阅读更新日志：`doc/01-入门指南/UPDATE_SUMMARY.md`
+- 阅读更新日志：**doc/01-入门指南/UPDATE_SUMMARY.md**
