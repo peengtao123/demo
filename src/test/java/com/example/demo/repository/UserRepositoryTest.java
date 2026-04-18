@@ -1,15 +1,19 @@
 package com.example.demo.repository;
 
-import com.example.demo.entity.User;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import java.util.List;
+import java.util.Optional;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
-import java.util.List;
-import java.util.Optional;
-
-import static org.junit.jupiter.api.Assertions.*;
+import com.example.demo.entity.User;
 
 /**
  * UserRepository集成测试
@@ -55,7 +59,7 @@ class UserRepositoryTest {
     @Test
     void testFindByUsername() {
         Optional<User> found = userRepository.findByUsername("user1");
-        
+
         assertTrue(found.isPresent());
         assertEquals("user1", found.get().getUsername());
         assertEquals("user1@example.com", found.get().getEmail());
@@ -65,14 +69,14 @@ class UserRepositoryTest {
     @Test
     void testFindByUsernameNotFound() {
         Optional<User> found = userRepository.findByUsername("nonexistent");
-        
+
         assertFalse(found.isPresent());
     }
 
     @Test
     void testFindByEmail() {
         Optional<User> found = userRepository.findByEmail("user2@example.com");
-        
+
         assertTrue(found.isPresent());
         assertEquals("user2", found.get().getUsername());
         assertEquals("user2@example.com", found.get().getEmail());
@@ -81,21 +85,21 @@ class UserRepositoryTest {
     @Test
     void testFindByEmailNotFound() {
         Optional<User> found = userRepository.findByEmail("nonexistent@example.com");
-        
+
         assertFalse(found.isPresent());
     }
 
     @Test
     void testFindByNameContainingIgnoreCase() {
         List<User> users = userRepository.findByNameContainingIgnoreCase("user");
-        
+
         assertEquals(3, users.size());
     }
 
     @Test
     void testFindByNameContainingIgnoreCasePartialMatch() {
         List<User> users = userRepository.findByNameContainingIgnoreCase("One");
-        
+
         assertEquals(1, users.size());
         assertEquals("User One", users.get(0).getName());
     }
@@ -103,7 +107,7 @@ class UserRepositoryTest {
     @Test
     void testFindByNameContainingIgnoreCaseNoMatch() {
         List<User> users = userRepository.findByNameContainingIgnoreCase("NonExistent");
-        
+
         assertTrue(users.isEmpty());
     }
 
@@ -124,10 +128,11 @@ class UserRepositoryTest {
     @Test
     void testSaveAndFindById() {
         User newUser = new User("newuser", "newuser@example.com", "New User");
+        newUser.setPassword("password123");
         User savedUser = userRepository.save(newUser);
 
         assertNotNull(savedUser.getId());
-        
+
         Optional<User> found = userRepository.findById(savedUser.getId());
         assertTrue(found.isPresent());
         assertEquals("newuser", found.get().getUsername());
@@ -138,12 +143,12 @@ class UserRepositoryTest {
     void testUpdateUser() {
         Optional<User> found = userRepository.findByUsername("user1");
         assertTrue(found.isPresent());
-        
+
         User user = found.get();
         user.setName("Updated Name");
         user.setAge(26);
         user.setPhone("13900139000");
-        
+
         userRepository.save(user);
 
         Optional<User> updated = userRepository.findById(user.getId());
@@ -157,20 +162,20 @@ class UserRepositoryTest {
     void testDeleteUser() {
         Optional<User> found = userRepository.findByUsername("user1");
         assertTrue(found.isPresent());
-        
+
         Long userId = found.get().getId();
         userRepository.deleteById(userId);
 
         Optional<User> deleted = userRepository.findById(userId);
         assertFalse(deleted.isPresent());
-        
+
         assertEquals(2, userRepository.count());
     }
 
     @Test
     void testFindAll() {
         List<User> users = userRepository.findAll();
-        
+
         assertEquals(3, users.size());
     }
 

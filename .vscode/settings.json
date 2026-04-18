@@ -1,0 +1,156 @@
+{
+    // ==================== Java 语言服务器配置 ====================
+    "java.compile.nullAnalysis.mode": "automatic",
+    "java.configuration.updateBuildConfiguration": "automatic",
+    
+    // Java 运行时配置（根据你的系统调整 JDK 路径）
+    "java.configuration.runtimes": [
+        {
+            "name": "JavaSE-17",
+            "path": "C:\\Program Files\\Java\\jdk-17",
+            "default": true
+        }
+    ],
+    
+    // Java 项目源码和输出路径
+    "java.project.sourcePaths": ["src/main/java"],
+    "java.project.outputPath": "target/classes",
+    "java.project.referencedLibraries": [
+        "lib/**/*.jar"
+    ],
+    
+    // ==================== 问题检测与诊断配置 ====================
+    // 自动显示问题面板
+    "problems.autoReveal": true,
+    
+    // 问题排序方式：按严重性排序
+    "problems.sortOrder": "severity",
+    
+    // 排除不需要显示问题的目录
+    "problems.exclude": {
+        "**/node_modules/**": true,
+        "**/dist/**": true,
+        "**/target/**": true,
+        "**/.git/**": true
+    },
+    
+    // ==================== Java 错误级别配置 ====================
+    // 不完整类路径的严重性级别
+    "java.errors.incompleteClasspath.severity": "warning",
+    
+    // 未使用的导入显示为警告
+    "java.completion.importOrder": [
+        "java",
+        "javax",
+        "org",
+        "com"
+    ],
+    
+    // ==================== 代码质量检查配置 ====================
+    // 启用实时代码检查
+    "java.validation.enabled": true,
+    
+    // 显示代码建议（包括最佳实践提示）
+    "java.codeGeneration.hashCodeEquals.useJava7Objects": true,
+    
+    // ==================== Spring Boot 特定配置 ====================
+    // Spring Boot 属性自动补全和验证
+    "spring-boot.ls.java.home": "",
+    
+    // 启用 Spring Boot 开发工具支持
+    "java.server.launchMode": "Standard",
+    
+    // ==================== 编辑器集成配置 ====================
+    // 在编辑器中显示验证装饰（波浪线）
+    "editor.renderValidationDecorations": "on",
+    
+    // 悬停时显示详细信息
+    "editor.hover.enabled": "on",
+    
+    // 快速修复建议
+    "editor.lightbulb.enabled": "on",
+    
+    // ==================== Maven 集成配置 ====================
+    // Maven 可执行文件路径（如果使用系统 Maven）
+    "maven.executable.path": "",
+    
+    // Maven 视图刷新间隔（毫秒）
+    "maven.pomfile.autoUpdateEffectivePOM": true,
+    
+    // ==================== 调试配置 ====================
+    // 调试时显示变量值
+    "java.debug.settings.showHex": false,
+    "java.debug.settings.showStaticVariables": false,
+    "java.debug.settings.showQualifiedNames": false,
+    "java.debug.settings.maxStringLength": 0,
+    "java.debug.settings.numericPrecision": 0,
+    
+    // ==================== 格式化配置 ====================
+    // 使用 Google Java Style Guide 格式化
+    "java.format.enabled": true,
+    "java.format.settings.url": "",
+    "java.format.settings.profile": "",
+    
+    // 保存时自动格式化
+    "[java]": {
+        "editor.defaultFormatter": "redhat.java",
+        "editor.formatOnSave": true,
+        "editor.formatOnPaste": true,
+        "editor.codeActionsOnSave": {
+            "source.organizeImports": "explicit"
+        }
+    },
+    
+    // ==================== 智能感知配置 ====================
+    // 自动导入优化
+    "java.sources.organizeImports.starThreshold": 99,
+    "java.sources.organizeImports.staticStarThreshold": 99,
+    
+    // 成员变量前缀提示
+    "java.completion.guessMethodArguments": true,
+    "java.completion.favoriteStaticMembers": [
+        "org.junit.Assert.*",
+        "org.junit.Assume.*",
+        "org.junit.jupiter.api.Assertions.*",
+        "org.junit.jupiter.api.Assumptions.*",
+        "org.mockito.Mockito.*",
+        "org.mockito.ArgumentMatchers.*",
+        "org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*",
+        "org.springframework.test.web.servlet.result.MockMvcResultMatchers.*"
+    ],
+    
+    // ==================== 测试配置 ====================
+    // JUnit 测试运行器配置
+    "java.test.config": {},
+    "java.test.defaultConfig": "",
+    
+    // ==================== 性能优化配置 ====================
+    // 限制大型项目的分析范围
+    "java.import.gradle.enabled": false,
+    "java.import.maven.enabled": true,
+    "java.autobuild.enabled": true,
+    
+    // 编译时自定义问题严重级别
+    "java.compile.problemSeverity": {
+        // === 高优先级：必须修复 ===
+        "nullReference": "error",                    // null 引用（会导致 NPE）
+        "resourceLeak": "error",                     // 资源泄漏
+        "incompatibleAssign": "error",               // 不兼容的赋值
+        
+        // === 中优先级：建议修复 ===
+        "unusedImport": "warning",                   // 未使用的导入
+        "unusedLocalVariable": "warning",            // 未使用的局部变量
+        "unusedParameter": "warning",                // 未使用的参数（改为 warning）
+        "rawTypeReference": "warning",               // 原始类型引用
+        "uncheckedTypeOperation": "warning",         // 未检查的类型操作
+        "potentialNullReference": "warning",         // 潜在 null 引用
+        "deprecation": "warning",                    // 使用废弃 API
+        "serialVersionUID": "warning",               // 缺少序列化版本ID
+        
+        // === 低优先级：可选处理 ===
+        "boxingConversion": "info",                  // 自动装箱/拆箱
+        "staticAccess": "info",                      // 通过实例访问静态成员
+        "redundantSuperinterface": "info",           // 冗余的父接口
+        "unqualifiedFieldAccess": "ignore"           // 非限定字段访问（忽略）
+    }
+}

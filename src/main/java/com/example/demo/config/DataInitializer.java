@@ -245,36 +245,36 @@ public class DataInitializer {
                 // ============ 初始化用户 ============
                 // 管理员账号
                 User admin = new User("admin", "admin@example.com", "管理员");
+                admin.setPassword(passwordEncoder.encode("admin123"));
                 admin.setPhone("13800138000");
                 admin.setAge(30);
-                admin.setPassword(passwordEncoder.encode("admin123"));
                 Set<Role> adminRoles = new HashSet<>();
                 adminRoles.add(adminRole);
                 admin.setRoles(adminRoles);
                 
                 // 普通用户1
                 User user1 = new User("zhangsan", "zhangsan@example.com", "张三");
+                user1.setPassword(passwordEncoder.encode("user123"));
                 user1.setPhone("13800138001");
                 user1.setAge(25);
-                user1.setPassword(passwordEncoder.encode("user123"));
                 Set<Role> user1Roles = new HashSet<>();
                 user1Roles.add(userRole);
                 user1.setRoles(user1Roles);
                 
                 // 普通用户2
                 User user2 = new User("lisi", "lisi@example.com", "李四");
+                user2.setPassword(passwordEncoder.encode("user123"));
                 user2.setPhone("13800138002");
                 user2.setAge(30);
-                user2.setPassword(passwordEncoder.encode("user123"));
                 Set<Role> user2Roles = new HashSet<>();
                 user2Roles.add(userRole);
                 user2.setRoles(user2Roles);
                 
                 // 编辑者用户
                 User user3 = new User("wangwu", "wangwu@example.com", "王五");
+                user3.setPassword(passwordEncoder.encode("user123"));
                 user3.setPhone("13800138003");
                 user3.setAge(28);
-                user3.setPassword(passwordEncoder.encode("user123"));
                 Set<Role> user3Roles = new HashSet<>();
                 user3Roles.add(editorRole);
                 user3.setRoles(user3Roles);
