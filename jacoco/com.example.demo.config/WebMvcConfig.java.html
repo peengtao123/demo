@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="zh"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>WebMvcConfig.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">demo</a> &gt; <a href="index.source.html" class="el_package">com.example.demo.config</a> &gt; <span class="el_source">WebMvcConfig.java</span></div><h1>WebMvcConfig.java</h1><pre class="source lang-java linenums">package com.example.demo.config;
+
+import com.example.demo.interceptor.PermissionInterceptor;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
+
+/**
+ * Web MVC配置类
+ * &lt;p&gt;配置Spring MVC的核心功能，包括拦截器、视图解析器、消息转换器等。
+ * 该类实现了WebMvcConfigurer接口，用于自定义MVC行为。&lt;/p&gt;
+ * 
+ * &lt;h2&gt;主要功能&lt;/h2&gt;
+ * &lt;ul&gt;
+ *   &lt;li&gt;注册自定义拦截器（PermissionInterceptor）&lt;/li&gt;
+ *   &lt;li&gt;配置拦截器的路径匹配规则&lt;/li&gt;
+ *   &lt;li&gt;排除不需要拦截的路径（静态资源、登录页面等）&lt;/li&gt;
+ * &lt;/ul&gt;
+ * 
+ * &lt;h2&gt;拦截器配置&lt;/h2&gt;
+ * &lt;ul&gt;
+ *   &lt;li&gt;&lt;strong&gt;拦截路径：&lt;/strong&gt;/admin/**（所有管理后台请求）&lt;/li&gt;
+ *   &lt;li&gt;&lt;strong&gt;排除路径：&lt;/strong&gt;
+ *     &lt;ul&gt;
+ *       &lt;li&gt;/admin/login - 登录页面&lt;/li&gt;
+ *       &lt;li&gt;/admin/logout - 登出接口&lt;/li&gt;
+ *       &lt;li&gt;/css/**、/js/**、/images/** - 静态资源&lt;/li&gt;
+ *       &lt;li&gt;/favicon.ico - 网站图标&lt;/li&gt;
+ *     &lt;/ul&gt;
+ *   &lt;/li&gt;
+ * &lt;/ul&gt;
+ * 
+ * &lt;h3&gt;执行顺序&lt;/h3&gt;
+ * &lt;ol&gt;
+ *   &lt;li&gt;请求到达DispatcherServlet&lt;/li&gt;
+ *   &lt;li&gt;执行PermissionInterceptor.preHandle()&lt;/li&gt;
+ *   &lt;li&gt;如果preHandle返回true，继续执行Controller方法&lt;/li&gt;
+ *   &lt;li&gt;如果preHandle返回false，中断请求并返回响应&lt;/li&gt;
+ *   &lt;li&gt;执行Controller方法&lt;/li&gt;
+ *   &lt;li&gt;执行PermissionInterceptor.postHandle()&lt;/li&gt;
+ *   &lt;li&gt;执行PermissionInterceptor.afterCompletion()&lt;/li&gt;
+ * &lt;/ol&gt;
+ * 
+ * &lt;h3&gt;扩展建议&lt;/h3&gt;
+ * &lt;p&gt;如需添加更多MVC配置，可以在此类中实现其他WebMvcConfigurer方法：&lt;/p&gt;
+ * &lt;ul&gt;
+ *   &lt;li&gt;addViewControllers() - 配置视图控制器&lt;/li&gt;
+ *   &lt;li&gt;addResourceHandlers() - 配置静态资源处理&lt;/li&gt;
+ *   &lt;li&gt;configureMessageConverters() - 配置消息转换器&lt;/li&gt;
+ *   &lt;li&gt;addCorsMappings() - 配置跨域支持&lt;/li&gt;
+ * &lt;/ul&gt;
+ * 
+ * @author Demo Team
+ * @version 1.0
+ * @since 2024-01-01
+ * @see PermissionInterceptor
+ * @see WebMvcConfigurer
+ */
+@Configuration
+<span class="fc" id="L61">public class WebMvcConfig implements WebMvcConfigurer {</span>
+
+    /**
+     * 权限拦截器
+     * &lt;p&gt;用于验证用户是否具有访问特定资源的权限&lt;/p&gt;
+     */
+    @Autowired
+    private PermissionInterceptor permissionInterceptor;
+
+    /**
+     * 注册拦截器
+     * &lt;p&gt;将PermissionInterceptor注册到拦截器链中，并配置拦截规则。&lt;/p&gt;
+     * 
+     * @param registry InterceptorRegistry对象，用于注册拦截器
+     * 
+     * &lt;p&gt;&lt;b&gt;注意：&lt;/b&gt;拦截器会按照注册的顺序执行。如果有多个拦截器，
+     *           需要注意它们的执行顺序和优先级。&lt;/p&gt;
+     */
+    @Override
+    public void addInterceptors(InterceptorRegistry registry) {
+        // 注册权限拦截器，排除静态资源和登录相关路径
+<span class="fc" id="L82">        registry.addInterceptor(permissionInterceptor)</span>
+<span class="fc" id="L83">                .addPathPatterns(&quot;/admin/**&quot;)</span>
+<span class="fc" id="L84">                .excludePathPatterns(</span>
+                    &quot;/admin/login&quot;,
+                    &quot;/admin/logout&quot;,
+                    &quot;/css/**&quot;,
+                    &quot;/js/**&quot;,
+                    &quot;/images/**&quot;,
+                    &quot;/favicon.ico&quot;
+                );
+<span class="fc" id="L92">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

@@ -1,0 +1,226 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="zh"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ApiResponse.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">demo</a> &gt; <a href="index.source.html" class="el_package">com.example.demo.dto</a> &gt; <span class="el_source">ApiResponse.java</span></div><h1>ApiResponse.java</h1><pre class="source lang-java linenums">package com.example.demo.dto;
+
+import java.time.LocalDateTime;
+
+/**
+ * 统一API响应封装类
+ * &lt;p&gt;用于标准化REST API的返回格式，提供统一的响应结构。
+ * 所有Controller方法都应使用此类包装返回数据，确保前后端交互的一致性。&lt;/p&gt;
+ * 
+ * &lt;h2&gt;响应结构&lt;/h2&gt;
+ * &lt;pre&gt;{@code
+ * {
+ *   &quot;success&quot;: true,
+ *   &quot;message&quot;: &quot;操作成功&quot;,
+ *   &quot;data&quot;: {...},
+ *   &quot;timestamp&quot;: &quot;2024-01-01T12:00:00&quot;
+ * }
+ * }&lt;/pre&gt;
+ * 
+ * &lt;h2&gt;字段说明&lt;/h2&gt;
+ * &lt;ul&gt;
+ *   &lt;li&gt;success - 操作是否成功（true/false）&lt;/li&gt;
+ *   &lt;li&gt;message - 响应消息，描述操作结果&lt;/li&gt;
+ *   &lt;li&gt;data - 实际返回的数据，支持泛型&lt;/li&gt;
+ *   &lt;li&gt;timestamp - 响应时间戳，ISO 8601格式&lt;/li&gt;
+ * &lt;/ul&gt;
+ * 
+ * &lt;h2&gt;使用示例&lt;/h2&gt;
+ * &lt;pre&gt;{@code
+ * // 成功响应（带数据）
+ * return ApiResponse.success(userList);
+ * 
+ * // 成功响应（自定义消息）
+ * return ApiResponse.success(&quot;用户创建成功&quot;, newUser);
+ * 
+ * // 错误响应
+ * return ApiResponse.error(&quot;用户名已存在&quot;);
+ * 
+ * // 错误响应（带数据）
+ * return ApiResponse.error(&quot;验证失败&quot;, validationErrors);
+ * }&lt;/pre&gt;
+ * 
+ * &lt;h3&gt;最佳实践&lt;/h3&gt;
+ * &lt;ul&gt;
+ *   &lt;li&gt;成功操作使用success()静态方法&lt;/li&gt;
+ *   &lt;li&gt;失败操作使用error()静态方法&lt;/li&gt;
+ *   &lt;li&gt;保持message简洁明了，便于前端展示&lt;/li&gt;
+ *   &lt;li&gt;敏感信息不应包含在data中&lt;/li&gt;
+ *   &lt;li&gt;异常情况下应返回适当的HTTP状态码和错误信息&lt;/li&gt;
+ * &lt;/ul&gt;
+ * 
+ * @param &lt;T&gt; 响应数据的类型，支持任意类型
+ * 
+ * @author Demo Team
+ * @version 1.0
+ * @since 2024-01-01
+ */
+public class ApiResponse&lt;T&gt; {
+
+    /**
+     * 操作是否成功
+     * &lt;p&gt;true表示操作成功，false表示操作失败&lt;/p&gt;
+     */
+    private boolean success;
+
+    /**
+     * 响应消息
+     * &lt;p&gt;描述操作结果的信息，如&quot;操作成功&quot;、&quot;用户名已存在&quot;等&lt;/p&gt;
+     */
+    private String message;
+
+    /**
+     * 响应数据
+     * &lt;p&gt;实际的业务数据，支持泛型，可以是对象、集合或null&lt;/p&gt;
+     */
+    private T data;
+
+    /**
+     * 响应时间戳
+     * &lt;p&gt;记录响应生成的时间，使用ISO 8601格式&lt;/p&gt;
+     */
+    private LocalDateTime timestamp;
+
+    /**
+     * 无参构造函数
+     * &lt;p&gt;自动设置时间戳为当前时间&lt;/p&gt;
+     */
+<span class="fc" id="L88">    public ApiResponse() {</span>
+<span class="fc" id="L89">        this.timestamp = LocalDateTime.now();</span>
+<span class="fc" id="L90">    }</span>
+
+    /**
+     * 全参构造函数
+     * 
+     * @param success 操作是否成功
+     * @param message 响应消息
+     * @param data 响应数据
+     */
+<span class="fc" id="L99">    public ApiResponse(boolean success, String message, T data) {</span>
+<span class="fc" id="L100">        this.success = success;</span>
+<span class="fc" id="L101">        this.message = message;</span>
+<span class="fc" id="L102">        this.data = data;</span>
+<span class="fc" id="L103">        this.timestamp = LocalDateTime.now();</span>
+<span class="fc" id="L104">    }</span>
+
+    /**
+     * 创建成功响应（默认消息）
+     * 
+     * @param data 响应数据
+     * @param &lt;T&gt; 数据类型
+     * @return 成功的ApiResponse实例
+     */
+    public static &lt;T&gt; ApiResponse&lt;T&gt; success(T data) {
+<span class="fc" id="L114">        return new ApiResponse&lt;&gt;(true, &quot;操作成功&quot;, data);</span>
+    }
+
+    /**
+     * 创建成功响应（自定义消息）
+     * 
+     * @param message 响应消息
+     * @param data 响应数据
+     * @param &lt;T&gt; 数据类型
+     * @return 成功的ApiResponse实例
+     */
+    public static &lt;T&gt; ApiResponse&lt;T&gt; success(String message, T data) {
+<span class="fc" id="L126">        return new ApiResponse&lt;&gt;(true, message, data);</span>
+    }
+
+    /**
+     * 创建错误响应
+     * 
+     * @param message 错误消息
+     * @param &lt;T&gt; 数据类型
+     * @return 失败的ApiResponse实例
+     */
+    public static &lt;T&gt; ApiResponse&lt;T&gt; error(String message) {
+<span class="fc" id="L137">        return new ApiResponse&lt;&gt;(false, message, null);</span>
+    }
+
+    /**
+     * 创建错误响应（带数据）
+     * 
+     * @param message 错误消息
+     * @param data 错误详情或相关数据
+     * @param &lt;T&gt; 数据类型
+     * @return 失败的ApiResponse实例
+     */
+    public static &lt;T&gt; ApiResponse&lt;T&gt; error(String message, T data) {
+<span class="fc" id="L149">        return new ApiResponse&lt;&gt;(false, message, data);</span>
+    }
+
+    // Getters and Setters
+    
+    /**
+     * 获取操作成功状态
+     * 
+     * @return true表示成功，false表示失败
+     */
+    public boolean isSuccess() {
+<span class="fc" id="L160">        return success;</span>
+    }
+
+    /**
+     * 设置操作成功状态
+     * 
+     * @param success 成功状态
+     */
+    public void setSuccess(boolean success) {
+<span class="fc" id="L169">        this.success = success;</span>
+<span class="fc" id="L170">    }</span>
+
+    /**
+     * 获取响应消息
+     * 
+     * @return 响应消息
+     */
+    public String getMessage() {
+<span class="fc" id="L178">        return message;</span>
+    }
+
+    /**
+     * 设置响应消息
+     * 
+     * @param message 响应消息
+     */
+    public void setMessage(String message) {
+<span class="fc" id="L187">        this.message = message;</span>
+<span class="fc" id="L188">    }</span>
+
+    /**
+     * 获取响应数据
+     * 
+     * @return 响应数据
+     */
+    public T getData() {
+<span class="fc" id="L196">        return data;</span>
+    }
+
+    /**
+     * 设置响应数据
+     * 
+     * @param data 响应数据
+     */
+    public void setData(T data) {
+<span class="fc" id="L205">        this.data = data;</span>
+<span class="fc" id="L206">    }</span>
+
+    /**
+     * 获取响应时间戳
+     * 
+     * @return 时间戳
+     */
+    public LocalDateTime getTimestamp() {
+<span class="fc" id="L214">        return timestamp;</span>
+    }
+
+    /**
+     * 设置响应时间戳
+     * 
+     * @param timestamp 时间戳
+     */
+    public void setTimestamp(LocalDateTime timestamp) {
+<span class="fc" id="L223">        this.timestamp = timestamp;</span>
+<span class="fc" id="L224">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

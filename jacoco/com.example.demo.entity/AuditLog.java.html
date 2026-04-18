@@ -1,0 +1,380 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="zh"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>AuditLog.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">demo</a> &gt; <a href="index.source.html" class="el_package">com.example.demo.entity</a> &gt; <span class="el_source">AuditLog.java</span></div><h1>AuditLog.java</h1><pre class="source lang-java linenums">package com.example.demo.entity;
+
+import jakarta.persistence.*;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+
+import java.time.LocalDateTime;
+
+/**
+ * 权限审计日志实体
+ * &lt;p&gt;对应数据库中的audit_logs表，用于记录系统中所有重要的权限相关操作。
+ * 审计日志是系统安全和合规性的重要组成部分，提供操作追溯能力。&lt;/p&gt;
+ * 
+ * &lt;h2&gt;主要功能&lt;/h2&gt;
+ * &lt;ul&gt;
+ *   &lt;li&gt;记录用户的关键操作（创建、修改、删除等）&lt;/li&gt;
+ *   &lt;li&gt;保存操作前后的数据变化（oldValue/newValue）&lt;/li&gt;
+ *   &lt;li&gt;记录操作人的IP地址和时间戳&lt;/li&gt;
+ *   &lt;li&gt;支持按操作类型、目标类型进行筛选和查询&lt;/li&gt;
+ *   &lt;li&gt;为安全审计和问题排查提供数据支持&lt;/li&gt;
+ * &lt;/ul&gt;
+ * 
+ * &lt;h2&gt;记录场景&lt;/h2&gt;
+ * &lt;ul&gt;
+ *   &lt;li&gt;用户管理：创建用户、修改用户信息、分配角色&lt;/li&gt;
+ *   &lt;li&gt;角色管理：创建角色、修改角色、分配权限&lt;/li&gt;
+ *   &lt;li&gt;权限管理：创建权限、修改权限配置&lt;/li&gt;
+ *   &lt;li&gt;个人信息：修改密码、更新个人资料&lt;/li&gt;
+ *   &lt;li&gt;系统配置：修改系统参数、调整权限策略&lt;/li&gt;
+ * &lt;/ul&gt;
+ * 
+ * &lt;h3&gt;操作类型规范&lt;/h3&gt;
+ * &lt;p&gt;建议使用统一的枚举值，例如：&lt;/p&gt;
+ * &lt;ul&gt;
+ *   &lt;li&gt;CREATE - 创建操作&lt;/li&gt;
+ *   &lt;li&gt;UPDATE - 更新操作&lt;/li&gt;
+ *   &lt;li&gt;DELETE - 删除操作&lt;/li&gt;
+ *   &lt;li&gt;ROLE_ASSIGN - 角色分配&lt;/li&gt;
+ *   &lt;li&gt;PERMISSION_ASSIGN - 权限分配&lt;/li&gt;
+ *   &lt;li&gt;PASSWORD_CHANGE - 密码修改&lt;/li&gt;
+ *   &lt;li&gt;LOGIN - 登录&lt;/li&gt;
+ *   &lt;li&gt;LOGOUT - 登出&lt;/li&gt;
+ * &lt;/ul&gt;
+ * 
+ * &lt;h3&gt;数据约束&lt;/h3&gt;
+ * &lt;ul&gt;
+ *   &lt;li&gt;操作人：必填，最多50个字符&lt;/li&gt;
+ *   &lt;li&gt;操作类型：必填，最多20个字符&lt;/li&gt;
+ *   &lt;li&gt;目标类型：可选，最多100个字符（如&quot;User&quot;、&quot;Role&quot;）&lt;/li&gt;
+ *   &lt;li&gt;目标ID：可选，最多100个字符&lt;/li&gt;
+ *   &lt;li&gt;描述：可选，TEXT类型，详细说明操作内容&lt;/li&gt;
+ *   &lt;li&gt;旧值：可选，TEXT类型，JSON格式存储修改前的数据&lt;/li&gt;
+ *   &lt;li&gt;新值：可选，TEXT类型，JSON格式存储修改后的数据&lt;/li&gt;
+ *   &lt;li&gt;IP地址：可选，最多50个字符&lt;/li&gt;
+ * &lt;/ul&gt;
+ * 
+ * &lt;h3&gt;使用建议&lt;/h3&gt;
+ * &lt;ul&gt;
+ *   &lt;li&gt;在Service层的关键业务方法中记录审计日志&lt;/li&gt;
+ *   &lt;li&gt;异步记录日志以避免影响主业务流程性能&lt;/li&gt;
+ *   &lt;li&gt;定期归档或删除过期日志以控制数据量&lt;/li&gt;
+ *   &lt;li&gt;敏感信息（如密码）不应记录到日志中&lt;/li&gt;
+ * &lt;/ul&gt;
+ * 
+ * @author Demo Team
+ * @version 1.0
+ * @since 2024-01-01
+ * @see AuditingEntityListener
+ */
+@Entity
+@Table(name = &quot;audit_logs&quot;)
+@EntityListeners(AuditingEntityListener.class)
+public class AuditLog {
+
+    /**
+     * 日志ID，主键，自增
+     */
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    /**
+     * 操作人用户名
+     * &lt;p&gt;约束：必填，最多50个字符&lt;/p&gt;
+     * &lt;p&gt;来源：当前登录用户的username&lt;/p&gt;
+     */
+    @Column(nullable = false, length = 50)
+    private String operator;
+
+    /**
+     * 操作类型
+     * &lt;p&gt;约束：必填，最多20个字符&lt;/p&gt;
+     * &lt;p&gt;示例：&quot;CREATE&quot;、&quot;UPDATE&quot;、&quot;DELETE&quot;、&quot;ROLE_ASSIGN&quot;&lt;/p&gt;
+     */
+    @Column(nullable = false, length = 20)
+    private String operationType;
+
+    /**
+     * 操作目标类型
+     * &lt;p&gt;约束：可选，最多100个字符&lt;/p&gt;
+     * &lt;p&gt;示例：&quot;User&quot;、&quot;Role&quot;、&quot;Permission&quot;&lt;/p&gt;
+     */
+    @Column(length = 100)
+    private String targetType;
+
+    /**
+     * 操作目标ID
+     * &lt;p&gt;约束：可选，最多100个字符&lt;/p&gt;
+     * &lt;p&gt;被操作对象的ID，便于追溯具体记录&lt;/p&gt;
+     */
+    @Column(length = 100)
+    private String targetId;
+
+    /**
+     * 操作描述
+     * &lt;p&gt;约束：可选，TEXT类型&lt;/p&gt;
+     * &lt;p&gt;详细说明本次操作的内容，如&quot;为用户admin分配了ADMIN角色&quot;&lt;/p&gt;
+     */
+    @Column(columnDefinition = &quot;TEXT&quot;)
+    private String description;
+
+    /**
+     * 修改前的值
+     * &lt;p&gt;约束：可选，TEXT类型&lt;/p&gt;
+     * &lt;p&gt;通常以JSON格式存储，记录数据变更前的状态&lt;/p&gt;
+     */
+    @Column(columnDefinition = &quot;TEXT&quot;)
+    private String oldValue;
+
+    /**
+     * 修改后的值
+     * &lt;p&gt;约束：可选，TEXT类型&lt;/p&gt;
+     * &lt;p&gt;通常以JSON格式存储，记录数据变更后的状态&lt;/p&gt;
+     */
+    @Column(columnDefinition = &quot;TEXT&quot;)
+    private String newValue;
+
+    /**
+     * 操作人IP地址
+     * &lt;p&gt;约束：可选，最多50个字符&lt;/p&gt;
+     * &lt;p&gt;用于安全审计和异常行为检测&lt;/p&gt;
+     */
+    @Column(length = 50)
+    private String ipAddress;
+
+    /**
+     * 创建时间，由JPA审计功能自动填充
+     * &lt;p&gt;特性：不可更新，仅在创建时设置&lt;/p&gt;
+     * &lt;p&gt;用途：作为操作发生的时间戳&lt;/p&gt;
+     */
+    @CreatedDate
+    @Column(updatable = false, nullable = false)
+    private LocalDateTime createTime;
+
+    /**
+     * 无参构造函数
+     * &lt;p&gt;JPA规范要求必须提供无参构造函数&lt;/p&gt;
+     */
+<span class="fc" id="L159">    public AuditLog() {</span>
+<span class="fc" id="L160">    }</span>
+
+    /**
+     * 便捷构造函数
+     * 
+     * @param operator 操作人用户名
+     * @param operationType 操作类型
+     * @param targetType 目标类型
+     * @param targetId 目标ID
+     * @param description 操作描述
+     */
+    public AuditLog(String operator, String operationType, String targetType, 
+<span class="fc" id="L172">                   String targetId, String description) {</span>
+<span class="fc" id="L173">        this.operator = operator;</span>
+<span class="fc" id="L174">        this.operationType = operationType;</span>
+<span class="fc" id="L175">        this.targetType = targetType;</span>
+<span class="fc" id="L176">        this.targetId = targetId;</span>
+<span class="fc" id="L177">        this.description = description;</span>
+<span class="fc" id="L178">    }</span>
+
+    // Getters and Setters
+    
+    /**
+     * 获取日志ID
+     * 
+     * @return 日志ID
+     */
+    public Long getId() {
+<span class="nc" id="L188">        return id;</span>
+    }
+
+    /**
+     * 设置日志ID
+     * 
+     * @param id 日志ID
+     */
+    public void setId(Long id) {
+<span class="nc" id="L197">        this.id = id;</span>
+<span class="nc" id="L198">    }</span>
+
+    /**
+     * 获取操作人
+     * 
+     * @return 操作人用户名
+     */
+    public String getOperator() {
+<span class="nc" id="L206">        return operator;</span>
+    }
+
+    /**
+     * 设置操作人
+     * 
+     * @param operator 操作人用户名
+     */
+    public void setOperator(String operator) {
+<span class="nc" id="L215">        this.operator = operator;</span>
+<span class="nc" id="L216">    }</span>
+
+    /**
+     * 获取操作类型
+     * 
+     * @return 操作类型
+     */
+    public String getOperationType() {
+<span class="nc" id="L224">        return operationType;</span>
+    }
+
+    /**
+     * 设置操作类型
+     * 
+     * @param operationType 操作类型
+     */
+    public void setOperationType(String operationType) {
+<span class="nc" id="L233">        this.operationType = operationType;</span>
+<span class="nc" id="L234">    }</span>
+
+    /**
+     * 获取目标类型
+     * 
+     * @return 目标类型
+     */
+    public String getTargetType() {
+<span class="nc" id="L242">        return targetType;</span>
+    }
+
+    /**
+     * 设置目标类型
+     * 
+     * @param targetType 目标类型
+     */
+    public void setTargetType(String targetType) {
+<span class="nc" id="L251">        this.targetType = targetType;</span>
+<span class="nc" id="L252">    }</span>
+
+    /**
+     * 获取目标ID
+     * 
+     * @return 目标ID
+     */
+    public String getTargetId() {
+<span class="nc" id="L260">        return targetId;</span>
+    }
+
+    /**
+     * 设置目标ID
+     * 
+     * @param targetId 目标ID
+     */
+    public void setTargetId(String targetId) {
+<span class="nc" id="L269">        this.targetId = targetId;</span>
+<span class="nc" id="L270">    }</span>
+
+    /**
+     * 获取操作描述
+     * 
+     * @return 操作描述
+     */
+    public String getDescription() {
+<span class="nc" id="L278">        return description;</span>
+    }
+
+    /**
+     * 设置操作描述
+     * 
+     * @param description 操作描述
+     */
+    public void setDescription(String description) {
+<span class="nc" id="L287">        this.description = description;</span>
+<span class="nc" id="L288">    }</span>
+
+    /**
+     * 获取旧值
+     * 
+     * @return 修改前的值（JSON格式）
+     */
+    public String getOldValue() {
+<span class="nc" id="L296">        return oldValue;</span>
+    }
+
+    /**
+     * 设置旧值
+     * 
+     * @param oldValue 修改前的值
+     */
+    public void setOldValue(String oldValue) {
+<span class="fc" id="L305">        this.oldValue = oldValue;</span>
+<span class="fc" id="L306">    }</span>
+
+    /**
+     * 获取新值
+     * 
+     * @return 修改后的值（JSON格式）
+     */
+    public String getNewValue() {
+<span class="nc" id="L314">        return newValue;</span>
+    }
+
+    /**
+     * 设置新值
+     * 
+     * @param newValue 修改后的值
+     */
+    public void setNewValue(String newValue) {
+<span class="fc" id="L323">        this.newValue = newValue;</span>
+<span class="fc" id="L324">    }</span>
+
+    /**
+     * 获取IP地址
+     * 
+     * @return 操作人IP地址
+     */
+    public String getIpAddress() {
+<span class="nc" id="L332">        return ipAddress;</span>
+    }
+
+    /**
+     * 设置IP地址
+     * 
+     * @param ipAddress IP地址
+     */
+    public void setIpAddress(String ipAddress) {
+<span class="fc" id="L341">        this.ipAddress = ipAddress;</span>
+<span class="fc" id="L342">    }</span>
+
+    /**
+     * 获取创建时间
+     * 
+     * @return 操作发生的时间戳
+     */
+    public LocalDateTime getCreateTime() {
+<span class="nc" id="L350">        return createTime;</span>
+    }
+
+    /**
+     * 设置创建时间（通常由JPA自动管理）
+     * 
+     * @param createTime 创建时间戳
+     */
+    public void setCreateTime(LocalDateTime createTime) {
+<span class="nc" id="L359">        this.createTime = createTime;</span>
+<span class="nc" id="L360">    }</span>
+
+    /**
+     * 生成审计日志的字符串表示
+     * &lt;p&gt;包含主要字段信息，用于调试和日志记录&lt;/p&gt;
+     * 
+     * @return 审计日志信息的字符串形式
+     */
+    @Override
+    public String toString() {
+<span class="nc" id="L370">        return &quot;AuditLog{&quot; +</span>
+                &quot;id=&quot; + id +
+                &quot;, operator='&quot; + operator + '\'' +
+                &quot;, operationType='&quot; + operationType + '\'' +
+                &quot;, targetType='&quot; + targetType + '\'' +
+                &quot;, targetId='&quot; + targetId + '\'' +
+                &quot;, createTime=&quot; + createTime +
+                '}';
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

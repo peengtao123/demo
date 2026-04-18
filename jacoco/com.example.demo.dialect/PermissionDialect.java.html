@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="zh"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>PermissionDialect.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">demo</a> &gt; <a href="index.source.html" class="el_package">com.example.demo.dialect</a> &gt; <span class="el_source">PermissionDialect.java</span></div><h1>PermissionDialect.java</h1><pre class="source lang-java linenums">package com.example.demo.dialect;
+
+import org.thymeleaf.context.IExpressionContext;
+import org.thymeleaf.dialect.AbstractProcessorDialect;
+import org.thymeleaf.processor.IProcessor;
+import org.thymeleaf.standard.StandardDialect;
+
+import java.util.HashSet;
+import java.util.Set;
+
+/**
+ * 权限控制方言
+ * &lt;p&gt;这是一个Thymeleaf自定义方言，用于在模板中实现细粒度的权限控制功能。
+ * 该方言注册了自定义属性处理器，允许在HTML模板中使用权限相关的属性来控制元素的显示。&lt;/p&gt;
+ * 
+ * &lt;h2&gt;功能特性&lt;/h2&gt;
+ * &lt;ul&gt;
+ *   &lt;li&gt;提供&quot;perm&quot;作为方言前缀&lt;/li&gt;
+ *   &lt;li&gt;支持hasPermission属性进行权限验证&lt;/li&gt;
+ *   &lt;li&gt;与Spring Security集成，基于当前用户权限控制视图元素&lt;/li&gt;
+ *   &lt;li&gt;无权限时自动从DOM中移除元素，而非仅隐藏&lt;/li&gt;
+ * &lt;/ul&gt;
+ * 
+ * &lt;h2&gt;使用方式&lt;/h2&gt;
+ * &lt;p&gt;在Thymeleaf模板中引入该方言后，可以使用以下语法：&lt;/p&gt;
+ * &lt;pre&gt;{@code
+ * &lt;!-- 使用perm前缀 --&gt;
+ * &lt;button perm:hasPermission=&quot;user:create&quot;&gt;创建用户&lt;/button&gt;
+ * &lt;a href=&quot;/admin/roles&quot; perm:hasPermission=&quot;role:view&quot;&gt;角色管理&lt;/a&gt;
+ * }&lt;/pre&gt;
+ * 
+ * &lt;h2&gt;注册机制&lt;/h2&gt;
+ * &lt;p&gt;该方言通过Spring Boot的自动配置机制被注册到Thymeleaf引擎中。
+ * 只需在配置类中声明一个PermissionDialect类型的Bean即可启用：&lt;/p&gt;
+ * &lt;pre&gt;{@code
+ * @Configuration
+ * public class ThymeleafConfig {
+ *     @Bean
+ *     public PermissionDialect permissionDialect() {
+ *         return new PermissionDialect();
+ *     }
+ * }
+ * }&lt;/pre&gt;
+ * 
+ * &lt;h2&gt;扩展性&lt;/h2&gt;
+ * &lt;p&gt;如需添加更多权限相关的模板功能，可以在{@link #getProcessors(String)}方法中
+ * 注册新的处理器。例如可以添加：&lt;/p&gt;
+ * &lt;ul&gt;
+ *   &lt;li&gt;hasRole - 角色检查处理器&lt;/li&gt;
+ *   &lt;li&gt;hasAnyPermission - 多权限或逻辑检查处理器&lt;/li&gt;
+ *   &lt;li&gt;lacksPermission - 反向权限检查处理器&lt;/li&gt;
+ * &lt;/ul&gt;
+ * 
+ * @author Demo Team
+ * @version 1.0
+ * @since 2024-01-01
+ * @see AbstractProcessorDialect
+ * @see HasPermissionAttributeTagProcessor
+ * @see org.thymeleaf.dialect.IDialect
+ */
+public class PermissionDialect extends AbstractProcessorDialect {
+
+    /**
+     * 方言名称
+     * &lt;p&gt;用于标识和日志记录，通常不会直接在模板中使用&lt;/p&gt;
+     */
+    private static final String DIALECT_NAME = &quot;Permission Dialect&quot;;
+
+    /**
+     * 构造函数
+     * &lt;p&gt;初始化权限控制方言，设置方言名称、前缀和优先级。&lt;/p&gt;
+     * 
+     * &lt;p&gt;&lt;b&gt;规范要求：&lt;/b&gt;使用StandardDialect.PROCESSOR_PRECEDENCE作为优先级，
+     *           确保与其他标准处理器协调工作&lt;/p&gt;
+     */
+    public PermissionDialect() {
+<span class="fc" id="L77">        super(DIALECT_NAME, &quot;perm&quot;, StandardDialect.PROCESSOR_PRECEDENCE);</span>
+<span class="fc" id="L78">    }</span>
+
+    /**
+     * 获取该方言注册的所有处理器
+     * &lt;p&gt;该方法在Thymeleaf引擎初始化时被调用，返回此方言提供的所有处理器集合。
+     * 目前仅注册了hasPermission属性处理器，未来可扩展更多权限相关处理器。&lt;/p&gt;
+     * 
+     * @param dialectPrefix 方言前缀，由父类传入，通常为&quot;perm&quot;
+     * @return 处理器集合，包含所有需要注册的IProcessor实例
+     * 
+     * &lt;p&gt;&lt;b&gt;当前实现：&lt;/b&gt;
+     * &lt;ol&gt;
+     *   &lt;li&gt;创建一个新的HashSet用于存储处理器&lt;/li&gt;
+     *   &lt;li&gt;实例化HasPermissionAttributeTagProcessor并添加到集合&lt;/li&gt;
+     *   &lt;li&gt;返回处理器集合供Thymeleaf引擎注册&lt;/li&gt;
+     * &lt;/ol&gt;
+     * 
+     * @see HasPermissionAttributeTagProcessor
+     */
+    @Override
+    public Set&lt;IProcessor&gt; getProcessors(String dialectPrefix) {
+<span class="nc" id="L99">        Set&lt;IProcessor&gt; processors = new HashSet&lt;&gt;();</span>
+        // 添加hasPermission属性处理器
+<span class="nc" id="L101">        processors.add(new HasPermissionAttributeTagProcessor(dialectPrefix));</span>
+<span class="nc" id="L102">        return processors;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

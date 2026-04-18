@@ -1,0 +1,165 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="zh"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>HasPermissionAttributeTagProcessor.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">demo</a> &gt; <a href="index.source.html" class="el_package">com.example.demo.dialect</a> &gt; <span class="el_source">HasPermissionAttributeTagProcessor.java</span></div><h1>HasPermissionAttributeTagProcessor.java</h1><pre class="source lang-java linenums">package com.example.demo.dialect;
+
+import com.example.demo.entity.User;
+import com.example.demo.service.UserService;
+import jakarta.servlet.http.HttpServletRequest;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
+import org.thymeleaf.context.ITemplateContext;
+import org.thymeleaf.engine.AttributeName;
+import org.thymeleaf.model.IProcessableElementTag;
+import org.thymeleaf.processor.element.AbstractAttributeTagProcessor;
+import org.thymeleaf.processor.element.IElementTagStructureHandler;
+import org.thymeleaf.spring6.context.SpringContextUtils;
+import org.thymeleaf.templatemode.TemplateMode;
+
+import java.util.Set;
+import java.util.stream.Collectors;
+
+/**
+ * hasPermission属性处理器
+ * &lt;p&gt;用于在Thymeleaf模板中实现基于权限的视图元素控制。当用户没有指定权限时，
+ * 对应的HTML元素将被从DOM中移除，从而实现细粒度的前端权限控制。&lt;/p&gt;
+ * 
+ * &lt;h2&gt;功能说明&lt;/h2&gt;
+ * &lt;ul&gt;
+ *   &lt;li&gt;获取当前登录用户的认证信息&lt;/li&gt;
+ *   &lt;li&gt;查询用户拥有的所有角色及权限&lt;/li&gt;
+ *   &lt;li&gt;验证用户是否具有指定的权限编码&lt;/li&gt;
+ *   &lt;li&gt;无权限时自动移除HTML元素&lt;/li&gt;
+ * &lt;/ul&gt;
+ * 
+ * &lt;h2&gt;用法示例&lt;/h2&gt;
+ * &lt;pre&gt;{@code
+ * &lt;!-- 按钮级权限控制 --&gt;
+ * &lt;button perm:hasPermission=&quot;user:create&quot;&gt;创建用户&lt;/button&gt;
+ * 
+ * &lt;!-- 菜单项权限控制 --&gt;
+ * &lt;a href=&quot;/admin/users&quot; perm:hasPermission=&quot;user:view&quot;&gt;用户管理&lt;/a&gt;
+ * 
+ * &lt;!-- 区域内容权限控制 --&gt;
+ * &lt;div perm:hasPermission=&quot;system:config&quot;&gt;
+ *     &lt;p&gt;系统配置信息&lt;/p&gt;
+ * &lt;/div&gt;
+ * }&lt;/pre&gt;
+ * 
+ * &lt;h2&gt;处理流程&lt;/h2&gt;
+ * &lt;ol&gt;
+ *   &lt;li&gt;从Spring上下文中获取UserService&lt;/li&gt;
+ *   &lt;li&gt;通过SecurityContextHolder获取当前认证信息&lt;/li&gt;
+ *   &lt;li&gt;根据用户名查询用户实体及其关联的角色和权限&lt;/li&gt;
+ *   &lt;li&gt;过滤出状态为启用的权限编码集合&lt;/li&gt;
+ *   &lt;li&gt;检查是否包含属性值指定的权限&lt;/li&gt;
+ *   &lt;li&gt;若无权限则调用structureHandler.removeElement()移除元素&lt;/li&gt;
+ * &lt;/ol&gt;
+ * 
+ * &lt;h2&gt;注意事项&lt;/h2&gt;
+ * &lt;ul&gt;
+ *   &lt;li&gt;该处理器仅在HTML模板模式下工作&lt;/li&gt;
+ *   &lt;li&gt;权限编码需与数据库中Permission.code字段完全匹配&lt;/li&gt;
+ *   &lt;li&gt;未认证或认证失败的用户将无法看到任何受保护的元素&lt;/li&gt;
+ *   &lt;li&gt;异常情况下会安全地隐藏元素而非抛出错误&lt;/li&gt;
+ * &lt;/ul&gt;
+ * 
+ * @author Demo Team
+ * @version 1.0
+ * @since 2024-01-01
+ * @see AbstractAttributeTagProcessor
+ * @see UserService
+ * @see com.example.demo.entity.Permission
+ */
+public class HasPermissionAttributeTagProcessor extends AbstractAttributeTagProcessor {
+
+    /**
+     * 自定义属性名称（不含前缀）
+     * &lt;p&gt;在模板中使用格式：perm:hasPermission=&quot;permissionCode&quot;&lt;/p&gt;
+     */
+    private static final String ATTR_NAME = &quot;hasPermission&quot;;
+    
+    /**
+     * 处理器优先级
+     * &lt;p&gt;数值越小优先级越高，1000表示中等优先级，确保在其他基础处理器之后执行&lt;/p&gt;
+     */
+    private static final int PRECEDENCE = 1000;
+
+    /**
+     * 构造函数
+     * 
+     * @param dialectPrefix Thymeleaf方言前缀，通常为&quot;perm&quot;
+     */
+    public HasPermissionAttributeTagProcessor(String dialectPrefix) {
+<span class="nc" id="L92">        super(</span>
+            TemplateMode.HTML,
+            dialectPrefix,
+            null,
+            false,
+            ATTR_NAME,
+            true,
+            PRECEDENCE,
+            true
+        );
+<span class="nc" id="L102">    }</span>
+
+    /**
+     * 处理hasPermission属性的核心方法
+     * &lt;p&gt;该方法在Thymeleaf渲染模板时被调用，负责验证用户权限并决定是否显示对应元素。&lt;/p&gt;
+     * 
+     * @param context Thymeleaf模板上下文，包含模板渲染所需的所有信息
+     * @param tag 当前处理的HTML标签元素
+     * @param attributeName 属性名称对象，包含属性的命名空间和本地名称
+     * @param attributeValue 属性值，即需要验证的权限编码（如&quot;user:create&quot;）
+     * @param structureHandler 结构处理器，用于修改模板结构（如移除元素、设置属性等）
+     * 
+     * &lt;p&gt;&lt;b&gt;实现逻辑：&lt;/b&gt;
+     * &lt;ol&gt;
+     *   &lt;li&gt;从Spring应用上下文中获取UserService Bean&lt;/li&gt;
+     *   &lt;li&gt;通过SecurityContextHolder获取当前用户的Authentication对象&lt;/li&gt;
+     *   &lt;li&gt;若用户未认证或未登录，直接移除元素&lt;/li&gt;
+     *   &lt;li&gt;根据用户名查询用户实体，获取其所有角色和权限&lt;/li&gt;
+     *   &lt;li&gt;过滤出启用状态的权限，提取权限编码集合&lt;/li&gt;
+     *   &lt;li&gt;检查权限集合是否包含attributeValue指定的权限&lt;/li&gt;
+     *   &lt;li&gt;若不包含则移除元素，否则保留元素正常渲染&lt;/li&gt;
+     *   &lt;li&gt;任何异常发生时都会安全地移除元素&lt;/li&gt;
+     * &lt;/ol&gt;
+     */
+    @Override
+    protected void doProcess(ITemplateContext context, IProcessableElementTag tag,
+                            AttributeName attributeName, String attributeValue,
+                            IElementTagStructureHandler structureHandler) {
+        
+        // 获取Spring上下文
+<span class="nc" id="L132">        org.springframework.context.ApplicationContext appContext = </span>
+<span class="nc" id="L133">            SpringContextUtils.getApplicationContext(context);</span>
+<span class="nc" id="L134">        UserService userService = appContext.getBean(UserService.class);</span>
+
+        // 获取当前用户
+<span class="nc" id="L137">        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();</span>
+<span class="nc bnc" id="L138" title="All 4 branches missed.">        if (authentication == null || !authentication.isAuthenticated()) {</span>
+<span class="nc" id="L139">            structureHandler.removeElement();</span>
+<span class="nc" id="L140">            return;</span>
+        }
+
+<span class="nc" id="L143">        String username = authentication.getName();</span>
+        try {
+<span class="nc" id="L145">            User user = userService.getUserByUsername(username);</span>
+            
+            // 获取用户的所有权限编码
+<span class="nc" id="L148">            Set&lt;String&gt; userPermissions = user.getRoles().stream()</span>
+<span class="nc" id="L149">                    .flatMap(role -&gt; role.getPermissions().stream())</span>
+<span class="nc" id="L150">                    .filter(permission -&gt; permission.getStatus())</span>
+<span class="nc" id="L151">                    .map(permission -&gt; permission.getCode())</span>
+<span class="nc" id="L152">                    .collect(Collectors.toSet());</span>
+
+            // 检查是否有指定权限
+<span class="nc bnc" id="L155" title="All 2 branches missed.">            if (!userPermissions.contains(attributeValue)) {</span>
+<span class="nc" id="L156">                structureHandler.removeElement();</span>
+            }
+<span class="nc" id="L158">        } catch (Exception e) {</span>
+            // 如果获取用户失败，隐藏元素
+<span class="nc" id="L160">            structureHandler.removeElement();</span>
+<span class="nc" id="L161">        }</span>
+<span class="nc" id="L162">    }</span>
+}
+
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

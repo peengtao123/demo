@@ -1,0 +1,333 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="zh"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>PermissionService.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">demo</a> &gt; <a href="index.source.html" class="el_package">com.example.demo.service</a> &gt; <span class="el_source">PermissionService.java</span></div><h1>PermissionService.java</h1><pre class="source lang-java linenums">package com.example.demo.service;
+
+import com.example.demo.entity.Permission;
+import com.example.demo.repository.PermissionRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.*;
+
+/**
+ * 权限服务类 - 提供权限相关的业务逻辑处理
+ */
+@Service
+@Transactional
+<span class="fc" id="L20">public class PermissionService {</span>
+
+    @Autowired
+    private PermissionRepository permissionRepository;
+
+    /**
+     * 获取所有权限（不分页）
+     *
+     * @return 按排序号和创建时间升序排列的所有权限列表
+     */
+    @Transactional(readOnly = true)
+    public List&lt;Permission&gt; getAllPermissions() {
+<span class="nc" id="L32">        return permissionRepository.findAll(Sort.by(Sort.Direction.ASC, &quot;sortOrder&quot;, &quot;createTime&quot;));</span>
+    }
+
+    /**
+     * 分页查询权限列表
+     *
+     * @param page 页码（从0开始）
+     * @param size 每页大小
+     * @return 按排序号和创建时间升序排列的分页权限结果
+     */
+    @Transactional(readOnly = true)
+    public Page&lt;Permission&gt; getPermissionsWithPaging(int page, int size) {
+<span class="nc" id="L44">        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.ASC, &quot;sortOrder&quot;, &quot;createTime&quot;));</span>
+<span class="nc" id="L45">        return permissionRepository.findAll(pageable);</span>
+    }
+
+    /**
+     * 搜索权限
+     *
+     * @param keyword 搜索关键词，支持名称或编码模糊匹配
+     * @param page 页码（从0开始）
+     * @param size 每页大小
+     * @return 按排序号和创建时间升序排列的分页搜索结果
+     */
+    @Transactional(readOnly = true)
+    public Page&lt;Permission&gt; searchPermissions(String keyword, int page, int size) {
+<span class="nc" id="L58">        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.ASC, &quot;sortOrder&quot;, &quot;createTime&quot;));</span>
+<span class="nc" id="L59">        return permissionRepository.searchPermissions(keyword, pageable);</span>
+    }
+
+    /**
+     * 根据ID查询权限
+     *
+     * @param id 权限ID
+     * @return 包含权限的Optional对象，如果不存在则返回空Optional
+     */
+    @Transactional(readOnly = true)
+    public Optional&lt;Permission&gt; getPermissionById(Long id) {
+<span class="nc" id="L70">        return permissionRepository.findById(id);</span>
+    }
+
+    /**
+     * 创建权限
+     *
+     * @param permission 权限实体对象，包含名称、编码、类型等信息
+     * @return 创建成功的权限实体对象
+     * @throws RuntimeException 如果权限编码或名称已存在则抛出异常
+     */
+    public Permission createPermission(Permission permission) {
+        // 检查权限编码是否已存在
+<span class="nc bnc" id="L82" title="All 2 branches missed.">        if (permissionRepository.findByCode(permission.getCode()).isPresent()) {</span>
+<span class="nc" id="L83">            throw new RuntimeException(&quot;权限编码已存在: &quot; + permission.getCode());</span>
+        }
+        
+        // 检查权限名称是否已存在
+<span class="nc bnc" id="L87" title="All 2 branches missed.">        if (permissionRepository.findByName(permission.getName()).isPresent()) {</span>
+<span class="nc" id="L88">            throw new RuntimeException(&quot;权限名称已存在: &quot; + permission.getName());</span>
+        }
+        
+<span class="nc bnc" id="L91" title="All 2 branches missed.">        if (permission.getStatus() == null) {</span>
+<span class="nc" id="L92">            permission.setStatus(true);</span>
+        }
+<span class="nc bnc" id="L94" title="All 2 branches missed.">        if (permission.getSortOrder() == null) {</span>
+<span class="nc" id="L95">            permission.setSortOrder(0);</span>
+        }
+<span class="nc bnc" id="L97" title="All 4 branches missed.">        if (permission.getType() == null || permission.getType().isEmpty()) {</span>
+<span class="nc" id="L98">            permission.setType(&quot;MENU&quot;);</span>
+        }
+        
+<span class="nc" id="L101">        return permissionRepository.save(permission);</span>
+    }
+
+    /**
+     * 更新权限
+     *
+     * @param id 权限ID
+     * @param permissionDetails 包含更新信息的权限对象
+     * @return 更新后的权限实体对象
+     * @throws RuntimeException 如果权限不存在或新编码/名称已被其他权限使用则抛出异常
+     */
+    public Permission updatePermission(Long id, Permission permissionDetails) {
+<span class="nc" id="L113">        Permission permission = permissionRepository.findById(id)</span>
+<span class="nc" id="L114">                .orElseThrow(() -&gt; new RuntimeException(&quot;权限不存在: &quot; + id));</span>
+        
+        // 如果修改了编码，检查新编码是否已被其他权限使用
+<span class="nc bnc" id="L117" title="All 2 branches missed.">        if (!permission.getCode().equals(permissionDetails.getCode()) &amp;&amp; </span>
+<span class="nc bnc" id="L118" title="All 2 branches missed.">            permissionRepository.findByCode(permissionDetails.getCode()).isPresent()) {</span>
+<span class="nc" id="L119">            throw new RuntimeException(&quot;权限编码已存在: &quot; + permissionDetails.getCode());</span>
+        }
+        
+        // 如果修改了名称，检查新名称是否已被其他权限使用
+<span class="nc bnc" id="L123" title="All 2 branches missed.">        if (!permission.getName().equals(permissionDetails.getName()) &amp;&amp; </span>
+<span class="nc bnc" id="L124" title="All 2 branches missed.">            permissionRepository.findByName(permissionDetails.getName()).isPresent()) {</span>
+<span class="nc" id="L125">            throw new RuntimeException(&quot;权限名称已存在: &quot; + permissionDetails.getName());</span>
+        }
+        
+<span class="nc" id="L128">        permission.setName(permissionDetails.getName());</span>
+<span class="nc" id="L129">        permission.setCode(permissionDetails.getCode());</span>
+<span class="nc" id="L130">        permission.setDescription(permissionDetails.getDescription());</span>
+<span class="nc" id="L131">        permission.setIcon(permissionDetails.getIcon());</span>
+<span class="nc" id="L132">        permission.setStatus(permissionDetails.getStatus());</span>
+<span class="nc" id="L133">        permission.setParentId(permissionDetails.getParentId());</span>
+<span class="nc" id="L134">        permission.setSortOrder(permissionDetails.getSortOrder());</span>
+<span class="nc" id="L135">        permission.setType(permissionDetails.getType());</span>
+        
+<span class="nc" id="L137">        return permissionRepository.save(permission);</span>
+    }
+
+    /**
+     * 删除权限
+     *
+     * @param id 权限ID
+     * @throws RuntimeException 如果权限不存在或正在被角色使用则抛出异常
+     */
+    public void deletePermission(Long id) {
+<span class="nc" id="L147">        Permission permission = permissionRepository.findById(id)</span>
+<span class="nc" id="L148">                .orElseThrow(() -&gt; new RuntimeException(&quot;权限不存在: &quot; + id));</span>
+        
+        // 检查是否有角色使用该权限
+<span class="nc" id="L151">        long roleCount = permissionRepository.countRolesByPermissionId(id);</span>
+<span class="nc bnc" id="L152" title="All 2 branches missed.">        if (roleCount &gt; 0) {</span>
+<span class="nc" id="L153">            throw new RuntimeException(&quot;该权限正在被 &quot; + roleCount + &quot; 个角色使用，无法删除&quot;);</span>
+        }
+        
+<span class="nc" id="L156">        permissionRepository.delete(permission);</span>
+<span class="nc" id="L157">    }</span>
+
+    /**
+     * 批量删除权限
+     *
+     * @param ids 权限ID列表
+     * @throws RuntimeException 如果任何权限正在被角色使用则抛出异常
+     */
+    public void batchDeletePermissions(List&lt;Long&gt; ids) {
+<span class="nc bnc" id="L166" title="All 2 branches missed.">        for (Long id : ids) {</span>
+<span class="nc" id="L167">            long roleCount = permissionRepository.countRolesByPermissionId(id);</span>
+<span class="nc bnc" id="L168" title="All 2 branches missed.">            if (roleCount &gt; 0) {</span>
+<span class="nc" id="L169">                Permission permission = permissionRepository.findById(id).orElse(null);</span>
+<span class="nc bnc" id="L170" title="All 2 branches missed.">                String permName = permission != null ? permission.getName() : &quot;ID:&quot; + id;</span>
+<span class="nc" id="L171">                throw new RuntimeException(&quot;权限 '&quot; + permName + &quot;' 正在被角色使用，无法删除&quot;);</span>
+            }
+<span class="nc" id="L173">        }</span>
+<span class="nc" id="L174">        permissionRepository.deleteAllById(ids);</span>
+<span class="nc" id="L175">    }</span>
+
+    /**
+     * 启用/禁用权限
+     *
+     * @param id 权限ID
+     * @return 更新后的权限实体对象，状态已切换
+     * @throws RuntimeException 如果权限不存在则抛出异常
+     */
+    public Permission togglePermissionStatus(Long id) {
+<span class="nc" id="L185">        Permission permission = permissionRepository.findById(id)</span>
+<span class="nc" id="L186">                .orElseThrow(() -&gt; new RuntimeException(&quot;权限不存在: &quot; + id));</span>
+<span class="nc bnc" id="L187" title="All 2 branches missed.">        permission.setStatus(!permission.getStatus());</span>
+<span class="nc" id="L188">        return permissionRepository.save(permission);</span>
+    }
+
+    /**
+     * 根据编码查询权限
+     *
+     * @param code 权限编码
+     * @return 包含权限的Optional对象，如果不存在则返回空Optional
+     */
+    @Transactional(readOnly = true)
+    public Optional&lt;Permission&gt; findByCode(String code) {
+<span class="nc" id="L199">        return permissionRepository.findByCode(code);</span>
+    }
+
+    /**
+     * 根据名称查询权限
+     *
+     * @param name 权限名称
+     * @return 包含权限的Optional对象，如果不存在则返回空Optional
+     */
+    @Transactional(readOnly = true)
+    public Optional&lt;Permission&gt; findByName(String name) {
+<span class="nc" id="L210">        return permissionRepository.findByName(name);</span>
+    }
+
+    /**
+     * 获取启用的权限列表
+     *
+     * @return 所有启用状态的权限列表
+     */
+    @Transactional(readOnly = true)
+    public List&lt;Permission&gt; getEnabledPermissions() {
+<span class="nc" id="L220">        return permissionRepository.findByStatus(true);</span>
+    }
+
+    /**
+     * 根据父级ID获取子权限
+     *
+     * @param parentId 父级权限ID
+     * @return 指定父级下的所有子权限列表
+     */
+    @Transactional(readOnly = true)
+    public List&lt;Permission&gt; getChildPermissions(Long parentId) {
+<span class="nc" id="L231">        return permissionRepository.findByParentId(parentId);</span>
+    }
+
+    /**
+     * 根据类型获取权限列表
+     *
+     * @param type 权限类型（如 MENU、BUTTON 等）
+     * @return 指定类型的权限列表
+     */
+    @Transactional(readOnly = true)
+    public List&lt;Permission&gt; getPermissionsByType(String type) {
+<span class="nc" id="L242">        return permissionRepository.findByType(type);</span>
+    }
+
+    /**
+     * 构建权限树
+     *
+     * @return 树形结构的权限列表，每个节点包含子节点信息
+     */
+    @Transactional(readOnly = true)
+    public List&lt;Map&lt;String, Object&gt;&gt; buildPermissionTree() {
+<span class="nc" id="L252">        List&lt;Permission&gt; allPermissions = permissionRepository.findAll(Sort.by(Sort.Direction.ASC, &quot;sortOrder&quot;));</span>
+<span class="nc" id="L253">        return buildTree(allPermissions, null);</span>
+    }
+
+    /**
+     * 递归构建树形结构
+     *
+     * @param permissions 所有权限列表
+     * @param parentId 父级ID，null表示根节点
+     * @return 树形结构的节点列表
+     */
+    private List&lt;Map&lt;String, Object&gt;&gt; buildTree(List&lt;Permission&gt; permissions, Long parentId) {
+<span class="nc" id="L264">        List&lt;Map&lt;String, Object&gt;&gt; tree = new ArrayList&lt;&gt;();</span>
+        
+<span class="nc bnc" id="L266" title="All 2 branches missed.">        for (Permission permission : permissions) {</span>
+<span class="nc bnc" id="L267" title="All 6 branches missed.">            if ((parentId == null &amp;&amp; permission.getParentId() == null) ||</span>
+<span class="nc bnc" id="L268" title="All 2 branches missed.">                (parentId != null &amp;&amp; parentId.equals(permission.getParentId()))) {</span>
+                
+<span class="nc" id="L270">                Map&lt;String, Object&gt; node = new HashMap&lt;&gt;();</span>
+<span class="nc" id="L271">                node.put(&quot;id&quot;, permission.getId());</span>
+<span class="nc" id="L272">                node.put(&quot;name&quot;, permission.getName());</span>
+<span class="nc" id="L273">                node.put(&quot;code&quot;, permission.getCode());</span>
+<span class="nc" id="L274">                node.put(&quot;icon&quot;, permission.getIcon());</span>
+<span class="nc" id="L275">                node.put(&quot;type&quot;, permission.getType());</span>
+<span class="nc" id="L276">                node.put(&quot;status&quot;, permission.getStatus());</span>
+                
+                // 递归查找子节点
+<span class="nc" id="L279">                List&lt;Map&lt;String, Object&gt;&gt; children = buildTree(permissions, permission.getId());</span>
+<span class="nc bnc" id="L280" title="All 2 branches missed.">                if (!children.isEmpty()) {</span>
+<span class="nc" id="L281">                    node.put(&quot;children&quot;, children);</span>
+                }
+                
+<span class="nc" id="L284">                tree.add(node);</span>
+            }
+<span class="nc" id="L286">        }</span>
+        
+<span class="nc" id="L288">        return tree;</span>
+    }
+
+    /**
+     * 统计启用权限数量
+     *
+     * @return 启用状态的权限数量
+     */
+    @Transactional(readOnly = true)
+    public long countEnabledPermissions() {
+<span class="nc" id="L298">        return permissionRepository.countByStatus(true);</span>
+    }
+
+    /**
+     * 统计禁用权限数量
+     *
+     * @return 禁用状态的权限数量
+     */
+    @Transactional(readOnly = true)
+    public long countDisabledPermissions() {
+<span class="nc" id="L308">        return permissionRepository.countByStatus(false);</span>
+    }
+
+    /**
+     * 检查权限是否被角色使用
+     *
+     * @param permissionId 权限ID
+     * @return 如果权限正在被至少一个角色使用则返回 true，否则返回 false
+     */
+    @Transactional(readOnly = true)
+    public boolean isPermissionInUse(Long permissionId) {
+<span class="nc bnc" id="L319" title="All 2 branches missed.">        return permissionRepository.countRolesByPermissionId(permissionId) &gt; 0;</span>
+    }
+
+    /**
+     * 获取使用该权限的角色数量
+     *
+     * @param permissionId 权限ID
+     * @return 使用该权限的角色数量
+     */
+    @Transactional(readOnly = true)
+    public long getRolesCountByPermission(Long permissionId) {
+<span class="nc" id="L330">        return permissionRepository.countRolesByPermissionId(permissionId);</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

@@ -1,0 +1,288 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="zh"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>UserDTO.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">demo</a> &gt; <a href="index.source.html" class="el_package">com.example.demo.dto</a> &gt; <span class="el_source">UserDTO.java</span></div><h1>UserDTO.java</h1><pre class="source lang-java linenums">package com.example.demo.dto;
+
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
+
+/**
+ * 用户数据传输对象（DTO）
+ * &lt;p&gt;用于在表现层和服务层之间传输用户数据，包含验证注解以确保数据完整性。
+ * 与User实体类不同，DTO专注于数据传输和验证，不包含JPA注解和业务逻辑。&lt;/p&gt;
+ * 
+ * &lt;h2&gt;主要功能&lt;/h2&gt;
+ * &lt;ul&gt;
+ *   &lt;li&gt;封装用户表单数据，用于创建和更新用户&lt;/li&gt;
+ *   &lt;li&gt;提供Bean Validation验证注解，确保数据合法性&lt;/li&gt;
+ *   &lt;li&gt;支持分组验证（CreateGroup/UpdateGroup），区分创建和更新场景&lt;/li&gt;
+ *   &lt;li&gt;简化API接口参数传递&lt;/li&gt;
+ * &lt;/ul&gt;
+ * 
+ * &lt;h2&gt;字段说明&lt;/h2&gt;
+ * &lt;ul&gt;
+ *   &lt;li&gt;&lt;strong&gt;id：&lt;/strong&gt;用户ID，仅在更新时使用，创建时为null&lt;/li&gt;
+ *   &lt;li&gt;&lt;strong&gt;username：&lt;/strong&gt;用户名，3-50个字符，必填，全局唯一&lt;/li&gt;
+ *   &lt;li&gt;&lt;strong&gt;email：&lt;/strong&gt;邮箱地址，标准邮箱格式，必填，全局唯一&lt;/li&gt;
+ *   &lt;li&gt;&lt;strong&gt;name：&lt;/strong&gt;真实姓名，最多100个字符，必填&lt;/li&gt;
+ *   &lt;li&gt;&lt;strong&gt;phone：&lt;/strong&gt;联系电话，最多20个字符，可选&lt;/li&gt;
+ *   &lt;li&gt;&lt;strong&gt;age：&lt;/strong&gt;年龄，整数类型，可选&lt;/li&gt;
+ *   &lt;li&gt;&lt;strong&gt;password：&lt;/strong&gt;密码，6-100个字符，创建时必填，更新时可选&lt;/li&gt;
+ * &lt;/ul&gt;
+ * 
+ * &lt;h2&gt;验证分组&lt;/h2&gt;
+ * &lt;ul&gt;
+ *   &lt;li&gt;&lt;strong&gt;CreateGroup：&lt;/strong&gt;创建用户时的验证规则（密码必填）&lt;/li&gt;
+ *   &lt;li&gt;&lt;strong&gt;UpdateGroup：&lt;/strong&gt;更新用户时的验证规则（密码可选）&lt;/li&gt;
+ * &lt;/ul&gt;
+ * 
+ * &lt;h3&gt;使用示例&lt;/h3&gt;
+ * &lt;pre&gt;{@code
+ * // 创建用户
+ * UserDTO userDTO = new UserDTO();
+ * userDTO.setUsername(&quot;admin&quot;);
+ * userDTO.setEmail(&quot;admin@example.com&quot;);
+ * userDTO.setName(&quot;管理员&quot;);
+ * userDTO.setPassword(&quot;123456&quot;);
+ * User user = userService.createUser(userDTO);
+ * 
+ * // 更新用户
+ * UserDTO updateDTO = new UserDTO();
+ * updateDTO.setId(1L);
+ * updateDTO.setName(&quot;新名字&quot;);
+ * updateDTO.setPhone(&quot;13800138000&quot;);
+ * userService.updateUser(1L, updateDTO);
+ * }&lt;/pre&gt;
+ * 
+ * &lt;h3&gt;与User实体的区别&lt;/h3&gt;
+ * &lt;ul&gt;
+ *   &lt;li&gt;UserDTO：用于数据传输，包含验证注解，无JPA注解&lt;/li&gt;
+ *   &lt;li&gt;User：持久化实体，包含JPA注解，关联其他实体（Role等）&lt;/li&gt;
+ *   &lt;li&gt;转换：通过UserService.convertToEntity()和convertToDTO()方法进行转换&lt;/li&gt;
+ * &lt;/ul&gt;
+ * 
+ * @author Demo Team
+ * @version 1.0
+ * @since 2024-01-01
+ * @see com.example.demo.entity.User
+ * @see com.example.demo.service.UserService
+ */
+public class UserDTO {
+
+    /**
+     * 用户ID
+     * &lt;p&gt;仅在更新操作时使用，创建新用户时为null&lt;/p&gt;
+     */
+    private Long id;
+
+    /**
+     * 用户名
+     * &lt;p&gt;约束：3-50个字符，必填，全局唯一&lt;/p&gt;
+     * &lt;p&gt;用途：用于登录和身份标识&lt;/p&gt;
+     */
+    @NotBlank(message = &quot;用户名不能为空&quot;)
+    @Size(min = 3, max = 50, message = &quot;用户名长度必须在3-50个字符之间&quot;)
+    private String username;
+
+    /**
+     * 邮箱地址
+     * &lt;p&gt;约束：标准邮箱格式，必填，全局唯一&lt;/p&gt;
+     * &lt;p&gt;用途：用于联系和密码找回&lt;/p&gt;
+     */
+    @NotBlank(message = &quot;邮箱不能为空&quot;)
+    @Email(message = &quot;邮箱格式不正确&quot;)
+    private String email;
+
+    /**
+     * 真实姓名
+     * &lt;p&gt;约束：最多100个字符，必填&lt;/p&gt;
+     * &lt;p&gt;用途：用于显示和用户识别&lt;/p&gt;
+     */
+    @NotBlank(message = &quot;姓名不能为空&quot;)
+    @Size(max = 100, message = &quot;姓名长度不能超过100个字符&quot;)
+    private String name;
+
+    /**
+     * 联系电话
+     * &lt;p&gt;约束：最多20个字符，可选&lt;/p&gt;
+     * &lt;p&gt;用途：用于紧急联系或通知&lt;/p&gt;
+     */
+    @Size(max = 20, message = &quot;电话号码长度不能超过20个字符&quot;)
+    private String phone;
+
+    /**
+     * 年龄
+     * &lt;p&gt;约束：可选，整数类型&lt;/p&gt;
+     * &lt;p&gt;用途：用于用户画像和统计分析&lt;/p&gt;
+     */
+    private Integer age;
+
+    /**
+     * 密码
+     * &lt;p&gt;约束：6-100个字符，创建时必填（CreateGroup），更新时可选&lt;/p&gt;
+     * &lt;p&gt;注意：存储到数据库前应使用BCrypt加密&lt;/p&gt;
+     */
+    @NotBlank(message = &quot;密码不能为空&quot;, groups = CreateGroup.class)
+    @Size(min = 6, max = 100, message = &quot;密码长度必须在6-100个字符之间&quot;, groups = CreateGroup.class)
+    private String password;
+
+    /**
+     * 创建用户验证组
+     * &lt;p&gt;用于区分创建和更新场景的验证规则&lt;/p&gt;
+     * &lt;p&gt;创建时：密码必填&lt;/p&gt;
+     */
+    public interface CreateGroup {}
+    
+    /**
+     * 更新用户验证组
+     * &lt;p&gt;用于区分创建和更新场景的验证规则&lt;/p&gt;
+     * &lt;p&gt;更新时：密码可选（不修改密码时可不传）&lt;/p&gt;
+     */
+    public interface UpdateGroup {}
+
+    /**
+     * 无参构造函数
+     */
+<span class="fc" id="L144">    public UserDTO() {</span>
+<span class="fc" id="L145">    }</span>
+
+    /**
+     * 便捷构造函数
+     * 
+     * @param username 用户名
+     * @param email 邮箱
+     * @param name 姓名
+     */
+<span class="fc" id="L154">    public UserDTO(String username, String email, String name) {</span>
+<span class="fc" id="L155">        this.username = username;</span>
+<span class="fc" id="L156">        this.email = email;</span>
+<span class="fc" id="L157">        this.name = name;</span>
+<span class="fc" id="L158">    }</span>
+
+    // Getters and Setters
+    
+    /**
+     * 获取用户ID
+     * 
+     * @return 用户ID
+     */
+    public Long getId() {
+<span class="fc" id="L168">        return id;</span>
+    }
+
+    /**
+     * 设置用户ID
+     * 
+     * @param id 用户ID
+     */
+    public void setId(Long id) {
+<span class="fc" id="L177">        this.id = id;</span>
+<span class="fc" id="L178">    }</span>
+
+    /**
+     * 获取用户名
+     * 
+     * @return 用户名
+     */
+    public String getUsername() {
+<span class="fc" id="L186">        return username;</span>
+    }
+
+    /**
+     * 设置用户名
+     * 
+     * @param username 用户名
+     */
+    public void setUsername(String username) {
+<span class="fc" id="L195">        this.username = username;</span>
+<span class="fc" id="L196">    }</span>
+
+    /**
+     * 获取邮箱
+     * 
+     * @return 邮箱地址
+     */
+    public String getEmail() {
+<span class="fc" id="L204">        return email;</span>
+    }
+
+    /**
+     * 设置邮箱
+     * 
+     * @param email 邮箱地址
+     */
+    public void setEmail(String email) {
+<span class="fc" id="L213">        this.email = email;</span>
+<span class="fc" id="L214">    }</span>
+
+    /**
+     * 获取姓名
+     * 
+     * @return 真实姓名
+     */
+    public String getName() {
+<span class="fc" id="L222">        return name;</span>
+    }
+
+    /**
+     * 设置姓名
+     * 
+     * @param name 真实姓名
+     */
+    public void setName(String name) {
+<span class="fc" id="L231">        this.name = name;</span>
+<span class="fc" id="L232">    }</span>
+
+    /**
+     * 获取电话
+     * 
+     * @return 联系电话
+     */
+    public String getPhone() {
+<span class="fc" id="L240">        return phone;</span>
+    }
+
+    /**
+     * 设置电话
+     * 
+     * @param phone 联系电话
+     */
+    public void setPhone(String phone) {
+<span class="fc" id="L249">        this.phone = phone;</span>
+<span class="fc" id="L250">    }</span>
+
+    /**
+     * 获取年龄
+     * 
+     * @return 年龄
+     */
+    public Integer getAge() {
+<span class="fc" id="L258">        return age;</span>
+    }
+
+    /**
+     * 设置年龄
+     * 
+     * @param age 年龄
+     */
+    public void setAge(Integer age) {
+<span class="fc" id="L267">        this.age = age;</span>
+<span class="fc" id="L268">    }</span>
+
+    /**
+     * 获取密码
+     * 
+     * @return 明文密码（应在Service层加密后存储）
+     */
+    public String getPassword() {
+<span class="fc" id="L276">        return password;</span>
+    }
+
+    /**
+     * 设置密码
+     * 
+     * @param password 明文密码
+     */
+    public void setPassword(String password) {
+<span class="fc" id="L285">        this.password = password;</span>
+<span class="fc" id="L286">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

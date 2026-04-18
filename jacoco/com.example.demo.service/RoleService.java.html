@@ -1,0 +1,378 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="zh"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>RoleService.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">demo</a> &gt; <a href="index.source.html" class="el_package">com.example.demo.service</a> &gt; <span class="el_source">RoleService.java</span></div><h1>RoleService.java</h1><pre class="source lang-java linenums">package com.example.demo.service;
+
+import com.example.demo.entity.Permission;
+import com.example.demo.entity.Role;
+import com.example.demo.repository.PermissionRepository;
+import com.example.demo.repository.RoleRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.*;
+import java.util.stream.Collectors;
+
+/**
+ * 角色服务类 - 提供角色相关的业务逻辑处理
+ */
+@Service
+@Transactional
+<span class="fc" id="L24">public class RoleService {</span>
+
+    @Autowired
+    private RoleRepository roleRepository;
+
+    @Autowired
+    private PermissionRepository permissionRepository;
+
+    @Autowired
+    private AuditLogService auditLogService;
+
+    /**
+     * 获取当前操作用户名
+     *
+     * @return 当前登录用户的用户名，如果获取失败则返回 &quot;system&quot;
+     */
+    private String getCurrentUser() {
+        try {
+<span class="nc" id="L42">            return SecurityContextHolder.getContext().getAuthentication().getName();</span>
+<span class="nc" id="L43">        } catch (Exception e) {</span>
+<span class="nc" id="L44">            return &quot;system&quot;;</span>
+        }
+    }
+
+    /**
+     * 获取所有角色（不分页）
+     *
+     * @return 按排序号和创建时间升序排列的所有角色列表
+     */
+    @Transactional(readOnly = true)
+    public List&lt;Role&gt; getAllRoles() {
+<span class="nc" id="L55">        return roleRepository.findAll(Sort.by(Sort.Direction.ASC, &quot;sortOrder&quot;, &quot;createTime&quot;));</span>
+    }
+
+    /**
+     * 分页查询角色列表
+     *
+     * @param page 页码（从0开始）
+     * @param size 每页大小
+     * @return 按排序号和创建时间升序排列的分页角色结果
+     */
+    @Transactional(readOnly = true)
+    public Page&lt;Role&gt; getRolesWithPaging(int page, int size) {
+<span class="nc" id="L67">        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.ASC, &quot;sortOrder&quot;, &quot;createTime&quot;));</span>
+<span class="nc" id="L68">        return roleRepository.findAll(pageable);</span>
+    }
+
+    /**
+     * 搜索角色
+     *
+     * @param keyword 搜索关键词，支持名称模糊匹配
+     * @param page 页码（从0开始）
+     * @param size 每页大小
+     * @return 按排序号和创建时间升序排列的分页搜索结果
+     */
+    @Transactional(readOnly = true)
+    public Page&lt;Role&gt; searchRoles(String keyword, int page, int size) {
+<span class="nc" id="L81">        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.ASC, &quot;sortOrder&quot;, &quot;createTime&quot;));</span>
+<span class="nc" id="L82">        return roleRepository.searchRoles(keyword, pageable);</span>
+    }
+
+    /**
+     * 根据ID查询角色
+     *
+     * @param id 角色ID
+     * @return 包含角色的Optional对象，如果不存在则返回空Optional
+     */
+    @Transactional(readOnly = true)
+    public Optional&lt;Role&gt; getRoleById(Long id) {
+<span class="nc" id="L93">        return roleRepository.findById(id);</span>
+    }
+
+    /**
+     * 创建角色
+     *
+     * @param role 角色实体对象，包含名称、描述、图标等信息
+     * @return 创建成功的角色实体对象
+     * @throws RuntimeException 如果角色名称已存在则抛出异常
+     */
+    public Role createRole(Role role) {
+        // 检查角色名是否已存在
+<span class="nc bnc" id="L105" title="All 2 branches missed.">        if (roleRepository.findByName(role.getName()).isPresent()) {</span>
+<span class="nc" id="L106">            throw new RuntimeException(&quot;角色名称已存在: &quot; + role.getName());</span>
+        }
+        
+<span class="nc bnc" id="L109" title="All 2 branches missed.">        if (role.getStatus() == null) {</span>
+<span class="nc" id="L110">            role.setStatus(true);</span>
+        }
+<span class="nc bnc" id="L112" title="All 2 branches missed.">        if (role.getSortOrder() == null) {</span>
+<span class="nc" id="L113">            role.setSortOrder(0);</span>
+        }
+        
+<span class="nc" id="L116">        Role savedRole = roleRepository.save(role);</span>
+        
+        // 记录审计日志
+<span class="nc" id="L119">        auditLogService.log(</span>
+<span class="nc" id="L120">            getCurrentUser(),</span>
+            &quot;CREATE&quot;,
+            &quot;ROLE&quot;,
+<span class="nc" id="L123">            savedRole.getId().toString(),</span>
+<span class="nc" id="L124">            &quot;创建角色: &quot; + savedRole.getName()</span>
+        );
+        
+<span class="nc" id="L127">        return savedRole;</span>
+    }
+
+    /**
+     * 更新角色
+     *
+     * @param id 角色ID
+     * @param roleDetails 包含更新信息的角色对象
+     * @return 更新后的角色实体对象
+     * @throws RuntimeException 如果角色不存在或新名称已被其他角色使用则抛出异常
+     */
+    public Role updateRole(Long id, Role roleDetails) {
+<span class="nc" id="L139">        Role role = roleRepository.findById(id)</span>
+<span class="nc" id="L140">                .orElseThrow(() -&gt; new RuntimeException(&quot;角色不存在: &quot; + id));</span>
+<span class="nc" id="L141">        String oldInfo = &quot;name=&quot; + role.getName() + &quot;, status=&quot; + role.getStatus();</span>
+        
+        // 如果修改了名称，检查新名称是否已被其他角色使用
+<span class="nc bnc" id="L144" title="All 2 branches missed.">        if (!role.getName().equals(roleDetails.getName()) &amp;&amp; </span>
+<span class="nc bnc" id="L145" title="All 2 branches missed.">            roleRepository.findByName(roleDetails.getName()).isPresent()) {</span>
+<span class="nc" id="L146">            throw new RuntimeException(&quot;角色名称已存在: &quot; + roleDetails.getName());</span>
+        }
+        
+<span class="nc" id="L149">        role.setName(roleDetails.getName());</span>
+<span class="nc" id="L150">        role.setDescription(roleDetails.getDescription());</span>
+<span class="nc" id="L151">        role.setIcon(roleDetails.getIcon());</span>
+<span class="nc" id="L152">        role.setStatus(roleDetails.getStatus());</span>
+<span class="nc" id="L153">        role.setSortOrder(roleDetails.getSortOrder());</span>
+        
+<span class="nc" id="L155">        Role updatedRole = roleRepository.save(role);</span>
+        
+        // 记录审计日志
+<span class="nc" id="L158">        auditLogService.logWithChanges(</span>
+<span class="nc" id="L159">            getCurrentUser(),</span>
+            &quot;UPDATE&quot;,
+            &quot;ROLE&quot;,
+<span class="nc" id="L162">            id.toString(),</span>
+<span class="nc" id="L163">            &quot;更新角色: &quot; + updatedRole.getName(),</span>
+            oldInfo,
+<span class="nc" id="L165">            &quot;name=&quot; + updatedRole.getName() + &quot;, status=&quot; + updatedRole.getStatus()</span>
+        );
+        
+<span class="nc" id="L168">        return updatedRole;</span>
+    }
+
+    /**
+     * 删除角色
+     *
+     * @param id 角色ID
+     * @throws RuntimeException 如果角色不存在或正在被用户使用则抛出异常
+     */
+    public void deleteRole(Long id) {
+<span class="nc" id="L178">        Role role = roleRepository.findById(id)</span>
+<span class="nc" id="L179">                .orElseThrow(() -&gt; new RuntimeException(&quot;角色不存在: &quot; + id));</span>
+<span class="nc" id="L180">        String roleName = role.getName();</span>
+        
+        // 检查是否有用户使用该角色
+<span class="nc" id="L183">        long userCount = roleRepository.countUsersByRoleId(id);</span>
+<span class="nc bnc" id="L184" title="All 2 branches missed.">        if (userCount &gt; 0) {</span>
+<span class="nc" id="L185">            throw new RuntimeException(&quot;该角色正在被 &quot; + userCount + &quot; 个用户使用，无法删除&quot;);</span>
+        }
+        
+<span class="nc" id="L188">        roleRepository.delete(role);</span>
+        
+        // 记录审计日志
+<span class="nc" id="L191">        auditLogService.log(</span>
+<span class="nc" id="L192">            getCurrentUser(),</span>
+            &quot;DELETE&quot;,
+            &quot;ROLE&quot;,
+<span class="nc" id="L195">            id.toString(),</span>
+            &quot;删除角色: &quot; + roleName
+        );
+<span class="nc" id="L198">    }</span>
+
+    /**
+     * 批量删除角色
+     *
+     * @param ids 角色ID列表
+     * @throws RuntimeException 如果任何角色正在被用户使用则抛出异常
+     */
+    public void batchDeleteRoles(List&lt;Long&gt; ids) {
+<span class="nc" id="L207">        String deletedRoles = ids.stream()</span>
+<span class="nc" id="L208">                .map(id -&gt; {</span>
+                    try {
+<span class="nc" id="L210">                        return roleRepository.findById(id).map(Role::getName).orElse(&quot;ID:&quot; + id);</span>
+<span class="nc" id="L211">                    } catch (Exception e) {</span>
+<span class="nc" id="L212">                        return &quot;ID:&quot; + id;</span>
+                    }
+                })
+<span class="nc" id="L215">                .collect(Collectors.joining(&quot;, &quot;));</span>
+        
+<span class="nc bnc" id="L217" title="All 2 branches missed.">        for (Long id : ids) {</span>
+<span class="nc" id="L218">            long userCount = roleRepository.countUsersByRoleId(id);</span>
+<span class="nc bnc" id="L219" title="All 2 branches missed.">            if (userCount &gt; 0) {</span>
+<span class="nc" id="L220">                Role role = roleRepository.findById(id).orElse(null);</span>
+<span class="nc bnc" id="L221" title="All 2 branches missed.">                String roleName = role != null ? role.getName() : &quot;ID:&quot; + id;</span>
+<span class="nc" id="L222">                throw new RuntimeException(&quot;角色 '&quot; + roleName + &quot;' 正在被用户使用，无法删除&quot;);</span>
+            }
+<span class="nc" id="L224">        }</span>
+        
+<span class="nc" id="L226">        roleRepository.deleteAllById(ids);</span>
+        
+        // 记录审计日志
+<span class="nc" id="L229">        auditLogService.log(</span>
+<span class="nc" id="L230">            getCurrentUser(),</span>
+            &quot;BATCH_DELETE&quot;,
+            &quot;ROLE&quot;,
+<span class="nc" id="L233">            ids.toString(),</span>
+            &quot;批量删除角色: &quot; + deletedRoles
+        );
+<span class="nc" id="L236">    }</span>
+
+    /**
+     * 启用/禁用角色
+     *
+     * @param id 角色ID
+     * @return 更新后的角色实体对象，状态已切换
+     * @throws RuntimeException 如果角色不存在则抛出异常
+     */
+    public Role toggleRoleStatus(Long id) {
+<span class="nc" id="L246">        Role role = roleRepository.findById(id)</span>
+<span class="nc" id="L247">                .orElseThrow(() -&gt; new RuntimeException(&quot;角色不存在: &quot; + id));</span>
+<span class="nc" id="L248">        Boolean oldStatus = role.getStatus();</span>
+        
+<span class="nc bnc" id="L250" title="All 2 branches missed.">        role.setStatus(!role.getStatus());</span>
+<span class="nc" id="L251">        Role updatedRole = roleRepository.save(role);</span>
+        
+        // 记录审计日志
+<span class="nc" id="L254">        auditLogService.log(</span>
+<span class="nc" id="L255">            getCurrentUser(),</span>
+            &quot;STATUS_CHANGE&quot;,
+            &quot;ROLE&quot;,
+<span class="nc" id="L258">            id.toString(),</span>
+<span class="nc" id="L259">            &quot;切换角色状态: &quot; + updatedRole.getName() + &quot; (&quot; + oldStatus + &quot; -&gt; &quot; + updatedRole.getStatus() + &quot;)&quot;</span>
+        );
+        
+<span class="nc" id="L262">        return updatedRole;</span>
+    }
+
+    /**
+     * 为角色分配权限
+     *
+     * @param roleId 角色ID
+     * @param permissionIds 权限ID列表
+     * @return 更新后的角色实体对象，包含新分配的权限
+     * @throws RuntimeException 如果角色或权限不存在则抛出异常
+     */
+    public Role assignPermissions(Long roleId, List&lt;Long&gt; permissionIds) {
+<span class="nc" id="L274">        Role role = roleRepository.findById(roleId)</span>
+<span class="nc" id="L275">                .orElseThrow(() -&gt; new RuntimeException(&quot;角色不存在: &quot; + roleId));</span>
+        
+<span class="nc" id="L277">        Set&lt;Permission&gt; oldPermissions = new HashSet&lt;&gt;(role.getPermissions());</span>
+        
+<span class="nc" id="L279">        Set&lt;Permission&gt; permissions = new HashSet&lt;&gt;();</span>
+<span class="nc bnc" id="L280" title="All 2 branches missed.">        for (Long permissionId : permissionIds) {</span>
+<span class="nc" id="L281">            Permission permission = permissionRepository.findById(permissionId)</span>
+<span class="nc" id="L282">                    .orElseThrow(() -&gt; new RuntimeException(&quot;权限不存在: &quot; + permissionId));</span>
+<span class="nc" id="L283">            permissions.add(permission);</span>
+<span class="nc" id="L284">        }</span>
+        
+<span class="nc" id="L286">        role.setPermissions(permissions);</span>
+<span class="nc" id="L287">        Role updatedRole = roleRepository.save(role);</span>
+        
+        // 记录审计日志
+<span class="nc" id="L290">        auditLogService.log(</span>
+<span class="nc" id="L291">            getCurrentUser(),</span>
+            &quot;PERMISSION_ASSIGN&quot;,
+            &quot;ROLE&quot;,
+<span class="nc" id="L294">            roleId.toString(),</span>
+<span class="nc" id="L295">            &quot;为角色分配权限: &quot; + role.getName() + &quot; (权限数量: &quot; + permissionIds.size() + &quot;)&quot;</span>
+        );
+        
+<span class="nc" id="L298">        return updatedRole;</span>
+    }
+
+    /**
+     * 获取角色的权限列表
+     *
+     * @param roleId 角色ID
+     * @return 角色关联的权限集合
+     * @throws RuntimeException 如果角色不存在则抛出异常
+     */
+    @Transactional(readOnly = true)
+    public Set&lt;Permission&gt; getRolePermissions(Long roleId) {
+<span class="nc" id="L310">        Role role = roleRepository.findById(roleId)</span>
+<span class="nc" id="L311">                .orElseThrow(() -&gt; new RuntimeException(&quot;角色不存在: &quot; + roleId));</span>
+<span class="nc" id="L312">        return role.getPermissions();</span>
+    }
+
+    /**
+     * 根据名称查询角色
+     *
+     * @param name 角色名称
+     * @return 包含角色的Optional对象，如果不存在则返回空Optional
+     */
+    @Transactional(readOnly = true)
+    public Optional&lt;Role&gt; findByName(String name) {
+<span class="nc" id="L323">        return roleRepository.findByName(name);</span>
+    }
+
+    /**
+     * 获取启用的角色列表
+     *
+     * @return 所有启用状态的角色列表
+     */
+    @Transactional(readOnly = true)
+    public List&lt;Role&gt; getEnabledRoles() {
+<span class="nc" id="L333">        return roleRepository.findByStatus(true);</span>
+    }
+
+    /**
+     * 统计启用角色数量
+     *
+     * @return 启用状态的角色数量
+     */
+    @Transactional(readOnly = true)
+    public long countEnabledRoles() {
+<span class="nc" id="L343">        return roleRepository.countByStatus(true);</span>
+    }
+
+    /**
+     * 统计禁用角色数量
+     *
+     * @return 禁用状态的角色数量
+     */
+    @Transactional(readOnly = true)
+    public long countDisabledRoles() {
+<span class="nc" id="L353">        return roleRepository.countByStatus(false);</span>
+    }
+
+    /**
+     * 检查角色是否被用户使用
+     *
+     * @param roleId 角色ID
+     * @return 如果角色正在被至少一个用户使用则返回 true，否则返回 false
+     */
+    @Transactional(readOnly = true)
+    public boolean isRoleInUse(Long roleId) {
+<span class="nc bnc" id="L364" title="All 2 branches missed.">        return roleRepository.countUsersByRoleId(roleId) &gt; 0;</span>
+    }
+
+    /**
+     * 获取使用该角色的用户数量
+     *
+     * @param roleId 角色ID
+     * @return 使用该角色的用户数量
+     */
+    @Transactional(readOnly = true)
+    public long getUsersCountByRole(Long roleId) {
+<span class="nc" id="L375">        return roleRepository.countUsersByRoleId(roleId);</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

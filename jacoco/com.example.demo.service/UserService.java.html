@@ -1,0 +1,610 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="zh"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>UserService.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">demo</a> &gt; <a href="index.source.html" class="el_package">com.example.demo.service</a> &gt; <span class="el_source">UserService.java</span></div><h1>UserService.java</h1><pre class="source lang-java linenums">package com.example.demo.service;
+
+import com.example.demo.dto.UserDTO;
+import com.example.demo.entity.Role;
+import com.example.demo.entity.User;
+import com.example.demo.repository.UserRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
+
+import java.time.LocalDateTime;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+/**
+ * 用户服务类
+ * &lt;p&gt;提供用户相关的核心业务逻辑处理，包括用户的CRUD操作、权限管理、
+ * 密码管理、个人信息管理等所有与用户相关的功能。&lt;/p&gt;
+ * 
+ * &lt;h2&gt;主要功能&lt;/h2&gt;
+ * &lt;ul&gt;
+ *   &lt;li&gt;&lt;strong&gt;用户CRUD：&lt;/strong&gt;创建、查询、更新、删除用户&lt;/li&gt;
+ *   &lt;li&gt;&lt;strong&gt;分页查询：&lt;/strong&gt;支持分页和关键词搜索&lt;/li&gt;
+ *   &lt;li&gt;&lt;strong&gt;状态管理：&lt;/strong&gt;启用/禁用用户账户&lt;/li&gt;
+ *   &lt;li&gt;&lt;strong&gt;密码管理：&lt;/strong&gt;密码加密、重置密码、修改密码&lt;/li&gt;
+ *   &lt;li&gt;&lt;strong&gt;角色分配：&lt;/strong&gt;为用户分配或移除角色&lt;/li&gt;
+ *   &lt;li&gt;&lt;strong&gt;登录追踪：&lt;/strong&gt;记录最后登录时间和IP&lt;/li&gt;
+ *   &lt;li&gt;&lt;strong&gt;个人信息：&lt;/strong&gt;更新当前用户的个人资料&lt;/li&gt;
+ *   &lt;li&gt;&lt;strong&gt;审计日志：&lt;/strong&gt;记录所有用户相关操作&lt;/li&gt;
+ * &lt;/ul&gt;
+ * 
+ * &lt;h2&gt;安全特性&lt;/h2&gt;
+ * &lt;ul&gt;
+ *   &lt;li&gt;密码使用BCrypt强哈希算法加密存储&lt;/li&gt;
+ *   &lt;li&gt;修改密码时必须验证原密码&lt;/li&gt;
+ *   &lt;li&gt;只能修改当前登录用户的信息&lt;/li&gt;
+ *   &lt;li&gt;所有敏感操作都记录审计日志（包含IP地址）&lt;/li&gt;
+ *   &lt;li&gt;用户名和邮箱全局唯一性校验&lt;/li&gt;
+ * &lt;/ul&gt;
+ * 
+ * &lt;h3&gt;事务管理&lt;/h3&gt;
+ * &lt;p&gt;整个Service类使用@Transactional注解，确保所有操作的原子性：
+ * 如果任何步骤失败，所有数据库更改都会回滚。&lt;/p&gt;
+ * 
+ * &lt;h3&gt;使用示例&lt;/h3&gt;
+ * &lt;pre&gt;{@code
+ * // 创建用户
+ * UserDTO dto = new UserDTO();
+ * dto.setUsername(&quot;admin&quot;);
+ * dto.setEmail(&quot;admin@example.com&quot;);
+ * dto.setName(&quot;管理员&quot;);
+ * dto.setPassword(&quot;123456&quot;);
+ * User user = userService.createUser(dto);
+ * 
+ * // 分页查询
+ * Page&lt;User&gt; users = userService.getUsersWithPaging(0, 10);
+ * 
+ * // 为用户分配角色
+ * List&lt;Long&gt; roleIds = Arrays.asList(1L, 2L);
+ * userService.assignRoles(userId, roleIds);
+ * 
+ * // 修改密码
+ * userService.changePassword(userId, oldPassword, newPassword);
+ * }&lt;/pre&gt;
+ * 
+ * @author Demo Team
+ * @version 2.0
+ * @since 2024-01-01
+ * @see UserRepository
+ * @see UserDTO
+ * @see AuditLogService
+ */
+@Service
+@Transactional
+<span class="fc" id="L85">public class UserService {</span>
+
+    @Autowired
+    private UserRepository userRepository;
+
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
+    @Autowired
+    private AuditLogService auditLogService;
+
+    /**
+     * 获取当前操作用户名
+     *
+     * @return 当前登录用户的用户名，如果获取失败则返回 &quot;system&quot;
+     */
+    private String getCurrentUser() {
+        try {
+<span class="nc" id="L103">            return SecurityContextHolder.getContext().getAuthentication().getName();</span>
+<span class="fc" id="L104">        } catch (Exception e) {</span>
+<span class="fc" id="L105">            return &quot;system&quot;;</span>
+        }
+    }
+
+    /**
+     * 获取客户端IP地址
+     *
+     * @return 客户端IP地址，如果无法获取则返回 &quot;unknown&quot;
+     */
+    private String getClientIp() {
+        try {
+            ServletRequestAttributes attributes = 
+<span class="fc" id="L117">                (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();</span>
+<span class="fc bfc" id="L118" title="All 2 branches covered.">            if (attributes != null) {</span>
+<span class="fc" id="L119">                return attributes.getRequest().getRemoteAddr();</span>
+            }
+<span class="nc" id="L121">        } catch (Exception e) {</span>
+            // ignore
+<span class="fc" id="L123">        }</span>
+<span class="fc" id="L124">        return &quot;unknown&quot;;</span>
+    }
+
+    /**
+     * 创建用户
+     *
+     * @param userDTO 用户数据传输对象，包含用户名、邮箱、姓名、密码等信息
+     * @return 创建成功的用户实体对象
+     * @throws RuntimeException 如果用户名或邮箱已存在则抛出异常
+     */
+    public User createUser(UserDTO userDTO) {
+        // 检查用户名是否已存在
+<span class="fc bfc" id="L136" title="All 2 branches covered.">        if (userRepository.existsByUsername(userDTO.getUsername())) {</span>
+<span class="fc" id="L137">            throw new RuntimeException(&quot;用户名已存在: &quot; + userDTO.getUsername());</span>
+        }
+        
+        // 检查邮箱是否已存在
+<span class="fc bfc" id="L141" title="All 2 branches covered.">        if (userRepository.existsByEmail(userDTO.getEmail())) {</span>
+<span class="fc" id="L142">            throw new RuntimeException(&quot;邮箱已被注册: &quot; + userDTO.getEmail());</span>
+        }
+
+<span class="fc" id="L145">        User user = convertToEntity(userDTO);</span>
+        // 加密密码
+<span class="pc bpc" id="L147" title="1 of 4 branches missed.">        if (userDTO.getPassword() != null &amp;&amp; !userDTO.getPassword().isEmpty()) {</span>
+<span class="fc" id="L148">            user.setPassword(passwordEncoder.encode(userDTO.getPassword()));</span>
+        } else {
+<span class="fc" id="L150">            user.setPassword(passwordEncoder.encode(&quot;123456&quot;)); // 默认密码</span>
+        }
+        
+<span class="fc" id="L153">        User savedUser = userRepository.save(user);</span>
+        
+        // 记录审计日志
+<span class="fc" id="L156">        auditLogService.logWithIp(</span>
+<span class="fc" id="L157">            getCurrentUser(),</span>
+            &quot;CREATE&quot;,
+            &quot;USER&quot;,
+<span class="fc" id="L160">            savedUser.getId().toString(),</span>
+<span class="fc" id="L161">            &quot;创建用户: &quot; + savedUser.getUsername(),</span>
+<span class="fc" id="L162">            getClientIp()</span>
+        );
+        
+<span class="fc" id="L165">        return savedUser;</span>
+    }
+
+    /**
+     * 根据ID查询用户
+     *
+     * @param id 用户ID
+     * @return 用户实体对象
+     * @throws RuntimeException 如果用户不存在则抛出异常
+     */
+    @Transactional(readOnly = true)
+    public User getUserById(Long id) {
+<span class="fc" id="L177">        return userRepository.findById(id)</span>
+<span class="fc" id="L178">                .orElseThrow(() -&gt; new RuntimeException(&quot;用户不存在，ID: &quot; + id));</span>
+    }
+
+    /**
+     * 查询所有用户（不分页）
+     *
+     * @return 所有用户实体对象列表
+     */
+    @Transactional(readOnly = true)
+    public List&lt;User&gt; getAllUsers() {
+<span class="fc" id="L188">        return userRepository.findAll();</span>
+    }
+
+    /**
+     * 分页查询用户列表
+     * @param page 页码（从0开始）
+     * @param size 每页大小
+     * @return 分页结果
+     */
+    @Transactional(readOnly = true)
+    public Page&lt;User&gt; getUsersWithPaging(int page, int size) {
+<span class="nc" id="L199">        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, &quot;createTime&quot;));</span>
+<span class="nc" id="L200">        return userRepository.findAll(pageable);</span>
+    }
+
+    /**
+     * 搜索用户（支持用户名、姓名、邮箱模糊搜索）
+     * @param keyword 搜索关键词
+     * @param page 页码
+     * @param size 每页大小
+     * @return 分页搜索结果
+     */
+    @Transactional(readOnly = true)
+    public Page&lt;User&gt; searchUsers(String keyword, int page, int size) {
+<span class="nc" id="L212">        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, &quot;createTime&quot;));</span>
+<span class="nc" id="L213">        return userRepository.searchUsers(keyword, pageable);</span>
+    }
+
+    /**
+     * 根据状态查询用户
+     * @param status true: 启用, false: 禁用
+     * @return 用户列表
+     */
+    @Transactional(readOnly = true)
+    public List&lt;User&gt; getUsersByStatus(Boolean status) {
+<span class="nc" id="L223">        return userRepository.findByStatus(status);</span>
+    }
+
+    /**
+     * 更新用户
+     *
+     * @param id 用户ID
+     * @param userDTO 用户数据传输对象，包含需要更新的字段
+     * @return 更新后的用户实体对象
+     * @throws RuntimeException 如果用户不存在或用户名/邮箱已被其他用户使用则抛出异常
+     */
+    public User updateUser(Long id, UserDTO userDTO) {
+<span class="fc" id="L235">        User existingUser = getUserById(id);</span>
+<span class="fc" id="L236">        String oldInfo = existingUser.toString();</span>
+
+        // 如果修改了用户名，检查新用户名是否已被其他用户使用
+<span class="fc bfc" id="L239" title="All 2 branches covered.">        if (!existingUser.getUsername().equals(userDTO.getUsername()) &amp;&amp; </span>
+<span class="fc bfc" id="L240" title="All 2 branches covered.">            userRepository.existsByUsername(userDTO.getUsername())) {</span>
+<span class="fc" id="L241">            throw new RuntimeException(&quot;用户名已存在: &quot; + userDTO.getUsername());</span>
+        }
+
+        // 如果修改了邮箱，检查新邮箱是否已被其他用户使用
+<span class="pc bpc" id="L245" title="1 of 2 branches missed.">        if (!existingUser.getEmail().equals(userDTO.getEmail()) &amp;&amp; </span>
+<span class="fc bfc" id="L246" title="All 2 branches covered.">            userRepository.existsByEmail(userDTO.getEmail())) {</span>
+<span class="fc" id="L247">            throw new RuntimeException(&quot;邮箱已被注册: &quot; + userDTO.getEmail());</span>
+        }
+
+<span class="fc" id="L250">        existingUser.setUsername(userDTO.getUsername());</span>
+<span class="fc" id="L251">        existingUser.setEmail(userDTO.getEmail());</span>
+<span class="fc" id="L252">        existingUser.setName(userDTO.getName());</span>
+<span class="fc" id="L253">        existingUser.setPhone(userDTO.getPhone());</span>
+<span class="fc" id="L254">        existingUser.setAge(userDTO.getAge());</span>
+
+<span class="fc" id="L256">        User updatedUser = userRepository.save(existingUser);</span>
+        
+        // 记录审计日志
+<span class="fc" id="L259">        auditLogService.logWithChanges(</span>
+<span class="fc" id="L260">            getCurrentUser(),</span>
+            &quot;UPDATE&quot;,
+            &quot;USER&quot;,
+<span class="fc" id="L263">            id.toString(),</span>
+<span class="fc" id="L264">            &quot;更新用户信息: &quot; + updatedUser.getUsername(),</span>
+            oldInfo,
+<span class="fc" id="L266">            updatedUser.toString()</span>
+        );
+        
+<span class="fc" id="L269">        return updatedUser;</span>
+    }
+
+    /**
+     * 更新用户基本信息（不包括密码）
+     *
+     * @param id 用户ID
+     * @param user 用户实体对象，包含姓名、电话、年龄、头像、备注等信息
+     * @return 更新后的用户实体对象
+     */
+    public User updateUserInfo(Long id, User user) {
+<span class="nc" id="L280">        User existingUser = getUserById(id);</span>
+<span class="nc" id="L281">        String oldInfo = &quot;name=&quot; + existingUser.getName() + &quot;, phone=&quot; + existingUser.getPhone();</span>
+        
+<span class="nc" id="L283">        existingUser.setName(user.getName());</span>
+<span class="nc" id="L284">        existingUser.setPhone(user.getPhone());</span>
+<span class="nc" id="L285">        existingUser.setAge(user.getAge());</span>
+<span class="nc" id="L286">        existingUser.setAvatar(user.getAvatar());</span>
+<span class="nc" id="L287">        existingUser.setRemark(user.getRemark());</span>
+        
+<span class="nc" id="L289">        User updatedUser = userRepository.save(existingUser);</span>
+        
+        // 记录审计日志
+<span class="nc" id="L292">        auditLogService.log(</span>
+<span class="nc" id="L293">            getCurrentUser(),</span>
+            &quot;UPDATE&quot;,
+            &quot;USER&quot;,
+<span class="nc" id="L296">            id.toString(),</span>
+<span class="nc" id="L297">            &quot;更新用户基本信息: &quot; + updatedUser.getUsername()</span>
+        );
+        
+<span class="nc" id="L300">        return updatedUser;</span>
+    }
+
+    /**
+     * 删除用户
+     *
+     * @param id 用户ID
+     * @throws RuntimeException 如果用户不存在则抛出异常
+     */
+    public void deleteUser(Long id) {
+<span class="fc" id="L310">        User user = getUserById(id);</span>
+<span class="fc" id="L311">        String userInfo = user.getUsername();</span>
+        
+<span class="fc" id="L313">        userRepository.delete(user);</span>
+        
+        // 记录审计日志
+<span class="fc" id="L316">        auditLogService.logWithIp(</span>
+<span class="fc" id="L317">            getCurrentUser(),</span>
+            &quot;DELETE&quot;,
+            &quot;USER&quot;,
+<span class="fc" id="L320">            id.toString(),</span>
+            &quot;删除用户: &quot; + userInfo,
+<span class="fc" id="L322">            getClientIp()</span>
+        );
+<span class="fc" id="L324">    }</span>
+
+    /**
+     * 批量删除用户
+     *
+     * @param ids 用户ID列表
+     */
+    public void batchDeleteUsers(List&lt;Long&gt; ids) {
+<span class="nc" id="L332">        String deletedUsers = ids.stream()</span>
+<span class="nc" id="L333">                .map(id -&gt; {</span>
+                    try {
+<span class="nc" id="L335">                        return getUserById(id).getUsername();</span>
+<span class="nc" id="L336">                    } catch (Exception e) {</span>
+<span class="nc" id="L337">                        return &quot;ID:&quot; + id;</span>
+                    }
+                })
+<span class="nc" id="L340">                .collect(Collectors.joining(&quot;, &quot;));</span>
+        
+<span class="nc" id="L342">        userRepository.deleteAllById(ids);</span>
+        
+        // 记录审计日志
+<span class="nc" id="L345">        auditLogService.log(</span>
+<span class="nc" id="L346">            getCurrentUser(),</span>
+            &quot;BATCH_DELETE&quot;,
+            &quot;USER&quot;,
+<span class="nc" id="L349">            ids.toString(),</span>
+            &quot;批量删除用户: &quot; + deletedUsers
+        );
+<span class="nc" id="L352">    }</span>
+
+    /**
+     * 启用/禁用用户
+     *
+     * @param id 用户ID
+     * @return 更新后的用户实体对象，状态已切换
+     * @throws RuntimeException 如果用户不存在则抛出异常
+     */
+    public User toggleUserStatus(Long id) {
+<span class="nc" id="L362">        User user = getUserById(id);</span>
+<span class="nc" id="L363">        Boolean oldStatus = user.getStatus();</span>
+        
+<span class="nc bnc" id="L365" title="All 2 branches missed.">        user.setStatus(!user.getStatus());</span>
+<span class="nc" id="L366">        User updatedUser = userRepository.save(user);</span>
+        
+        // 记录审计日志
+<span class="nc" id="L369">        auditLogService.log(</span>
+<span class="nc" id="L370">            getCurrentUser(),</span>
+            &quot;STATUS_CHANGE&quot;,
+            &quot;USER&quot;,
+<span class="nc" id="L373">            id.toString(),</span>
+<span class="nc" id="L374">            &quot;切换用户状态: &quot; + user.getUsername() + &quot; (&quot; + oldStatus + &quot; -&gt; &quot; + updatedUser.getStatus() + &quot;)&quot;</span>
+        );
+        
+<span class="nc" id="L377">        return updatedUser;</span>
+    }
+
+    /**
+     * 重置用户密码
+     *
+     * @param id 用户ID
+     * @param newPassword 新密码（明文），将被加密后存储
+     * @throws RuntimeException 如果用户不存在则抛出异常
+     */
+    public void resetPassword(Long id, String newPassword) {
+<span class="nc" id="L388">        User user = getUserById(id);</span>
+        
+<span class="nc" id="L390">        user.setPassword(passwordEncoder.encode(newPassword));</span>
+<span class="nc" id="L391">        userRepository.save(user);</span>
+        
+        // 记录审计日志
+<span class="nc" id="L394">        auditLogService.logWithIp(</span>
+<span class="nc" id="L395">            getCurrentUser(),</span>
+            &quot;PASSWORD_RESET&quot;,
+            &quot;USER&quot;,
+<span class="nc" id="L398">            id.toString(),</span>
+<span class="nc" id="L399">            &quot;重置用户密码: &quot; + user.getUsername(),</span>
+<span class="nc" id="L400">            getClientIp()</span>
+        );
+<span class="nc" id="L402">    }</span>
+
+    /**
+     * 更新当前用户的个人信息
+     *
+     * @param userId 用户ID
+     * @param name 姓名
+     * @param phone 电话，可选
+     * @param age 年龄，可选
+     * @param avatar 头像URL，可选
+     * @param remark 备注，可选
+     * @return 更新后的用户实体对象
+     * @throws RuntimeException 如果用户不存在则抛出异常
+     */
+    public User updateCurrentUserProfile(Long userId, String name, String phone, Integer age, String avatar, String remark) {
+<span class="nc" id="L417">        User user = getUserById(userId);</span>
+<span class="nc" id="L418">        String oldInfo = &quot;name=&quot; + user.getName() + &quot;, phone=&quot; + user.getPhone();</span>
+        
+<span class="nc" id="L420">        user.setName(name);</span>
+<span class="nc" id="L421">        user.setPhone(phone);</span>
+<span class="nc" id="L422">        user.setAge(age);</span>
+<span class="nc" id="L423">        user.setAvatar(avatar);</span>
+<span class="nc" id="L424">        user.setRemark(remark);</span>
+        
+<span class="nc" id="L426">        User updatedUser = userRepository.save(user);</span>
+        
+        // 记录审计日志
+<span class="nc" id="L429">        auditLogService.log(</span>
+<span class="nc" id="L430">            getCurrentUser(),</span>
+            &quot;PROFILE_UPDATE&quot;,
+            &quot;USER&quot;,
+<span class="nc" id="L433">            userId.toString(),</span>
+            &quot;更新个人信息&quot;
+        );
+        
+<span class="nc" id="L437">        return updatedUser;</span>
+    }
+
+    /**
+     * 修改当前用户密码
+     *
+     * @param userId 用户ID
+     * @param oldPassword 原密码（明文），用于验证身份
+     * @param newPassword 新密码（明文），将被加密后存储
+     * @throws RuntimeException 如果用户不存在或原密码不正确则抛出异常
+     */
+    public void changePassword(Long userId, String oldPassword, String newPassword) {
+<span class="nc" id="L449">        User user = getUserById(userId);</span>
+        
+        // 验证旧密码
+<span class="nc bnc" id="L452" title="All 2 branches missed.">        if (!passwordEncoder.matches(oldPassword, user.getPassword())) {</span>
+<span class="nc" id="L453">            throw new RuntimeException(&quot;原密码不正确&quot;);</span>
+        }
+        
+        // 设置新密码
+<span class="nc" id="L457">        user.setPassword(passwordEncoder.encode(newPassword));</span>
+<span class="nc" id="L458">        userRepository.save(user);</span>
+        
+        // 记录审计日志
+<span class="nc" id="L461">        auditLogService.logWithIp(</span>
+<span class="nc" id="L462">            getCurrentUser(),</span>
+            &quot;PASSWORD_CHANGE&quot;,
+            &quot;USER&quot;,
+<span class="nc" id="L465">            userId.toString(),</span>
+            &quot;修改密码&quot;,
+<span class="nc" id="L467">            getClientIp()</span>
+        );
+<span class="nc" id="L469">    }</span>
+
+    /**
+     * 更新最后登录信息
+     *
+     * @param id 用户ID
+     * @param ip 登录IP地址
+     * @throws RuntimeException 如果用户不存在则抛出异常
+     */
+    public void updateLastLoginInfo(Long id, String ip) {
+<span class="nc" id="L479">        User user = getUserById(id);</span>
+<span class="nc" id="L480">        user.setLastLoginTime(LocalDateTime.now());</span>
+<span class="nc" id="L481">        user.setLastLoginIp(ip);</span>
+<span class="nc" id="L482">        userRepository.save(user);</span>
+<span class="nc" id="L483">    }</span>
+
+    /**
+     * 为用户分配角色
+     *
+     * @param userId 用户ID
+     * @param roleIds 角色ID列表
+     * @return 更新后的用户实体对象
+     * @throws RuntimeException 该方法已废弃，请使用 RoleService 分配角色
+     * @deprecated 请使用 RoleService 进行角色分配
+     */
+    public User assignRoles(Long userId, List&lt;Long&gt; roleIds) {
+<span class="nc" id="L495">        User user = getUserById(userId);</span>
+<span class="nc" id="L496">        Set&lt;Role&gt; oldRoles = new HashSet&lt;&gt;(user.getRoles());</span>
+        
+<span class="nc" id="L498">        Set&lt;Role&gt; roles = new HashSet&lt;&gt;();</span>
+<span class="nc bnc" id="L499" title="All 2 branches missed.">        for (Long roleId : roleIds) {</span>
+            // 这里需要通过RoleRepository获取角色，但UserService没有注入
+            // 所以我们需要通过其他方式，或者在Controller层处理
+<span class="nc" id="L502">            throw new RuntimeException(&quot;请使用RoleService分配角色&quot;);</span>
+        }
+        
+<span class="nc" id="L505">        user.setRoles(roles);</span>
+<span class="nc" id="L506">        User updatedUser = userRepository.save(user);</span>
+        
+        // 记录审计日志
+<span class="nc" id="L509">        auditLogService.log(</span>
+<span class="nc" id="L510">            getCurrentUser(),</span>
+            &quot;ROLE_ASSIGN&quot;,
+            &quot;USER&quot;,
+<span class="nc" id="L513">            userId.toString(),</span>
+<span class="nc" id="L514">            &quot;为用户分配角色: &quot; + user.getUsername()</span>
+        );
+        
+<span class="nc" id="L517">        return updatedUser;</span>
+    }
+
+    /**
+     * 根据用户名查询用户
+     *
+     * @param username 用户名
+     * @return 用户实体对象
+     * @throws RuntimeException 如果用户不存在则抛出异常
+     */
+    @Transactional(readOnly = true)
+    public User getUserByUsername(String username) {
+<span class="fc" id="L529">        return userRepository.findByUsername(username)</span>
+<span class="fc" id="L530">                .orElseThrow(() -&gt; new RuntimeException(&quot;用户不存在，用户名: &quot; + username));</span>
+    }
+
+    /**
+     * 根据姓名模糊查询用户
+     *
+     * @param name 姓名关键词，支持大小写不敏感的模糊匹配
+     * @return 匹配的用户实体对象列表
+     */
+    @Transactional(readOnly = true)
+    public List&lt;User&gt; searchUsersByName(String name) {
+<span class="fc" id="L541">        return userRepository.findByNameContainingIgnoreCase(name);</span>
+    }
+
+    /**
+     * 统计启用用户数量
+     *
+     * @return 启用状态的用户数量
+     */
+    @Transactional(readOnly = true)
+    public long countEnabledUsers() {
+<span class="nc" id="L551">        return userRepository.countByStatus(true);</span>
+    }
+
+    /**
+     * 统计禁用用户数量
+     *
+     * @return 禁用状态的用户数量
+     */
+    @Transactional(readOnly = true)
+    public long countDisabledUsers() {
+<span class="nc" id="L561">        return userRepository.countByStatus(false);</span>
+    }
+
+    /**
+     * 将 DTO 转换为实体
+     *
+     * @param userDTO 用户数据传输对象
+     * @return 转换后的用户实体对象，默认状态为启用
+     */
+    private User convertToEntity(UserDTO userDTO) {
+<span class="fc" id="L571">        User user = new User();</span>
+<span class="fc" id="L572">        user.setUsername(userDTO.getUsername());</span>
+<span class="fc" id="L573">        user.setEmail(userDTO.getEmail());</span>
+<span class="fc" id="L574">        user.setName(userDTO.getName());</span>
+<span class="fc" id="L575">        user.setPhone(userDTO.getPhone());</span>
+<span class="fc" id="L576">        user.setAge(userDTO.getAge());</span>
+<span class="fc" id="L577">        user.setStatus(true); // 默认启用</span>
+<span class="fc" id="L578">        return user;</span>
+    }
+
+    /**
+     * 将实体转换为 DTO
+     *
+     * @param user 用户实体对象
+     * @return 转换后的用户数据传输对象
+     */
+    private UserDTO convertToDTO(User user) {
+<span class="fc" id="L588">        UserDTO dto = new UserDTO();</span>
+<span class="fc" id="L589">        dto.setId(user.getId());</span>
+<span class="fc" id="L590">        dto.setUsername(user.getUsername());</span>
+<span class="fc" id="L591">        dto.setEmail(user.getEmail());</span>
+<span class="fc" id="L592">        dto.setName(user.getName());</span>
+<span class="fc" id="L593">        dto.setPhone(user.getPhone());</span>
+<span class="fc" id="L594">        dto.setAge(user.getAge());</span>
+<span class="fc" id="L595">        return dto;</span>
+    }
+
+    /**
+     * 将实体列表转换为 DTO 列表
+     *
+     * @param users 用户实体对象列表
+     * @return 转换后的用户数据传输对象列表
+     */
+    public List&lt;UserDTO&gt; convertToDTOList(List&lt;User&gt; users) {
+<span class="fc" id="L605">        return users.stream()</span>
+<span class="fc" id="L606">                .map(this::convertToDTO)</span>
+<span class="fc" id="L607">                .collect(Collectors.toList());</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="zh"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>UserController.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">demo</a> &gt; <a href="index.source.html" class="el_package">com.example.demo.controller</a> &gt; <span class="el_source">UserController.java</span></div><h1>UserController.java</h1><pre class="source lang-java linenums">package com.example.demo.controller;
+
+import com.example.demo.dto.ApiResponse;
+import com.example.demo.dto.UserDTO;
+import com.example.demo.entity.User;
+import com.example.demo.service.UserService;
+import jakarta.validation.Valid;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+
+/**
+ * 用户API控制器 - 提供RESTful API接口
+ */
+@RestController
+@RequestMapping(&quot;/api/users&quot;)
+<span class="fc" id="L20">public class UserController {</span>
+
+    @Autowired
+    private UserService userService;
+
+    /**
+     * 创建用户
+     *
+     * @param userDTO 用户数据传输对象，包含用户名、邮箱、姓名等信息，需通过 CreateGroup 验证
+     * @return 响应实体，成功时返回200状态码和创建的用户信息，失败时返回400状态码和错误信息
+     */
+    @PostMapping
+    public ResponseEntity&lt;ApiResponse&lt;User&gt;&gt; createUser(@Validated(UserDTO.CreateGroup.class) @RequestBody UserDTO userDTO) {
+        try {
+<span class="fc" id="L34">            User user = userService.createUser(userDTO);</span>
+<span class="fc" id="L35">            return ResponseEntity.ok(ApiResponse.success(&quot;用户创建成功&quot;, user));</span>
+<span class="nc" id="L36">        } catch (RuntimeException e) {</span>
+<span class="nc" id="L37">            return ResponseEntity.badRequest().body(ApiResponse.error(e.getMessage()));</span>
+        }
+    }
+
+    /**
+     * 根据ID查询用户
+     *
+     * @param id 用户ID
+     * @return 响应实体，成功时返回200状态码和用户信息，失败时返回404状态码
+     */
+    @GetMapping(&quot;/{id}&quot;)
+    public ResponseEntity&lt;ApiResponse&lt;User&gt;&gt; getUserById(@PathVariable Long id) {
+        try {
+<span class="fc" id="L50">            User user = userService.getUserById(id);</span>
+<span class="fc" id="L51">            return ResponseEntity.ok(ApiResponse.success(user));</span>
+<span class="fc" id="L52">        } catch (RuntimeException e) {</span>
+<span class="fc" id="L53">            return ResponseEntity.notFound().build();</span>
+        }
+    }
+
+    /**
+     * 查询所有用户
+     *
+     * @return 响应实体，返回200状态码和所有用户列表
+     */
+    @GetMapping
+    public ResponseEntity&lt;ApiResponse&lt;List&lt;User&gt;&gt;&gt; getAllUsers() {
+<span class="nc" id="L64">        List&lt;User&gt; users = userService.getAllUsers();</span>
+<span class="nc" id="L65">        return ResponseEntity.ok(ApiResponse.success(users));</span>
+    }
+
+    /**
+     * 更新用户
+     *
+     * @param id 用户ID
+     * @param userDTO 用户数据传输对象，包含需要更新的字段
+     * @return 响应实体，成功时返回200状态码和更新后的用户信息，失败时返回400状态码和错误信息
+     */
+    @PutMapping(&quot;/{id}&quot;)
+    public ResponseEntity&lt;ApiResponse&lt;User&gt;&gt; updateUser(@PathVariable Long id, 
+                                                         @Valid @RequestBody UserDTO userDTO) {
+        try {
+<span class="fc" id="L79">            User user = userService.updateUser(id, userDTO);</span>
+<span class="fc" id="L80">            return ResponseEntity.ok(ApiResponse.success(&quot;用户更新成功&quot;, user));</span>
+<span class="nc" id="L81">        } catch (RuntimeException e) {</span>
+<span class="nc" id="L82">            return ResponseEntity.badRequest().body(ApiResponse.error(e.getMessage()));</span>
+        }
+    }
+
+    /**
+     * 删除用户
+     *
+     * @param id 用户ID
+     * @return 响应实体，成功时返回200状态码和成功消息，失败时返回404状态码
+     */
+    @DeleteMapping(&quot;/{id}&quot;)
+    public ResponseEntity&lt;ApiResponse&lt;Void&gt;&gt; deleteUser(@PathVariable Long id) {
+        try {
+<span class="fc" id="L95">            userService.deleteUser(id);</span>
+<span class="fc" id="L96">            return ResponseEntity.ok(ApiResponse.success(&quot;用户删除成功&quot;, null));</span>
+<span class="nc" id="L97">        } catch (RuntimeException e) {</span>
+<span class="nc" id="L98">            return ResponseEntity.notFound().build();</span>
+        }
+    }
+
+    /**
+     * 根据用户名查询用户
+     *
+     * @param username 用户名
+     * @return 响应实体，成功时返回200状态码和用户信息，失败时返回404状态码
+     */
+    @GetMapping(&quot;/username/{username}&quot;)
+    public ResponseEntity&lt;ApiResponse&lt;User&gt;&gt; getUserByUsername(@PathVariable String username) {
+        try {
+<span class="nc" id="L111">            User user = userService.getUserByUsername(username);</span>
+<span class="nc" id="L112">            return ResponseEntity.ok(ApiResponse.success(user));</span>
+<span class="nc" id="L113">        } catch (RuntimeException e) {</span>
+<span class="nc" id="L114">            return ResponseEntity.notFound().build();</span>
+        }
+    }
+
+    /**
+     * 根据姓名搜索用户
+     *
+     * @param name 姓名关键词，支持模糊匹配
+     * @return 响应实体，返回200状态码和匹配的用户列表
+     */
+    @GetMapping(&quot;/search&quot;)
+    public ResponseEntity&lt;ApiResponse&lt;List&lt;User&gt;&gt;&gt; searchUsers(@RequestParam String name) {
+<span class="fc" id="L126">        List&lt;User&gt; users = userService.searchUsersByName(name);</span>
+<span class="fc" id="L127">        return ResponseEntity.ok(ApiResponse.success(users));</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

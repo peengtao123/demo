@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="zh"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>DemoApplication.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">demo</a> &gt; <a href="index.source.html" class="el_package">com.example.demo</a> &gt; <span class="el_source">DemoApplication.java</span></div><h1>DemoApplication.java</h1><pre class="source lang-java linenums">package com.example.demo;
+
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
+
+/**
+ * Spring Boot应用程序主类
+ * &lt;p&gt;这是整个应用的入口点，负责启动Spring Boot应用并初始化所有组件。&lt;/p&gt;
+ * 
+ * &lt;h2&gt;主要功能&lt;/h2&gt;
+ * &lt;ul&gt;
+ *   &lt;li&gt;启动Spring Boot应用上下文&lt;/li&gt;
+ *   &lt;li&gt;启用自动配置（@SpringBootApplication）&lt;/li&gt;
+ *   &lt;li&gt;启用JPA审计功能（@EnableJpaAuditing）&lt;/li&gt;
+ *   &lt;li&gt;扫描并注册所有Bean组件&lt;/li&gt;
+ * &lt;/ul&gt;
+ * 
+ * &lt;h2&gt;注解说明&lt;/h2&gt;
+ * &lt;ul&gt;
+ *   &lt;li&gt;@SpringBootApplication - 组合注解，包含@Configuration、@EnableAutoConfiguration和@ComponentScan&lt;/li&gt;
+ *   &lt;li&gt;@EnableJpaAuditing - 启用JPA审计功能，支持@CreatedDate、@LastModifiedDate等注解&lt;/li&gt;
+ * &lt;/ul&gt;
+ * 
+ * &lt;h2&gt;启动流程&lt;/h2&gt;
+ * &lt;ol&gt;
+ *   &lt;li&gt;加载application.properties/yml配置文件&lt;/li&gt;
+ *   &lt;li&gt;初始化Spring应用上下文&lt;/li&gt;
+ *   &lt;li&gt;扫描并注册所有Bean（Controller、Service、Repository等）&lt;/li&gt;
+ *   &lt;li&gt;配置数据源和JPA&lt;/li&gt;
+ *   &lt;li&gt;启动内嵌Web服务器（Tomcat）&lt;/li&gt;
+ *   &lt;li&gt;应用准备就绪，开始接收请求&lt;/li&gt;
+ * &lt;/ol&gt;
+ * 
+ * &lt;h3&gt;运行方式&lt;/h3&gt;
+ * &lt;pre&gt;{@code
+ * // 方式1：IDE中直接运行
+ * // 右键 -&gt; Run 'DemoApplication'
+ * 
+ * // 方式2：Maven命令
+ * mvn spring-boot:run
+ * 
+ * // 方式3：打包后运行
+ * mvn clean package
+ * java -jar target/demo-0.0.1-SNAPSHOT.jar
+ * }&lt;/pre&gt;
+ * 
+ * @author Demo Team
+ * @version 1.0
+ * @since 2024-01-01
+ * @see SpringApplication
+ */
+@SpringBootApplication
+@EnableJpaAuditing
+<span class="fc" id="L55">public class DemoApplication {</span>
+
+    /**
+     * 应用程序入口方法
+     * &lt;p&gt;Spring Boot应用的启动点，调用SpringApplication.run()方法启动应用。&lt;/p&gt;
+     * 
+     * @param args 命令行参数，可传递配置选项
+     */
+    public static void main(String[] args) {
+<span class="nc" id="L64">        SpringApplication.run(DemoApplication.class, args);</span>
+<span class="nc" id="L65">    }</span>
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

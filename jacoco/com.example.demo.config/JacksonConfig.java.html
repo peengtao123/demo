@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="zh"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>JacksonConfig.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">demo</a> &gt; <a href="index.source.html" class="el_package">com.example.demo.config</a> &gt; <span class="el_source">JacksonConfig.java</span></div><h1>JacksonConfig.java</h1><pre class="source lang-java linenums">package com.example.demo.config;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+
+/**
+ * Jackson JSON配置类
+ * &lt;p&gt;根据Spring Boot 4.x最佳实践，仅定义自定义的ObjectMapper Bean。
+ * Spring Boot会自动检测并配置所有JSON消息转换器。&lt;/p&gt;
+ * 
+ * @author Demo Team
+ * @version 1.0
+ * @since 2024-01-01
+ */
+@Configuration
+<span class="fc" id="L17">public class JacksonConfig {</span>
+
+    /**
+     * 创建ObjectMapper Bean
+     * &lt;p&gt;用于测试类中的依赖注入和JSON序列化配置。&lt;/p&gt;
+     * 
+     * @return ObjectMapper实例
+     */
+    @Bean
+    public ObjectMapper objectMapper() {
+<span class="fc" id="L27">        return new ObjectMapper();</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

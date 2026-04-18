@@ -1,0 +1,161 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="zh"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>PermissionInterceptor.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">demo</a> &gt; <a href="index.source.html" class="el_package">com.example.demo.interceptor</a> &gt; <span class="el_source">PermissionInterceptor.java</span></div><h1>PermissionInterceptor.java</h1><pre class="source lang-java linenums">package com.example.demo.interceptor;
+
+import com.example.demo.annotation.RequirePermission;
+import com.example.demo.entity.User;
+import com.example.demo.service.UserService;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.stereotype.Component;
+import org.springframework.web.method.HandlerMethod;
+import org.springframework.web.servlet.HandlerInterceptor;
+
+import java.util.Set;
+import java.util.stream.Collectors;
+
+/**
+ * 权限验证拦截器
+ * &lt;p&gt;实现API级别的细粒度权限控制，通过检查@RequirePermission注解来验证用户权限。
+ * 该拦截器在Controller方法执行前进行权限校验，无权限则返回403错误。&lt;/p&gt;
+ * 
+ * &lt;h2&gt;工作原理&lt;/h2&gt;
+ * &lt;ol&gt;
+ *   &lt;li&gt;拦截所有/admin/**路径的请求（由WebMvcConfig配置）&lt;/li&gt;
+ *   &lt;li&gt;检查目标方法或类上是否有@RequirePermission注解&lt;/li&gt;
+ *   &lt;li&gt;从SecurityContext获取当前登录用户&lt;/li&gt;
+ *   &lt;li&gt;查询用户的所有角色和权限&lt;/li&gt;
+ *   &lt;li&gt;验证用户是否具有所需的权限编码&lt;/li&gt;
+ *   &lt;li&gt;有权限则放行，无权限则返回403 Forbidden&lt;/li&gt;
+ * &lt;/ol&gt;
+ * 
+ * &lt;h2&gt;注解优先级&lt;/h2&gt;
+ * &lt;ul&gt;
+ *   &lt;li&gt;&lt;strong&gt;方法级别优先：&lt;/strong&gt;如果方法上有@RequirePermission，使用方法上的注解&lt;/li&gt;
+ *   &lt;li&gt;&lt;strong&gt;类级别降级：&lt;/strong&gt;如果方法上没有，则使用类上的注解&lt;/li&gt;
+ *   &lt;li&gt;&lt;strong&gt;无注解放行：&lt;/strong&gt;如果都没有，直接放行（不限制权限）&lt;/li&gt;
+ * &lt;/ul&gt;
+ * 
+ * &lt;h2&gt;权限验证逻辑&lt;/h2&gt;
+ * &lt;ul&gt;
+ *   &lt;li&gt;获取用户所有角色的权限集合&lt;/li&gt;
+ *   &lt;li&gt;过滤出状态为启用的权限（status=true）&lt;/li&gt;
+ *   &lt;li&gt;提取权限编码（code字段）&lt;/li&gt;
+ *   &lt;li&gt;检查是否包含注解中指定的权限编码&lt;/li&gt;
+ * &lt;/ul&gt;
+ * 
+ * &lt;h2&gt;响应处理&lt;/h2&gt;
+ * &lt;ul&gt;
+ *   &lt;li&gt;&lt;strong&gt;未登录：&lt;/strong&gt;返回401 Unauthorized&lt;/li&gt;
+ *   &lt;li&gt;&lt;strong&gt;无权限：&lt;/strong&gt;返回403 Forbidden，附带权限编码信息&lt;/li&gt;
+ *   &lt;li&gt;&lt;strong&gt;有权限：&lt;/strong&gt;返回true，继续执行Controller方法&lt;/li&gt;
+ * &lt;/ul&gt;
+ * 
+ * &lt;h2&gt;使用场景&lt;/h2&gt;
+ * &lt;ul&gt;
+ *   &lt;li&gt;管理后台的敏感操作（删除用户、修改配置等）&lt;/li&gt;
+ *   &lt;li&gt;API接口的访问控制&lt;/li&gt;
+ *   &lt;li&gt;需要细粒度权限控制的业务功能&lt;/li&gt;
+ * &lt;/ul&gt;
+ * 
+ * &lt;h2&gt;注意事项&lt;/h2&gt;
+ * &lt;ul&gt;
+ *   &lt;li&gt;仅对标注了@RequirePermission的方法生效&lt;/li&gt;
+ *   &lt;li&gt;权限编码必须与数据库中Permission.code完全匹配&lt;/li&gt;
+ *   &lt;li&gt;用户必须有至少一个角色，否则无法获取权限&lt;/li&gt;
+ *   &lt;li&gt;禁用的权限不会被计入验证范围&lt;/li&gt;
+ * &lt;/ul&gt;
+ * 
+ * @author Demo Team
+ * @version 1.0
+ * @since 2024-01-01
+ * @see RequirePermission
+ * @see HandlerInterceptor
+ * @see UserService
+ */
+@Component
+<span class="fc" id="L78">public class PermissionInterceptor implements HandlerInterceptor {</span>
+
+    /**
+     * 用户服务，用于查询用户信息和权限
+     */
+    @Autowired
+    private UserService userService;
+
+    /**
+     * 预处理请求，在执行Controller方法前进行权限验证
+     * &lt;p&gt;这是拦截器的核心方法，负责检查用户是否有权限访问目标资源。&lt;/p&gt;
+     * 
+     * @param request HTTP请求对象
+     * @param response HTTP响应对象
+     * @param handler 被调用的处理器（通常是HandlerMethod）
+     * @return true表示放行，false表示中断请求
+     * @throws Exception 处理异常
+     * 
+     * &lt;p&gt;&lt;b&gt;验证流程：&lt;/b&gt;
+     * &lt;ol&gt;
+     *   &lt;li&gt;检查handler是否为HandlerMethod类型，非方法调用直接放行&lt;/li&gt;
+     *   &lt;li&gt;获取方法上的@RequirePermission注解&lt;/li&gt;
+     *   &lt;li&gt;如果方法上没有，尝试获取类上的注解&lt;/li&gt;
+     *   &lt;li&gt;没有注解则放行（无需权限验证）&lt;/li&gt;
+     *   &lt;li&gt;从SecurityContext获取当前认证信息&lt;/li&gt;
+     *   &lt;li&gt;未认证返回401错误&lt;/li&gt;
+     *   &lt;li&gt;查询用户实体及其权限集合&lt;/li&gt;
+     *   &lt;li&gt;验证是否有所需权限&lt;/li&gt;
+     *   &lt;li&gt;无权限返回403错误&lt;/li&gt;
+     *   &lt;li&gt;有权限返回true，继续执行&lt;/li&gt;
+     * &lt;/ol&gt;
+     */
+    @Override
+    public boolean preHandle(HttpServletRequest request, HttpServletResponse response, 
+                            Object handler) throws Exception {
+        // 只处理方法级别的注解
+<span class="nc bnc" id="L114" title="All 2 branches missed.">        if (!(handler instanceof HandlerMethod)) {</span>
+<span class="nc" id="L115">            return true;</span>
+        }
+
+<span class="nc" id="L118">        HandlerMethod handlerMethod = (HandlerMethod) handler;</span>
+<span class="nc" id="L119">        RequirePermission requirePermission = handlerMethod.getMethodAnnotation(RequirePermission.class);</span>
+        
+        // 如果方法上没有注解，检查类级别
+<span class="nc bnc" id="L122" title="All 2 branches missed.">        if (requirePermission == null) {</span>
+<span class="nc" id="L123">            requirePermission = handlerMethod.getBeanType().getAnnotation(RequirePermission.class);</span>
+        }
+        
+        // 没有权限要求，直接放行
+<span class="nc bnc" id="L127" title="All 2 branches missed.">        if (requirePermission == null) {</span>
+<span class="nc" id="L128">            return true;</span>
+        }
+
+        // 获取当前用户
+<span class="nc" id="L132">        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();</span>
+<span class="nc bnc" id="L133" title="All 4 branches missed.">        if (authentication == null || !authentication.isAuthenticated()) {</span>
+<span class="nc" id="L134">            response.sendError(HttpServletResponse.SC_UNAUTHORIZED, &quot;未登录&quot;);</span>
+<span class="nc" id="L135">            return false;</span>
+        }
+
+<span class="nc" id="L138">        String username = authentication.getName();</span>
+<span class="nc" id="L139">        User user = userService.getUserByUsername(username);</span>
+        
+        // 获取用户的所有权限编码
+<span class="nc" id="L142">        Set&lt;String&gt; userPermissions = user.getRoles().stream()</span>
+<span class="nc" id="L143">                .flatMap(role -&gt; role.getPermissions().stream())</span>
+<span class="nc" id="L144">                .filter(permission -&gt; permission.getStatus()) // 只考虑启用的权限</span>
+<span class="nc" id="L145">                .map(permission -&gt; permission.getCode())</span>
+<span class="nc" id="L146">                .collect(Collectors.toSet());</span>
+
+        // 验证权限
+<span class="nc" id="L149">        String requiredPermission = requirePermission.value();</span>
+<span class="nc" id="L150">        boolean hasPermission = userPermissions.contains(requiredPermission);</span>
+
+<span class="nc bnc" id="L152" title="All 2 branches missed.">        if (!hasPermission) {</span>
+<span class="nc" id="L153">            response.sendError(HttpServletResponse.SC_FORBIDDEN, </span>
+                &quot;没有权限访问: &quot; + requiredPermission);
+<span class="nc" id="L155">            return false;</span>
+        }
+
+<span class="nc" id="L158">        return true;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

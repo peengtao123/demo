@@ -1,0 +1,173 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="zh"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>SecurityConfig.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">demo</a> &gt; <a href="index.source.html" class="el_package">com.example.demo.config</a> &gt; <span class="el_source">SecurityConfig.java</span></div><h1>SecurityConfig.java</h1><pre class="source lang-java linenums">package com.example.demo.config;
+
+import com.example.demo.service.CustomUserDetailsService;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.ProviderManager;
+import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
+import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.SecurityFilterChain;
+
+/**
+ * Spring Security安全配置类
+ * &lt;p&gt;配置应用程序的安全策略，包括认证、授权、密码加密等核心安全功能。
+ * 这是Spring Security的核心配置类，控制整个应用的安全行为。&lt;/p&gt;
+ * 
+ * &lt;h2&gt;主要功能&lt;/h2&gt;
+ * &lt;ul&gt;
+ *   &lt;li&gt;配置URL访问权限规则（哪些路径需要认证、哪些可以公开访问）&lt;/li&gt;
+ *   &lt;li&gt;配置表单登录（登录页面、成功/失败跳转）&lt;/li&gt;
+ *   &lt;li&gt;配置登出逻辑（会话失效、Cookie清除）&lt;/li&gt;
+ *   &lt;li&gt;配置密码编码器（BCrypt强哈希算法）&lt;/li&gt;
+ *   &lt;li&gt;配置认证管理器（AuthenticationManager）&lt;/li&gt;
+ * &lt;/ul&gt;
+ * 
+ * &lt;h2&gt;访问权限规则&lt;/h2&gt;
+ * &lt;ul&gt;
+ *   &lt;li&gt;&lt;strong&gt;公开访问：&lt;/strong&gt;/login、/css/**、/js/**、/images/**（静态资源）&lt;/li&gt;
+ *   &lt;li&gt;&lt;strong&gt;管理员访问：&lt;/strong&gt;/admin/**（需要ADMIN角色）&lt;/li&gt;
+ *   &lt;li&gt;&lt;strong&gt;认证用户访问：&lt;/strong&gt;/api/**、/pages/**（需要登录）&lt;/li&gt;
+ *   &lt;li&gt;&lt;strong&gt;其他请求：&lt;/strong&gt;需要认证&lt;/li&gt;
+ * &lt;/ul&gt;
+ * 
+ * &lt;h3&gt;登录配置&lt;/h3&gt;
+ * &lt;ul&gt;
+ *   &lt;li&gt;登录页面：/login&lt;/li&gt;
+ *   &lt;li&gt;登录处理URL：/login（POST）&lt;/li&gt;
+ *   &lt;li&gt;登录成功跳转：/admin/dashboard&lt;/li&gt;
+ *   &lt;li&gt;登录失败跳转：/login?error=true&lt;/li&gt;
+ * &lt;/ul&gt;
+ * 
+ * &lt;h3&gt;登出配置&lt;/h3&gt;
+ * &lt;ul&gt;
+ *   &lt;li&gt;登出URL：/logout（POST）&lt;/li&gt;
+ *   &lt;li&gt;登出成功跳转：/login?logout=true&lt;/li&gt;
+ *   &lt;li&gt;会话失效：是&lt;/li&gt;
+ *   &lt;li&gt;删除Cookie：JSESSIONID&lt;/li&gt;
+ * &lt;/ul&gt;
+ * 
+ * &lt;h3&gt;安全建议&lt;/h3&gt;
+ * &lt;ul&gt;
+ *   &lt;li&gt;生产环境应启用CSRF保护（当前已禁用，仅用于开发简化）&lt;/li&gt;
+ *   &lt;li&gt;建议使用HTTPS协议传输敏感数据&lt;/li&gt;
+ *   &lt;li&gt;定期更新密码策略和加密算法&lt;/li&gt;
+ *   &lt;li&gt;配置适当的会话超时时间&lt;/li&gt;
+ *   &lt;li&gt;添加登录失败次数限制以防止暴力破解&lt;/li&gt;
+ * &lt;/ul&gt;
+ * 
+ * @author Demo Team
+ * @version 1.0
+ * @since 2024-01-01
+ * @see CustomUserDetailsService
+ * @see BCryptPasswordEncoder
+ * @see SecurityFilterChain
+ */
+@Configuration
+@EnableWebSecurity
+public class SecurityConfig {
+
+    /**
+     * 自定义用户详情服务
+     * &lt;p&gt;用于从数据库加载用户信息和权限&lt;/p&gt;
+     */
+    private final CustomUserDetailsService userDetailsService;
+
+    /**
+     * 构造函数注入CustomUserDetailsService
+     * 
+     * @param userDetailsService 自定义用户详情服务
+     */
+<span class="fc" id="L84">    public SecurityConfig(CustomUserDetailsService userDetailsService) {</span>
+<span class="fc" id="L85">        this.userDetailsService = userDetailsService;</span>
+<span class="fc" id="L86">    }</span>
+
+    /**
+     * 配置密码编码器
+     * &lt;p&gt;使用BCrypt强哈希算法对密码进行加密。BCrypt具有以下优势：&lt;/p&gt;
+     * &lt;ul&gt;
+     *   &lt;li&gt;自动加盐，防止彩虹表攻击&lt;/li&gt;
+     *   &lt;li&gt;可调节的计算强度，适应硬件发展&lt;/li&gt;
+     *   &lt;li&gt;单向加密，无法解密&lt;/li&gt;
+     * &lt;/ul&gt;
+     * 
+     * @return BCryptPasswordEncoder实例
+     * 
+     * &lt;p&gt;&lt;b&gt;注意：&lt;/b&gt;BCrypt默认strength为10，可根据安全需求调整（范围4-31）&lt;/p&gt;
+     */
+    @Bean
+    public PasswordEncoder passwordEncoder() {
+<span class="fc" id="L103">        return new BCryptPasswordEncoder();</span>
+    }
+
+    /**
+     * 配置认证管理器
+     * &lt;p&gt;创建AuthenticationManager Bean，负责用户认证流程。&lt;/p&gt;
+     * &lt;p&gt;使用DaoAuthenticationProvider从数据库验证用户凭据。&lt;/p&gt;
+     * 
+     * @return AuthenticationManager实例
+     * 
+     * &lt;p&gt;&lt;b&gt;注意：&lt;/b&gt;Spring Boot 4.x要求通过构造函数传入UserDetailsService，
+     *           不再支持无参构造函数配合setUserDetailsService的方式&lt;/p&gt;
+     */
+    @Bean
+    public AuthenticationManager authenticationManager() {
+<span class="fc" id="L118">        DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider(userDetailsService);</span>
+<span class="fc" id="L119">        authProvider.setPasswordEncoder(passwordEncoder());</span>
+<span class="fc" id="L120">        return new ProviderManager(authProvider);</span>
+    }
+
+    /**
+     * 配置安全过滤链
+     * &lt;p&gt;定义HTTP安全策略，包括URL访问控制、表单登录、登出等配置。&lt;/p&gt;
+     * 
+     * @param http HttpSecurity对象，用于配置安全规则
+     * @return SecurityFilterChain实例
+     * @throws Exception 配置异常
+     * 
+     * &lt;p&gt;&lt;b&gt;配置顺序要求：&lt;/b&gt;
+     * &lt;ol&gt;
+     *   &lt;li&gt;首先配置authorizeHttpRequests定义访问规则&lt;/li&gt;
+     *   &lt;li&gt;然后配置formLogin定义登录行为&lt;/li&gt;
+     *   &lt;li&gt;接着配置logout定义登出行为&lt;/li&gt;
+     *   &lt;li&gt;最后配置csrf等其他安全选项&lt;/li&gt;
+     * &lt;/ol&gt;
+     */
+    @Bean
+    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+<span class="fc" id="L141">        http</span>
+<span class="fc" id="L142">            .authorizeHttpRequests(authorize -&gt; authorize</span>
+                // 公开访问的页面
+<span class="fc" id="L144">                .requestMatchers(&quot;/login&quot;, &quot;/css/**&quot;, &quot;/js/**&quot;, &quot;/images/**&quot;).permitAll()</span>
+                // 管理页面 - 需要ADMIN角色
+<span class="fc" id="L146">                .requestMatchers(&quot;/admin/**&quot;).hasRole(&quot;ADMIN&quot;)</span>
+                // API端点需要认证
+<span class="fc" id="L148">                .requestMatchers(&quot;/api/**&quot;).authenticated()</span>
+                // 普通页面访问需要认证
+<span class="fc" id="L150">                .requestMatchers(&quot;/pages/**&quot;).authenticated()</span>
+                // 其他请求需要认证
+<span class="fc" id="L152">                .anyRequest().authenticated()</span>
+            )
+<span class="fc" id="L154">            .formLogin(form -&gt; form</span>
+<span class="fc" id="L155">                .loginPage(&quot;/login&quot;)</span>
+<span class="fc" id="L156">                .loginProcessingUrl(&quot;/login&quot;)</span>
+<span class="fc" id="L157">                .defaultSuccessUrl(&quot;/admin/dashboard&quot;, true) // 登录成功后跳转到管理仪表盘</span>
+<span class="fc" id="L158">                .failureUrl(&quot;/login?error=true&quot;)</span>
+<span class="fc" id="L159">                .permitAll()</span>
+            )
+<span class="fc" id="L161">            .logout(logout -&gt; logout</span>
+<span class="fc" id="L162">                .logoutUrl(&quot;/logout&quot;)</span>
+<span class="fc" id="L163">                .logoutSuccessUrl(&quot;/login?logout=true&quot;)</span>
+<span class="fc" id="L164">                .invalidateHttpSession(true)</span>
+<span class="fc" id="L165">                .deleteCookies(&quot;JSESSIONID&quot;)</span>
+<span class="fc" id="L166">                .permitAll()</span>
+            )
+<span class="fc" id="L168">            .csrf(csrf -&gt; csrf.disable()); // 简化配置，生产环境应启用CSRF</span>
+
+<span class="fc" id="L170">        return http.build();</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

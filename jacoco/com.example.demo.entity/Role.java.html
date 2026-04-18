@@ -1,0 +1,367 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="zh"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Role.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">demo</a> &gt; <a href="index.source.html" class="el_package">com.example.demo.entity</a> &gt; <span class="el_source">Role.java</span></div><h1>Role.java</h1><pre class="source lang-java linenums">package com.example.demo.entity;
+
+import jakarta.persistence.*;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+
+import java.time.LocalDateTime;
+import java.util.HashSet;
+import java.util.Set;
+
+/**
+ * 角色实体类
+ * &lt;p&gt;对应数据库中的roles表，用于定义系统中的角色及其权限集合。
+ * 角色是权限管理的核心概念，通过角色可以实现RBAC（基于角色的访问控制）。&lt;/p&gt;
+ * 
+ * &lt;h2&gt;主要功能&lt;/h2&gt;
+ * &lt;ul&gt;
+ *   &lt;li&gt;定义系统角色（如管理员、编辑、普通用户等）&lt;/li&gt;
+ *   &lt;li&gt;关联多个权限，形成权限集合&lt;/li&gt;
+ *   &lt;li&gt;被多个用户拥有，实现批量权限分配&lt;/li&gt;
+ *   &lt;li&gt;支持角色状态管理（启用/禁用）&lt;/li&gt;
+ *   &lt;li&gt;支持角色排序，便于前端展示&lt;/li&gt;
+ * &lt;/ul&gt;
+ * 
+ * &lt;h2&gt;数据约束&lt;/h2&gt;
+ * &lt;ul&gt;
+ *   &lt;li&gt;角色名称：2-50个字符，全局唯一，必填&lt;/li&gt;
+ *   &lt;li&gt;描述：可选，最多200个字符&lt;/li&gt;
+ *   &lt;li&gt;图标：可选，最多50个字符，通常为Bootstrap Icons类名&lt;/li&gt;
+ *   &lt;li&gt;排序号：可选，默认为0，数值越小越靠前&lt;/li&gt;
+ * &lt;/ul&gt;
+ * 
+ * &lt;h2&gt;关联关系&lt;/h2&gt;
+ * &lt;ul&gt;
+ *   &lt;li&gt;与User：多对多关系，一个角色可以被多个用户拥有&lt;/li&gt;
+ *   &lt;li&gt;与Permission：多对多关系，通过role_permission中间表关联&lt;/li&gt;
+ *   &lt;li&gt;一个角色可以包含多个权限&lt;/li&gt;
+ * &lt;/ul&gt;
+ * 
+ * &lt;h3&gt;使用场景&lt;/h3&gt;
+ * &lt;ul&gt;
+ *   &lt;li&gt;用户注册时分配默认角色&lt;/li&gt;
+ *   &lt;li&gt;管理员为用户分配或移除角色&lt;/li&gt;
+ *   &lt;li&gt;权限验证时检查用户是否拥有特定角色&lt;/li&gt;
+ *   &lt;li&gt;动态菜单生成时根据角色过滤菜单项&lt;/li&gt;
+ * &lt;/ul&gt;
+ * 
+ * @author Demo Team
+ * @version 1.0
+ * @since 2024-01-01
+ * @see User
+ * @see Permission
+ * @see AuditingEntityListener
+ */
+@Entity
+@Table(name = &quot;roles&quot;)
+@EntityListeners(AuditingEntityListener.class)
+public class Role {
+
+    /**
+     * 角色ID，主键，自增
+     */
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    /**
+     * 角色名称，用于标识角色
+     * &lt;p&gt;约束：2-50个字符，全局唯一，不能为空&lt;/p&gt;
+     * &lt;p&gt;示例：&quot;超级管理员&quot;、&quot;内容编辑&quot;、&quot;普通用户&quot;&lt;/p&gt;
+     */
+    @NotBlank(message = &quot;角色名称不能为空&quot;)
+    @Size(min = 2, max = 50, message = &quot;角色名称长度必须在2-50个字符之间&quot;)
+    @Column(unique = true, nullable = false, length = 50)
+    private String name;
+
+    /**
+     * 角色描述，说明角色的职责和权限范围
+     * &lt;p&gt;约束：可选，最多200个字符&lt;/p&gt;
+     */
+    @Size(max = 200, message = &quot;描述长度不能超过200个字符&quot;)
+    @Column(length = 200)
+    private String description;
+
+    /**
+     * 角色图标，用于前端展示
+     * &lt;p&gt;约束：可选，最多50个字符&lt;/p&gt;
+     * &lt;p&gt;建议使用Bootstrap Icons类名，如：&quot;bi-shield-lock&quot;、&quot;bi-person&quot;&lt;/p&gt;
+     */
+    @Column(length = 50)
+    private String icon;
+
+    /**
+     * 角色状态
+     * &lt;p&gt;true: 启用（可分配给用户），false: 禁用（不可分配）&lt;/p&gt;
+     * &lt;p&gt;默认值：true（启用）&lt;/p&gt;
+     */
+<span class="fc" id="L101">    @Column(nullable = false)</span>
+<span class="fc" id="L102">    private Boolean status = true;</span>
+
+    /**
+     * 排序号，用于控制角色在前端的显示顺序
+     * &lt;p&gt;约束：可选，默认为0，数值越小越靠前&lt;/p&gt;
+     */
+<span class="fc" id="L108">    @Column(name = &quot;sort_order&quot;)</span>
+<span class="fc" id="L109">    private Integer sortOrder = 0;</span>
+
+    /**
+     * 创建时间，由JPA审计功能自动填充
+     * &lt;p&gt;特性：不可更新，仅在创建时设置&lt;/p&gt;
+     */
+    @CreatedDate
+    @Column(updatable = false)
+    private LocalDateTime createTime;
+
+    /**
+     * 更新时间，由JPA审计功能自动维护
+     * &lt;p&gt;特性：每次更新实体时自动刷新&lt;/p&gt;
+     */
+    @LastModifiedDate
+    private LocalDateTime updateTime;
+
+    /**
+     * 拥有该角色的用户集合
+     * &lt;p&gt;关联关系：多对多，Role是反方（Inverse Side）&lt;/p&gt;
+     * &lt;p&gt;映射：通过User.roles字段中的mappedBy指定&lt;/p&gt;
+     */
+<span class="fc" id="L131">    @ManyToMany(mappedBy = &quot;roles&quot;)</span>
+    private Set&lt;User&gt; users = new HashSet&lt;&gt;();
+
+    /**
+     * 角色拥有的权限集合
+     * &lt;p&gt;关联关系：多对多，通过role_permission中间表关联&lt;/p&gt;
+     * &lt;p&gt;加载策略：默认LAZY（延迟加载），需要时显式fetch&lt;/p&gt;
+     */
+<span class="fc" id="L139">    @ManyToMany</span>
+    @JoinTable(
+        name = &quot;role_permission&quot;,
+        joinColumns = @JoinColumn(name = &quot;role_id&quot;),
+        inverseJoinColumns = @JoinColumn(name = &quot;permission_id&quot;)
+    )
+    private Set&lt;Permission&gt; permissions = new HashSet&lt;&gt;();
+
+    /**
+     * 无参构造函数
+     * &lt;p&gt;JPA规范要求必须提供无参构造函数&lt;/p&gt;
+     */
+<span class="fc" id="L151">    public Role() {</span>
+<span class="fc" id="L152">    }</span>
+
+    /**
+     * 便捷构造函数
+     * 
+     * @param name 角色名称
+     * @param description 角色描述
+     */
+<span class="fc" id="L160">    public Role(String name, String description) {</span>
+<span class="fc" id="L161">        this.name = name;</span>
+<span class="fc" id="L162">        this.description = description;</span>
+<span class="fc" id="L163">    }</span>
+
+    // Getters and Setters
+    
+    /**
+     * 获取角色ID
+     * 
+     * @return 角色ID
+     */
+    public Long getId() {
+<span class="nc" id="L173">        return id;</span>
+    }
+
+    /**
+     * 设置角色ID
+     * 
+     * @param id 角色ID
+     */
+    public void setId(Long id) {
+<span class="nc" id="L182">        this.id = id;</span>
+<span class="nc" id="L183">    }</span>
+
+    /**
+     * 获取角色名称
+     * 
+     * @return 角色名称
+     */
+    public String getName() {
+<span class="nc" id="L191">        return name;</span>
+    }
+
+    /**
+     * 设置角色名称
+     * 
+     * @param name 角色名称
+     */
+    public void setName(String name) {
+<span class="nc" id="L200">        this.name = name;</span>
+<span class="nc" id="L201">    }</span>
+
+    /**
+     * 获取角色描述
+     * 
+     * @return 角色描述
+     */
+    public String getDescription() {
+<span class="nc" id="L209">        return description;</span>
+    }
+
+    /**
+     * 设置角色描述
+     * 
+     * @param description 角色描述
+     */
+    public void setDescription(String description) {
+<span class="nc" id="L218">        this.description = description;</span>
+<span class="nc" id="L219">    }</span>
+
+    /**
+     * 获取角色图标
+     * 
+     * @return 图标类名
+     */
+    public String getIcon() {
+<span class="nc" id="L227">        return icon;</span>
+    }
+
+    /**
+     * 设置角色图标
+     * 
+     * @param icon 图标类名（如Bootstrap Icons）
+     */
+    public void setIcon(String icon) {
+<span class="nc" id="L236">        this.icon = icon;</span>
+<span class="nc" id="L237">    }</span>
+
+    /**
+     * 获取角色状态
+     * 
+     * @return true表示启用，false表示禁用
+     */
+    public Boolean getStatus() {
+<span class="nc" id="L245">        return status;</span>
+    }
+
+    /**
+     * 设置角色状态
+     * 
+     * @param status true表示启用，false表示禁用
+     */
+    public void setStatus(Boolean status) {
+<span class="nc" id="L254">        this.status = status;</span>
+<span class="nc" id="L255">    }</span>
+
+    /**
+     * 获取排序号
+     * 
+     * @return 排序号
+     */
+    public Integer getSortOrder() {
+<span class="nc" id="L263">        return sortOrder;</span>
+    }
+
+    /**
+     * 设置排序号
+     * 
+     * @param sortOrder 排序号
+     */
+    public void setSortOrder(Integer sortOrder) {
+<span class="nc" id="L272">        this.sortOrder = sortOrder;</span>
+<span class="nc" id="L273">    }</span>
+
+    /**
+     * 获取创建时间
+     * 
+     * @return 创建时间戳
+     */
+    public LocalDateTime getCreateTime() {
+<span class="nc" id="L281">        return createTime;</span>
+    }
+
+    /**
+     * 设置创建时间（通常由JPA自动管理）
+     * 
+     * @param createTime 创建时间戳
+     */
+    public void setCreateTime(LocalDateTime createTime) {
+<span class="nc" id="L290">        this.createTime = createTime;</span>
+<span class="nc" id="L291">    }</span>
+
+    /**
+     * 获取更新时间
+     * 
+     * @return 最后更新时间戳
+     */
+    public LocalDateTime getUpdateTime() {
+<span class="nc" id="L299">        return updateTime;</span>
+    }
+
+    /**
+     * 设置更新时间（通常由JPA自动管理）
+     * 
+     * @param updateTime 更新时间戳
+     */
+    public void setUpdateTime(LocalDateTime updateTime) {
+<span class="nc" id="L308">        this.updateTime = updateTime;</span>
+<span class="nc" id="L309">    }</span>
+
+    /**
+     * 获取拥有该角色的用户集合
+     * 
+     * @return 用户集合
+     */
+    public Set&lt;User&gt; getUsers() {
+<span class="nc" id="L317">        return users;</span>
+    }
+
+    /**
+     * 设置拥有该角色的用户集合
+     * 
+     * @param users 用户集合
+     */
+    public void setUsers(Set&lt;User&gt; users) {
+<span class="nc" id="L326">        this.users = users;</span>
+<span class="nc" id="L327">    }</span>
+
+    /**
+     * 获取角色拥有的权限集合
+     * 
+     * @return 权限集合
+     */
+    public Set&lt;Permission&gt; getPermissions() {
+<span class="fc" id="L335">        return permissions;</span>
+    }
+
+    /**
+     * 设置角色的权限集合
+     * 
+     * @param permissions 权限集合
+     */
+    public void setPermissions(Set&lt;Permission&gt; permissions) {
+<span class="fc" id="L344">        this.permissions = permissions;</span>
+<span class="fc" id="L345">    }</span>
+
+    /**
+     * 生成角色的字符串表示
+     * &lt;p&gt;包含主要字段信息，用于调试和日志记录&lt;/p&gt;
+     * 
+     * @return 角色信息的字符串形式
+     */
+    @Override
+    public String toString() {
+<span class="nc" id="L355">        return &quot;Role{&quot; +</span>
+                &quot;id=&quot; + id +
+                &quot;, name='&quot; + name + '\'' +
+                &quot;, description='&quot; + description + '\'' +
+                &quot;, icon='&quot; + icon + '\'' +
+                &quot;, status=&quot; + status +
+                &quot;, sortOrder=&quot; + sortOrder +
+                &quot;, createTime=&quot; + createTime +
+                &quot;, updateTime=&quot; + updateTime +
+                '}';
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

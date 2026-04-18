@@ -1,0 +1,440 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="zh"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Permission.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">demo</a> &gt; <a href="index.source.html" class="el_package">com.example.demo.entity</a> &gt; <span class="el_source">Permission.java</span></div><h1>Permission.java</h1><pre class="source lang-java linenums">package com.example.demo.entity;
+
+import jakarta.persistence.*;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+
+import java.time.LocalDateTime;
+import java.util.HashSet;
+import java.util.Set;
+
+/**
+ * 权限实体类
+ * &lt;p&gt;对应数据库中的permissions表，定义系统中的最小权限单元。
+ * 权限是RBAC模型中的核心概念，用于细粒度控制用户对系统资源的访问。&lt;/p&gt;
+ * 
+ * &lt;h2&gt;主要功能&lt;/h2&gt;
+ * &lt;ul&gt;
+ *   &lt;li&gt;定义系统权限（如菜单访问、按钮操作、API调用等）&lt;/li&gt;
+ *   &lt;li&gt;支持树形结构（通过parentId实现父子关系）&lt;/li&gt;
+ *   &lt;li&gt;区分权限类型（菜单、按钮、API等）&lt;/li&gt;
+ *   &lt;li&gt;被多个角色拥有，实现权限复用&lt;/li&gt;
+ *   &lt;li&gt;支持权限状态管理（启用/禁用）&lt;/li&gt;
+ *   &lt;li&gt;支持权限排序和图标展示&lt;/li&gt;
+ * &lt;/ul&gt;
+ * 
+ * &lt;h2&gt;数据约束&lt;/h2&gt;
+ * &lt;ul&gt;
+ *   &lt;li&gt;权限名称：2-100个字符，全局唯一，必填&lt;/li&gt;
+ *   &lt;li&gt;权限编码：2-100个字符，全局唯一，必填（用于代码中验证）&lt;/li&gt;
+ *   &lt;li&gt;描述：可选，最多200个字符&lt;/li&gt;
+ *   &lt;li&gt;图标：可选，最多50个字符，通常为Bootstrap Icons类名&lt;/li&gt;
+ *   &lt;li&gt;父ID：可选，用于构建树形结构，null表示根节点&lt;/li&gt;
+ *   &lt;li&gt;排序号：可选，默认为0，数值越小越靠前&lt;/li&gt;
+ *   &lt;li&gt;类型：可选，默认为&quot;MENU&quot;，可选值：MENU/BUTTON/API&lt;/li&gt;
+ * &lt;/ul&gt;
+ * 
+ * &lt;h3&gt;关联关系&lt;/h3&gt;
+ * &lt;ul&gt;
+ *   &lt;li&gt;与Role：多对多关系，一个权限可以被多个角色拥有&lt;/li&gt;
+ *   &lt;li&gt;自引用：通过parentId实现树形层级结构&lt;/li&gt;
+ * &lt;/ul&gt;
+ * 
+ * &lt;h3&gt;权限编码规范&lt;/h3&gt;
+ * &lt;p&gt;建议采用&quot;模块:操作&quot;的命名格式，例如：&lt;/p&gt;
+ * &lt;ul&gt;
+ *   &lt;li&gt;user:view - 查看用户列表&lt;/li&gt;
+ *   &lt;li&gt;user:create - 创建用户&lt;/li&gt;
+ *   &lt;li&gt;user:edit - 编辑用户&lt;/li&gt;
+ *   &lt;li&gt;user:delete - 删除用户&lt;/li&gt;
+ *   &lt;li&gt;role:menu - 角色管理菜单入口&lt;/li&gt;
+ * &lt;/ul&gt;
+ * 
+ * &lt;h3&gt;使用场景&lt;/h3&gt;
+ * &lt;ul&gt;
+ *   &lt;li&gt;前端按钮级权限控制（perm:hasPermission）&lt;/li&gt;
+ *   &lt;li&gt;后端API接口权限拦截（@RequirePermission）&lt;/li&gt;
+ *   &lt;li&gt;动态菜单生成和过滤&lt;/li&gt;
+ *   &lt;li&gt;角色权限分配和管理&lt;/li&gt;
+ * &lt;/ul&gt;
+ * 
+ * @author Demo Team
+ * @version 1.0
+ * @since 2024-01-01
+ * @see Role
+ * @see User
+ * @see AuditingEntityListener
+ */
+@Entity
+@Table(name = &quot;permissions&quot;)
+@EntityListeners(AuditingEntityListener.class)
+public class Permission {
+
+    /**
+     * 权限ID，主键，自增
+     */
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    /**
+     * 权限名称，用于显示
+     * &lt;p&gt;约束：2-100个字符，全局唯一，不能为空&lt;/p&gt;
+     * &lt;p&gt;示例：&quot;查看用户&quot;、&quot;创建角色&quot;、&quot;删除权限&quot;&lt;/p&gt;
+     */
+    @NotBlank(message = &quot;权限名称不能为空&quot;)
+    @Size(min = 2, max = 100, message = &quot;权限名称长度必须在2-100个字符之间&quot;)
+    @Column(unique = true, nullable = false, length = 100)
+    private String name;
+
+    /**
+     * 权限编码，用于代码中进行权限验证
+     * &lt;p&gt;约束：2-100个字符，全局唯一，不能为空&lt;/p&gt;
+     * &lt;p&gt;命名规范：建议使用&quot;模块:操作&quot;格式，如&quot;user:view&quot;&lt;/p&gt;
+     */
+    @NotBlank(message = &quot;权限编码不能为空&quot;)
+    @Size(min = 2, max = 100, message = &quot;权限编码长度必须在2-100个字符之间&quot;)
+    @Column(unique = true, nullable = false, length = 100)
+    private String code;
+
+    /**
+     * 权限描述，说明权限的具体用途
+     * &lt;p&gt;约束：可选，最多200个字符&lt;/p&gt;
+     */
+    @Size(max = 200, message = &quot;描述长度不能超过200个字符&quot;)
+    @Column(length = 200)
+    private String description;
+
+    /**
+     * 权限图标，用于前端菜单展示
+     * &lt;p&gt;约束：可选，最多50个字符&lt;/p&gt;
+     * &lt;p&gt;建议使用Bootstrap Icons类名，如：&quot;bi-person&quot;、&quot;bi-gear&quot;&lt;/p&gt;
+     */
+    @Column(length = 50)
+    private String icon;
+
+    /**
+     * 权限状态
+     * &lt;p&gt;true: 启用（可分配给角色），false: 禁用（不可分配）&lt;/p&gt;
+     * &lt;p&gt;默认值：true（启用）&lt;/p&gt;
+     */
+<span class="fc" id="L124">    @Column(nullable = false)</span>
+<span class="fc" id="L125">    private Boolean status = true;</span>
+
+    /**
+     * 父权限ID，用于构建树形结构
+     * &lt;p&gt;约束：可选，null表示根节点&lt;/p&gt;
+     * &lt;p&gt;用途：实现菜单的层级关系（一级菜单、二级菜单等）&lt;/p&gt;
+     */
+    @Column(name = &quot;parent_id&quot;)
+    private Long parentId;
+
+    /**
+     * 排序号，用于控制权限在前端的显示顺序
+     * &lt;p&gt;约束：可选，默认为0，数值越小越靠前&lt;/p&gt;
+     * &lt;p&gt;同一父节点下的子节点按此字段排序&lt;/p&gt;
+     */
+<span class="fc" id="L140">    @Column(name = &quot;sort_order&quot;)</span>
+<span class="fc" id="L141">    private Integer sortOrder = 0;</span>
+
+    /**
+     * 权限类型，区分不同种类的权限
+     * &lt;p&gt;约束：可选，默认为&quot;MENU&quot;&lt;/p&gt;
+     * &lt;p&gt;可选值：&lt;/p&gt;
+     * &lt;ul&gt;
+     *   &lt;li&gt;MENU - 菜单权限（控制菜单项显示）&lt;/li&gt;
+     *   &lt;li&gt;BUTTON - 按钮权限（控制按钮显示）&lt;/li&gt;
+     *   &lt;li&gt;API - API权限（控制接口访问）&lt;/li&gt;
+     * &lt;/ul&gt;
+     */
+<span class="fc" id="L153">    @Column(length = 50)</span>
+    private String type = &quot;MENU&quot;;
+
+    /**
+     * 创建时间，由JPA审计功能自动填充
+     * &lt;p&gt;特性：不可更新，仅在创建时设置&lt;/p&gt;
+     */
+    @CreatedDate
+    @Column(updatable = false)
+    private LocalDateTime createTime;
+
+    /**
+     * 更新时间，由JPA审计功能自动维护
+     * &lt;p&gt;特性：每次更新实体时自动刷新&lt;/p&gt;
+     */
+    @LastModifiedDate
+    private LocalDateTime updateTime;
+
+    /**
+     * 拥有该权限的角色集合
+     * &lt;p&gt;关联关系：多对多，Permission是反方（Inverse Side）&lt;/p&gt;
+     * &lt;p&gt;映射：通过Role.permissions字段中的mappedBy指定&lt;/p&gt;
+     */
+<span class="fc" id="L176">    @ManyToMany(mappedBy = &quot;permissions&quot;)</span>
+    private Set&lt;Role&gt; roles = new HashSet&lt;&gt;();
+
+    /**
+     * 无参构造函数
+     * &lt;p&gt;JPA规范要求必须提供无参构造函数&lt;/p&gt;
+     */
+<span class="fc" id="L183">    public Permission() {</span>
+<span class="fc" id="L184">    }</span>
+
+    /**
+     * 便捷构造函数
+     * 
+     * @param name 权限名称
+     * @param code 权限编码
+     * @param description 权限描述
+     */
+<span class="fc" id="L193">    public Permission(String name, String code, String description) {</span>
+<span class="fc" id="L194">        this.name = name;</span>
+<span class="fc" id="L195">        this.code = code;</span>
+<span class="fc" id="L196">        this.description = description;</span>
+<span class="fc" id="L197">    }</span>
+
+    // Getters and Setters
+    
+    /**
+     * 获取权限ID
+     * 
+     * @return 权限ID
+     */
+    public Long getId() {
+<span class="fc" id="L207">        return id;</span>
+    }
+
+    /**
+     * 设置权限ID
+     * 
+     * @param id 权限ID
+     */
+    public void setId(Long id) {
+<span class="nc" id="L216">        this.id = id;</span>
+<span class="nc" id="L217">    }</span>
+
+    /**
+     * 获取权限名称
+     * 
+     * @return 权限名称
+     */
+    public String getName() {
+<span class="nc" id="L225">        return name;</span>
+    }
+
+    /**
+     * 设置权限名称
+     * 
+     * @param name 权限名称
+     */
+    public void setName(String name) {
+<span class="nc" id="L234">        this.name = name;</span>
+<span class="nc" id="L235">    }</span>
+
+    /**
+     * 获取权限编码
+     * 
+     * @return 权限编码
+     */
+    public String getCode() {
+<span class="fc" id="L243">        return code;</span>
+    }
+
+    /**
+     * 设置权限编码
+     * 
+     * @param code 权限编码
+     */
+    public void setCode(String code) {
+<span class="nc" id="L252">        this.code = code;</span>
+<span class="nc" id="L253">    }</span>
+
+    /**
+     * 获取权限描述
+     * 
+     * @return 权限描述
+     */
+    public String getDescription() {
+<span class="nc" id="L261">        return description;</span>
+    }
+
+    /**
+     * 设置权限描述
+     * 
+     * @param description 权限描述
+     */
+    public void setDescription(String description) {
+<span class="nc" id="L270">        this.description = description;</span>
+<span class="nc" id="L271">    }</span>
+
+    /**
+     * 获取权限图标
+     * 
+     * @return 图标类名
+     */
+    public String getIcon() {
+<span class="nc" id="L279">        return icon;</span>
+    }
+
+    /**
+     * 设置权限图标
+     * 
+     * @param icon 图标类名（如Bootstrap Icons）
+     */
+    public void setIcon(String icon) {
+<span class="fc" id="L288">        this.icon = icon;</span>
+<span class="fc" id="L289">    }</span>
+
+    /**
+     * 获取权限状态
+     * 
+     * @return true表示启用，false表示禁用
+     */
+    public Boolean getStatus() {
+<span class="nc" id="L297">        return status;</span>
+    }
+
+    /**
+     * 设置权限状态
+     * 
+     * @param status true表示启用，false表示禁用
+     */
+    public void setStatus(Boolean status) {
+<span class="nc" id="L306">        this.status = status;</span>
+<span class="nc" id="L307">    }</span>
+
+    /**
+     * 获取父权限ID
+     * 
+     * @return 父权限ID，null表示根节点
+     */
+    public Long getParentId() {
+<span class="nc" id="L315">        return parentId;</span>
+    }
+
+    /**
+     * 设置父权限ID
+     * 
+     * @param parentId 父权限ID
+     */
+    public void setParentId(Long parentId) {
+<span class="fc" id="L324">        this.parentId = parentId;</span>
+<span class="fc" id="L325">    }</span>
+
+    /**
+     * 获取排序号
+     * 
+     * @return 排序号
+     */
+    public Integer getSortOrder() {
+<span class="nc" id="L333">        return sortOrder;</span>
+    }
+
+    /**
+     * 设置排序号
+     * 
+     * @param sortOrder 排序号
+     */
+    public void setSortOrder(Integer sortOrder) {
+<span class="fc" id="L342">        this.sortOrder = sortOrder;</span>
+<span class="fc" id="L343">    }</span>
+
+    /**
+     * 获取权限类型
+     * 
+     * @return 权限类型（MENU/BUTTON/API）
+     */
+    public String getType() {
+<span class="nc" id="L351">        return type;</span>
+    }
+
+    /**
+     * 设置权限类型
+     * 
+     * @param type 权限类型
+     */
+    public void setType(String type) {
+<span class="fc" id="L360">        this.type = type;</span>
+<span class="fc" id="L361">    }</span>
+
+    /**
+     * 获取创建时间
+     * 
+     * @return 创建时间戳
+     */
+    public LocalDateTime getCreateTime() {
+<span class="nc" id="L369">        return createTime;</span>
+    }
+
+    /**
+     * 设置创建时间（通常由JPA自动管理）
+     * 
+     * @param createTime 创建时间戳
+     */
+    public void setCreateTime(LocalDateTime createTime) {
+<span class="nc" id="L378">        this.createTime = createTime;</span>
+<span class="nc" id="L379">    }</span>
+
+    /**
+     * 获取更新时间
+     * 
+     * @return 最后更新时间戳
+     */
+    public LocalDateTime getUpdateTime() {
+<span class="nc" id="L387">        return updateTime;</span>
+    }
+
+    /**
+     * 设置更新时间（通常由JPA自动管理）
+     * 
+     * @param updateTime 更新时间戳
+     */
+    public void setUpdateTime(LocalDateTime updateTime) {
+<span class="nc" id="L396">        this.updateTime = updateTime;</span>
+<span class="nc" id="L397">    }</span>
+
+    /**
+     * 获取拥有该权限的角色集合
+     * 
+     * @return 角色集合
+     */
+    public Set&lt;Role&gt; getRoles() {
+<span class="nc" id="L405">        return roles;</span>
+    }
+
+    /**
+     * 设置拥有该权限的角色集合
+     * 
+     * @param roles 角色集合
+     */
+    public void setRoles(Set&lt;Role&gt; roles) {
+<span class="nc" id="L414">        this.roles = roles;</span>
+<span class="nc" id="L415">    }</span>
+
+    /**
+     * 生成权限的字符串表示
+     * &lt;p&gt;包含主要字段信息，用于调试和日志记录&lt;/p&gt;
+     * 
+     * @return 权限信息的字符串形式
+     */
+    @Override
+    public String toString() {
+<span class="nc" id="L425">        return &quot;Permission{&quot; +</span>
+                &quot;id=&quot; + id +
+                &quot;, name='&quot; + name + '\'' +
+                &quot;, code='&quot; + code + '\'' +
+                &quot;, description='&quot; + description + '\'' +
+                &quot;, icon='&quot; + icon + '\'' +
+                &quot;, status=&quot; + status +
+                &quot;, parentId=&quot; + parentId +
+                &quot;, sortOrder=&quot; + sortOrder +
+                &quot;, type='&quot; + type + '\'' +
+                &quot;, createTime=&quot; + createTime +
+                &quot;, updateTime=&quot; + updateTime +
+                '}';
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>
