@@ -1,7 +1,10 @@
 com.example.demo
+com.example.demo.annotation
 com.example.demo.config
 com.example.demo.controller
+com.example.demo.dialect
 com.example.demo.dto
 com.example.demo.entity
+com.example.demo.interceptor
 com.example.demo.repository
 com.example.demo.service
