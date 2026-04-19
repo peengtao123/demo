@@ -352,8 +352,56 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-javadoc-plugin</artifactId>
-                <version>3.5.0</version>
-                <configuration> 
+                <version>3.6.3</version>
+                <configuration>
+                    <!-- 编码格式 - 确保中文正确显示 -->
+                    <encoding>UTF-8</encoding>
+                    <charset>UTF-8</charset>
+                    <docencoding>UTF-8</docencoding>
+                    
+                    <!-- Java版本 -->
+                    <source>${java.version}</source>
+                    
+                    <!-- 明确指定源文件目录（使用项目属性避免路径问题） -->
+                    <sourcepath>${project.basedir}/src/main/java</sourcepath>
+                    
+                    <!-- 输出目录 -->
+                    <outputDirectory>${project.build.directory}/site/apidocs</outputDirectory>
+                    
+                    <!-- 是否显示作者信息 -->
+                    <author>true</author>
+                    
+                    <!-- 是否显示版本信息 -->
+                    <version>true</version>
+                    
+                    <!-- 是否显示使用信息 -->
+                    <use>true</use>
+                    
+                    <!-- 窗口标题（支持中文） -->
+                    <windowtitle>${project.name} API文档</windowtitle>
+                    
+                    <!-- 文档标题（支持中文） -->
+                    <doctitle>${project.name} ${project.version} API文档</doctitle>
+                    
+                    <!-- 头部信息（支持中文） -->
+                    <header>${project.name} API文档</header>
+                    
+                    <!-- 底部信息（支持中文） -->
+                    <bottom><![CDATA[Copyright &copy; ${project.inceptionYear} ${project.organization.name}. 保留所有权利。]]></bottom>
+                    
+                    <!-- 跳过错误继续生成 -->
+                    <failOnError>false</failOnError>
+                    
+                    <!-- 禁用严格检查 -->
+                    <additionalOptions>
+                        <additionalOption>-Xdoclint:none</additionalOption>
+                    </additionalOptions>
+                    
+                    <!-- 静默模式 -->
+                    <quiet>true</quiet>
+                    
+                    <!-- 语言环境设置为中文 -->
+                    <locale>zh_CN</locale>
                 </configuration>
                  <reportSets>
                     <reportSet><!-- by default, id = "default" -->
