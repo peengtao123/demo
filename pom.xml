@@ -199,8 +199,6 @@
                 <configuration>
                     <!-- Java版本 -->
                     <targetJdk>${java.version}</targetJdk>
-                    <!-- 编码格式 -->
-                    <encoding>UTF-8</encoding>
                     <!-- 是否将失败转换为错误 -->
                     <failurePriority>5</failurePriority>
                     <!-- 最小令牌数，低于此数的文件将被忽略 -->
@@ -239,8 +237,6 @@
                 <artifactId>maven-checkstyle-plugin</artifactId>
                 <version>3.6.0</version>
                 <configuration>
-                    <!-- 编码格式 -->
-                    <encoding>UTF-8</encoding>
                     <!-- 配置文件位置 -->
                     <configLocation>${project.basedir}/checkstyle.xml</configLocation>
                     <!-- 控制台输出 -->
@@ -282,7 +278,6 @@
                 <artifactId>maven-project-info-reports-plugin</artifactId>
                 <version>3.4.5</version>
                 <configuration>
-                    <dependencyLocationsEnabled>false</dependencyLocationsEnabled>
                 </configuration>
                 <reportSets>
                     <reportSet>
