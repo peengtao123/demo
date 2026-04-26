@@ -1,17 +1,21 @@
 package com.example.demo.controller;
 
-import com.example.demo.dto.UserDTO;
-import com.example.demo.entity.User;
-import com.example.demo.repository.UserRepository;
-import com.example.demo.service.UserService;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
+import java.util.List;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
-import java.util.List;
-
-import static org.junit.jupiter.api.Assertions.*;
+import com.example.demo.dto.UserDTO;
+import com.example.demo.entity.User;
+import com.example.demo.repository.UserRepository;
+import com.example.demo.service.UserService;
 
 /**
  * UserController集成测试
@@ -38,6 +42,7 @@ class UserControllerTest {
         newUser.setPhone("13900139000");
         newUser.setAge(30);
 
+        assertNull(newUser.getId());
         User created = userService.createUser(newUser);
 
         assertNotNull(created);
