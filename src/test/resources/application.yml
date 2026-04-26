@@ -1,0 +1,8 @@
+# 测试环境配置
+# 如需添加自定义配置属性，请确保在代码中有对应的 @ConfigurationProperties 类
+# 或者使用 Spring Boot 标准配置项，例如：
+spring:
+  profiles:
+    active: test
+  datasource:
+    name: hello-world
